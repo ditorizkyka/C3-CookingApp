@@ -10,5 +10,6 @@ import SwiftUI
 enum Radius {
     static let card : CGFloat = 34
     static let button : CGFloat = .infinity
+    static let emojiBackground: CGFloat = .infinity
 }
 
