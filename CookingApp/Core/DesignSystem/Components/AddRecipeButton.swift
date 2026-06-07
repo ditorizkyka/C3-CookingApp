@@ -44,7 +44,7 @@ struct AddRecipeButton: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 148)
             .background(isManual ? Color.brandSecondary : Color.brandPrimary)
-            .cornerRadius(Radius.card)
+            .cornerRadius(Radius.large)
             .foregroundStyle((isManual ? Color.labelDark : Color.labelLightest) ?? .white)
         }
     }
