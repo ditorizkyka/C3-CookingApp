@@ -11,6 +11,7 @@ struct RecipeCard: View {
     var recipeTitle: String
     var recipeCategoryIcon: String
     var recipeImage: String
+    var recipeColor: Color
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -26,7 +27,7 @@ struct RecipeCard: View {
                     .font(Font.body)
                     .padding(4)
                     .background(Color.labelLightest.opacity(0.3))
-                    .cornerRadius(Radius.emojiBackground)
+                    .cornerRadius(Radius.infinity)
             }
             
             Spacer()
@@ -60,15 +61,15 @@ struct RecipeCard: View {
                     .scaledToFill()
                 
                 LinearGradient(
-                    colors: [Color.red, Color.red.opacity(0.2)],
+                    colors: [recipeColor, recipeColor.opacity(0.2)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
             }
         )
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.large))
         .overlay(
-            RoundedRectangle(cornerRadius: Radius.card)
+            RoundedRectangle(cornerRadius: Radius.large)
                 .stroke(Color.surfaceElevated ?? .gray, lineWidth: 1.5)
         )
         
@@ -76,5 +77,5 @@ struct RecipeCard: View {
 }
 
 #Preview {
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test")
+    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.red)
 }

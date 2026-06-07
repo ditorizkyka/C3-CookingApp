@@ -32,7 +32,7 @@ struct ImportRecipeSheet: View {
                         .background(
                             Color.surfaceDefault
                         )
-                        .cornerRadius(Radius.button)
+                        .cornerRadius(Radius.small)
                     
                     
                 }

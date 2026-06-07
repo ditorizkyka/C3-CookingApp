@@ -23,7 +23,7 @@ extension Color {
     // Surface
     static let surfaceDefault = Color("#F2F2F7")
     static let surfaceElevated = Color("#FAFFFC")
-    static let surfaceBrand = Color("#004820")
+    static let surfaceBrand = Color("#EFF8D5")
     
     // Recipe Card
     static let recipeCardGreen = Color("#60A624")
