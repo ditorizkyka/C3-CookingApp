@@ -36,12 +36,10 @@ struct WebsitePreviewSheet: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 
-                // Bottom Import Bar
-                VStack {
-                    ButtonApp(title: "Simpan Resep", type: .primary, action: onImport,) // Safe area handled by container
-                }
-                .background(Color(.systemBackground).shadow(radius: 5))
+                ButtonApp(title: "Simpan Resep", type: .primary, action: onImport,)
+                
             }
+            .padding(.horizontal,16)
             .navigationTitle("Preview")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

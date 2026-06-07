@@ -4,11 +4,10 @@ struct AddRecipeButton: View {
     var isManual: Bool
     var titleButton: String
     var descriptionButton: String
+    var action : () -> Void
     
     var body: some View {
-        Button(action: {
-            // Action tombol
-        }) {
+        Button(action: action) {
             // 1. Tambahkan alignment .leading pada VStack paling luar agar ikon dan teks rata kiri
             VStack(alignment: .leading, spacing: 10) {
                 
@@ -52,8 +51,13 @@ struct AddRecipeButton: View {
 
 #Preview {
     HStack() {
-        AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website")
-        AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu")
+        AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website",
+                        action: {
+            print("import")
+        })
+        AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu", action: {
+            print("add manual")
+        })
     }
     .padding()
 }
