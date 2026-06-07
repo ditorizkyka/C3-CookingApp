@@ -22,6 +22,7 @@ let mockRecipes: [RecipeCard] = [
 struct HomeView: View {
     @State private var searchRecipe: String = ""
     @State private var selectedIndex: Int? = nil
+    @State private var allRecipes: [RecipeCard] = mockRecipes
     
     var body: some View {
         NavigationStack {
@@ -52,33 +53,40 @@ struct HomeView: View {
                         }
                     }
                     
-                    ScrollView {
-                        VStack(spacing: -120) {
-                            ForEach(mockRecipes.indices, id: \.self) { index in
-                                let isSelected = selectedIndex == index
-                                
-                                mockRecipes[index]
-                                    .zIndex(Double(index))
-//                                    .scaleEffect(!isSelected ? 1.0 - (CGFloat(mockRecipes.count - index) * 0.01) : 1.0)
-                                    .brightness(!isSelected ? -Double(mockRecipes.count - index) * 0.02 : 0)
-                                
-                                    .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
-                                
-                                    .onTapGesture {
-                                        withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
-                                            if selectedIndex == index {
-                                                selectedIndex = nil
-                                            } else {
-                                                selectedIndex = index
+                    if !allRecipes.isEmpty {
+                        ScrollView {
+                            VStack(spacing: -120) {
+                                ForEach(mockRecipes.indices, id: \.self) { index in
+                                    let isSelected = selectedIndex == index
+                                    
+                                    mockRecipes[index]
+                                        .zIndex(Double(index))
+    //                                    .scaleEffect(!isSelected ? 1.0 - (CGFloat(mockRecipes.count - index) * 0.01) : 1.0)
+                                        .brightness(!isSelected ? -Double(mockRecipes.count - index) * 0.02 : 0)
+                                    
+                                        .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
+                                    
+                                        .onTapGesture {
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
+                                                if selectedIndex == index {
+                                                    selectedIndex = nil
+                                                } else {
+                                                    selectedIndex = index
+                                                }
                                             }
                                         }
-                                    }
+                                }
+                                
+                                
                             }
-                            
-                            
                         }
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.large))
+
+                    } else {
+                        HomeEmptyStateCard()
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.large))
+                    
+                    Spacer()
                     
                 }
                 .padding(.horizontal)
