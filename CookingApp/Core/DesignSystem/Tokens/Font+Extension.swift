@@ -8,6 +8,7 @@
 import SwiftUI
 
 extension Font {
+    static let xLargeTitle = Font.system(size: 48.7, weight: .bold)
     static let largeTitle = Font.system(size: 34, weight: .bold)
     static let title = Font.system(size: 22, weight: .bold)
     static let headline = Font.system(size: 17, weight: .semibold)
