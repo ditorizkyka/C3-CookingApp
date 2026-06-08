@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RecipeCard: View {
+struct RecipeCardSmall: View {
     var recipeTitle: String
     var recipeCategoryIcon: String
     var recipeImage: String
@@ -18,22 +18,18 @@ struct RecipeCard: View {
     var body: some View {
         VStack(alignment: .leading) {
             // Title
-            HStack {
-                Text(recipeTitle)
-                    .font(Font.headline)
-                    .foregroundStyle(Color.labelLightest!)
-                    .lineLimit(2)
-                
-                Spacer()
-                
-                Text(recipeCategoryIcon)
-                    .font(Font.body)
-                    .padding(4)
-                    .background(Color.labelLightest.opacity(0.3))
-                    .cornerRadius(Radius.infinity)
-            }
+            Text(recipeTitle)
+                .font(Font.headline)
+                .foregroundStyle(Color.labelLightest!)
+                .lineLimit(2)
             
-            Spacer()
+            Text(recipeCategoryIcon)
+                .font(Font.body)
+                .padding(4)
+                .background(Color.labelLightest.opacity(0.3))
+                .cornerRadius(Radius.infinity)
+            
+            Spacer(minLength: 8)
             
             // Chip
             HStack(spacing: 4) {
@@ -55,9 +51,9 @@ struct RecipeCard: View {
             .glassEffect()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 150)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
+        .frame(height: 180)
         .background(
             ZStack() {
                 Image(recipeImage)
@@ -81,5 +77,5 @@ struct RecipeCard: View {
 }
 
 #Preview {
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.red, recipePortion: 4, recipeDuration: 30)
+    RecipeCardSmall(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.red, recipePortion: 4, recipeDuration: 30)
 }

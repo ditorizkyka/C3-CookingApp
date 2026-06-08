@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct StepSheet: View {
-    // Memanggil mock data yang sudah ada di DummyData.swift
     var instructions: [Instruction] = Recipe.dummyRecipes.first?.instructions ?? []
     
     var body: some View {

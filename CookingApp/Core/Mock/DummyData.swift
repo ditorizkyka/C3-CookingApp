@@ -102,6 +102,50 @@ extension Recipe {
                 )
             ],
             tips: "Jangan merebus mie terlalu lama agar teksturnya tetap kenyal."
+        ),
+        Recipe(
+            id: UUID(),
+            title: "Ayam Goreng Lengkuas",
+            author: Author(id: UUID(), name: "Dapur Nenek", username: "@dapurnenek", avatarUrl: nil),
+            coverImageUrl: nil,
+            portion: 4,
+            durationInMinutes: 45,
+            ingredientGroups: [],
+            instructions: [],
+            tips: "Goreng dengan api sedang agar matang merata."
+        ),
+        Recipe(
+            id: UUID(),
+            title: "Sayur Sop Bening",
+            author: Author(id: UUID(), name: "Masak Praktis", username: "@masakpraktis", avatarUrl: nil),
+            coverImageUrl: nil,
+            portion: 5,
+            durationInMinutes: 20,
+            ingredientGroups: [],
+            instructions: [],
+            tips: "Masukkan seledri dan daun bawang di akhir agar tetap segar."
+        ),
+        Recipe(
+            id: UUID(),
+            title: "Telur Balado Spesial",
+            author: Author(id: UUID(), name: "Cita Rasa", username: "@citarasa", avatarUrl: nil),
+            coverImageUrl: nil,
+            portion: 2,
+            durationInMinutes: 15,
+            ingredientGroups: [],
+            instructions: [],
+            tips: "Gunakan cabai keriting agar tidak terlalu pedas."
+        ),
+        Recipe(
+            id: UUID(),
+            title: "Tumis Kangkung Terasi",
+            author: Author(id: UUID(), name: "Dapur Kilat", username: "@dapurkilat", avatarUrl: nil),
+            coverImageUrl: nil,
+            portion: 3,
+            durationInMinutes: 10,
+            ingredientGroups: [],
+            instructions: [],
+            tips: "Gunakan api besar saat menumis kangkung."
         )
     ]
 }
