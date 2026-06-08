@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RadialGradiantCircle: View {
+struct RadialGradientCircle: View {
     var color: Color
     var offset: CGFloat
     
