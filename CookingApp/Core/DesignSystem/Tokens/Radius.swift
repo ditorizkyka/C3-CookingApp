@@ -9,6 +9,7 @@ import SwiftUI
 
 enum Radius {
     static let small : CGFloat = 14
+    static let medium : CGFloat = 24
     static let large : CGFloat = 34
     static let xLarge : CGFloat = 50
     static let infinity: CGFloat = .infinity
