@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct InstructorIntroView: View {
-    @State private var showIntro: Bool = false
+    @State private var showIntro: Bool = true
     
     private var guides = [
         "Lanjut": "Langkah Berikutnya",
@@ -28,90 +28,46 @@ struct InstructorIntroView: View {
                         .frame(height: 250)
                     
                     VStack(alignment: .center, spacing: 16) {
-                        VStack(spacing: 16) {
-                            // Step
-                            Text("Langkah 2 dari 12")
-                                .font(Font.title)
-                                .foregroundStyle(Color.labelLight!)
-                            
-                            // Instruction
-                            Text("Siapkan ayam yang telah digiling dengan chopper")
-                                .font(Font.largeTitle)
-                                .multilineTextAlignment(.center)
-                            
-                            // Repeat
-                            HStack {
-                                Image(systemName: "arrow.clockwise")
-                                
-                                Text("ulangi")
+                        // Step Container
+                        StepInstructionView(
+                            currentStep: 2,
+                            totalSteps: 12,
+                            instruction: "Siapkan ayam yang telah digiling dengan chopper",
+                            onRepeat: {
+                                print("Tombol ulangi ditekan")
                             }
-                            .font(Font.headline)
-                            .foregroundStyle(Color.labelLight!)
-                        }
+                        )
                         
-                        // Microphone
-                        HStack {
-                            Image(systemName: "wave.3.left")
-                                .font(Font.title)
-                            Image(systemName: "microphone.fill")
-                                .font(Font.largeTitle)
-                            Image(systemName: "wave.3.right")
-                                .font(Font.title)
-                        }
-                        .foregroundStyle(Color.brandPrimary!)
-                        .fontWeight(.regular)
-                        
-                        // Guide
-                        VStack(alignment: .leading, spacing: 5) {
-                            HStack {
-                                Image(systemName: "info.circle")
-                                Text("Petunjuk Perintah Suara")
-                            }
-                            
-                            ForEach(guides.sorted(by: >), id: \.key) { guide in
-                                HStack {
-                                    Text("• **‘\(guide.key)’** : ")
-                                    Text(guide.value)
-                                }
-                                
-                            }
-                            
-                            // Hide
-                            Button {
+                        // Mic and Guide
+                        MicAndGuideView(
+                            guides: guides,
+                            onHide: {
                                 print("Sembunyikan")
-                            } label: {
-                                Text("Sembunyikan")
-                                    .underline()
                             }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(Color.brandPrimary!)
-                        }
-                        .font(Font.footnote)
-                        .foregroundStyle(Color.labelLight!)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 10)
-                        .background(Color.surfaceElevated)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.medium))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Radius.medium)
-                                .stroke(style: StrokeStyle(lineWidth: 1)
-                                       )
                         )
                     }
                     .padding()
                     
                     Spacer()
                     
-                    
+                    // Navigation Controls (Bottom)
+                    NavigationControlsView(
+                        currentPage: 0,
+                        totalPages: 5,
+                        onPrevious: { print("Previous Step") },
+                        onNext: { print("Next Step") }
+                    )
+
                 }
+                .ignoresSafeArea(.container, edges: .bottom)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background {
                     VStack {
-                        RadialGradiantCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125)
+                        RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125)
                         
                         Spacer()
                         
-                        RadialGradiantCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125)
+                        RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125)
                     }
                     .ignoresSafeArea()
                 }
@@ -142,7 +98,6 @@ struct InstructorIntroView: View {
                     Image(systemName: "info.circle")
                 }
             }
-            .padding(.vertical)
         }
         
     }
