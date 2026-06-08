@@ -12,13 +12,18 @@ struct StepInstructionView: View {
     var totalSteps: Int
     var instruction: String
     var onRepeat: () -> Void
+    var onStep: () -> Void
     
     var body: some View {
         VStack(spacing: 16) {
             // Step
-            Text("Langkah \(currentStep) dari \(totalSteps)")
-                .font(Font.title)
-                .foregroundStyle(Color.labelLight!)
+            Button {
+                onStep()
+            } label: {
+                Text("Langkah \(currentStep) dari \(totalSteps)")
+                    .font(Font.title)
+                    .foregroundStyle(Color.labelLight!)
+            }
             
             // Instruction
             Text(instruction)

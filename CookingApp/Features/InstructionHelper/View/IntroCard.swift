@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct InstructionHelperIntroCard: View {
+struct IntroCard: View {
     var onDismiss: (() -> Void)? = nil
     
     var body: some View {
@@ -73,5 +73,5 @@ struct InstructionHelperIntroCard: View {
 }
 
 #Preview {
-    InstructionHelperIntroCard()
+    IntroCard()
 }

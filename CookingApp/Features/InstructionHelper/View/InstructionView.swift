@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct InstructorIntroView: View {
+struct InstructionView: View {
     @State private var showIntro: Bool = false
     @State private var showInfoSheet: Bool = false
+    @State private var showStepSheet: Bool = false
     
     private var guides = [
         "Lanjut": "Langkah Berikutnya",
@@ -36,6 +37,9 @@ struct InstructorIntroView: View {
                             instruction: "Siapkan ayam yang telah digiling dengan chopper",
                             onRepeat: {
                                 print("Tombol ulangi ditekan")
+                            },
+                            onStep: {
+                                showStepSheet = true
                             }
                         )
                         
@@ -58,7 +62,6 @@ struct InstructorIntroView: View {
                         onPrevious: { print("Previous Step") },
                         onNext: { print("Next Step") }
                     )
-
                 }
                 .ignoresSafeArea(.container, edges: .bottom)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -78,7 +81,7 @@ struct InstructorIntroView: View {
                         .ignoresSafeArea()
                         .transition(.opacity)
                     
-                    InstructionHelperIntroCard {
+                    IntroCard() {
                         withAnimation(.easeInOut(duration: 0.4)) {
                             showIntro = false
                         }
@@ -114,14 +117,16 @@ struct InstructorIntroView: View {
             }
         }
         .sheet(isPresented: $showInfoSheet) {
-            InstructionHelperSheet()
+            InfoSheet()
                 .presentationDetents([.fraction(0.75)])
                 .presentationDragIndicator(.visible)
+                .presentationBackground(Color.surfaceElevated!)
+            
         }
         
     }
 }
 
 #Preview {
-    InstructorIntroView()
+    InstructionView()
 }
