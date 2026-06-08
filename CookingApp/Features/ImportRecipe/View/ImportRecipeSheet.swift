@@ -12,41 +12,66 @@ struct ImportRecipeSheet: View {
     @State var link: String = ""
     @State private var showPreviewSheet = false
     @State private var previewUrlString: String = ""
-//    @State private var scrapedRecipe: Recipe?
+    //    @State private var scrapedRecipe: Recipe?
     @State private var recipeLink = "https://cookpad.com/id/resep/17154212-nasi-goreng-kampung"
     
     @State private var isLoading = false
     @State private var errorMessage: String?
-
+    
+    // Untuk menutup sheet
+    @Environment(\.dismiss) private var dismiss
+    
     
     var body: some View {
-        NavigationStack {
-            VStack {
+        ZStack {
+            Color.surfaceElevated
+            VStack(spacing: 32) {
+                ZStack {
+                    // Judul di tengah
+                    Text("Import Resep")
+                        .font(.headline) // Atau .title3
+                    
+                    // Tombol X di ujung kiri
+                    HStack {
+                        
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                                .frame(width: 45, height: 45)
+                                .background(Color(UIColor.tertiarySystemFill)) // Warna bulat abu-abu
+                                .clipShape(Circle())
+                        }
+                        Spacer() // Mendorong tombol ke ujung kiri
+                    }
+                }
+                
                 VStack(spacing:16) {
                     Text("Masukkan link resep (cth: Cookpad) untuk memproses bahan dan panduan masak secara otomatis")
                         .font(.body)
-                    TextField("Cari sesuatu...", text: $link)
+                    TextField("", text: $link)
                         .padding(.horizontal,15)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                         .background(
-                            Color.surfaceDefault
+                            Color(UIColor.tertiarySystemFill)
                         )
-                        .cornerRadius(Radius.small)
+                        .cornerRadius(Radius.infinity)
                     
                     
                 }
-                .padding(.bottom, 16)
                 VStack(spacing: 8,) {
                     ButtonApp(title: "Import Recipe", action: {
                         showPreviewSheet = true
                     })
-                    ButtonApp(title: "Cancel", type: .secondary, action: {
+                    ButtonApp(title: "Cancel", type: .tertiary, action: {
                         print("cancel")
                     })
                 }
             }
-            .padding(.vertical, 8)
+//            .padding(.vertical, 8)
             .padding(.horizontal,24)
             // Preview Sheet
             .sheet(isPresented: $showPreviewSheet) {
@@ -65,31 +90,36 @@ struct ImportRecipeSheet: View {
                         showPreviewSheet = false
                     }
                 )
+                
+                
+                
+                
             }
-            .navigationTitle("Import Recipe")
+            
         }
+        .ignoresSafeArea()
         
-    
+        
     }
     
-//    // MARK: - Start Scraping
-//    @MainActor
-//    private func startScraping() async {
-//        isLoading = true
-//        scrapedRecipe = nil
-//        errorMessage = nil
-//
-//        do {
-//            let result = try await CookpadScraperService.shared.scrape(urlString: recipeLink)
-//            scrapedRecipe = result
-//        } catch let error as ScraperError {
-//            errorMessage = error.errorDescription
-//        } catch {
-//            errorMessage = error.localizedDescription
-//        }
-//
-//        isLoading = false
-//    }
+    //    // MARK: - Start Scraping
+    //    @MainActor
+    //    private func startScraping() async {
+    //        isLoading = true
+    //        scrapedRecipe = nil
+    //        errorMessage = nil
+    //
+    //        do {
+    //            let result = try await CookpadScraperService.shared.scrape(urlString: recipeLink)
+    //            scrapedRecipe = result
+    //        } catch let error as ScraperError {
+    //            errorMessage = error.errorDescription
+    //        } catch {
+    //            errorMessage = error.localizedDescription
+    //        }
+    //
+    //        isLoading = false
+    //    }
     
     
 }

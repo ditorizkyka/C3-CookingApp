@@ -24,13 +24,27 @@ struct HomeView: View {
     @State private var selectedIndex: Int? = nil
     @State private var allRecipes: [RecipeCard] = mockRecipes
     
+    // 1. TAMBAHKAN STATE INI
+    @State private var navigateToManual = false
+    
+    @State private var isShowingImportSheet = false
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 24) {
+                
                 // Add Recipe Button
                 HStack() {
-                    AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website")
-                    AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu")
+                    AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website",
+                                    action: {
+                        isShowingImportSheet = true
+                    })
+                    AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu",
+                                    action: {
+                        navigateToManual = true
+                        
+                    })
+                    
                 }
                 .padding(.horizontal)
                 
@@ -62,7 +76,7 @@ struct HomeView: View {
                                     
                                     mockRecipes[index]
                                         .zIndex(Double(index))
-    //                                    .scaleEffect(!isSelected ? 1.0 - (CGFloat(mockRecipes.count - index) * 0.01) : 1.0)
+                                    //                                    .scaleEffect(!isSelected ? 1.0 - (CGFloat(mockRecipes.count - index) * 0.01) : 1.0)
                                         .brightness(!isSelected ? -Double(mockRecipes.count - index) * 0.02 : 0)
                                     
                                         .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
@@ -82,13 +96,18 @@ struct HomeView: View {
                             }
                         }
                         .clipShape(RoundedRectangle(cornerRadius: Radius.large))
-
+                        
                     } else {
                         HomeEmptyStateCard()
                     }
                     
                     Spacer()
                     
+                }
+                .sheet(isPresented: $isShowingImportSheet) {
+                    ImportRecipeSheet()
+                        .presentationDetents([.fraction(0.5), .large])
+                        .presentationDragIndicator(.visible)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 24)
@@ -97,7 +116,10 @@ struct HomeView: View {
                 .clipShape(RoundedRectangle(cornerRadius: Radius.xLarge))
                 .ignoresSafeArea()
                 
+                
+                
             }
+            
             .background(Color.surfaceBrand.ignoresSafeArea())
             .searchable(
                 text: $searchRecipe,
@@ -107,6 +129,12 @@ struct HomeView: View {
             .searchDictationBehavior(.inline(activation: .onSelect))
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(isPresented: $navigateToManual) {
+                AddManualRecipeView()
+            }
+            
+            
+            
             
         }
     }

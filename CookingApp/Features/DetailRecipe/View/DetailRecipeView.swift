@@ -90,9 +90,6 @@ struct DetailRecipeView: View {
                         
                         // Jika ada nama grup (misal: "Bumbu Halus")
                         if let namaGrup = group.groupName, !namaGrup.isEmpty {
-                            
-                            // Gunakan Text biasa yang ditebalkan sebagai pembatas grup di dalam List
-                            // Hindari menggunakan Section di dalam Section
                             Text(namaGrup)
                                 .font(.headline)
                                 .foregroundColor(.primary)
