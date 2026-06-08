@@ -28,3 +28,7 @@ struct RadialGradientCircle: View {
             .offset(y: offset)
     }
 }
+
+#Preview {
+    RadialGradientCircle(color: Color.ovalGreen!, offset: 0)
+}

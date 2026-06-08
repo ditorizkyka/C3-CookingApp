@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct InstructionHelperSheet: View {
+struct InfoSheet: View {
     var guides = [
         Guide(icon: "forward.fill", title: "Pindah Langkah", description: "Katakan **\"Lanjut\"** untuk beralih ke instruksi selanjutnya"),
         Guide(icon: "backward.fill", title: "Kembali ke Sebelumnya", description: "Katakan **\"Kembali\"** untuk melihat ulang instruksi sebelumnya"),
@@ -30,7 +30,7 @@ struct InstructionHelperSheet: View {
             // Content
             VStack {
                 ForEach(guides, id: \.title) { guide in
-                        InstructionSheetContentCard(guide: guide)
+                        GuideCard(guide: guide)
                 }
             }
         }
@@ -39,5 +39,5 @@ struct InstructionHelperSheet: View {
 }
 
 #Preview {
-    InstructionHelperSheet()
+    InfoSheet()
 }

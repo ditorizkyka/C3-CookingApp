@@ -13,7 +13,7 @@ struct Guide: Hashable {
     let description: String
 }
 
-struct InstructionSheetContentCard: View {
+struct GuideCard: View {
     var guide: Guide
     
     var body: some View {
@@ -45,5 +45,5 @@ struct InstructionSheetContentCard: View {
 }
 
 #Preview {
-    InstructionSheetContentCard(guide: Guide(icon: "forward.fill", title: "Pindah Langkah", description: "Katakan **\"Lanjut\"** untuk beralih ke instruksi selanjutnya"))
+    GuideCard(guide: Guide(icon: "forward.fill", title: "Pindah Langkah", description: "Katakan **\"Lanjut\"** untuk beralih ke instruksi selanjutnya"))
 }
