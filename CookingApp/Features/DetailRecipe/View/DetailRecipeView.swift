@@ -1,10 +1,9 @@
 import SwiftUI
 
-// MARK: - Komponen Reusable Gambar (Tetap sama)
+// MARK: - Komponen Reusable Gambar
 struct RecipeHeaderImage: View {
     var imageName: String?
     var height: CGFloat = 221
-    var cornerRadius: CGFloat = 12
     
     var body: some View {
         Group {
@@ -19,41 +18,37 @@ struct RecipeHeaderImage: View {
                     Text("No Image")
                         .font(.caption)
                 }
-                .foregroundColor(.gray)
+                .foregroundColor(Color.labelLight!)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.gray.opacity(0.2))
+                .background(Color.surfaceDefault!)
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: height)
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.small))
     }
 }
 
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
-    // Variabel state
     var recipeAssetImage: String? = nil
-    
-    // Menggunakan dummy data untuk resep
-    var dummyData: Recipe = Recipe.dummyRecipes[0]
+    var recipe: Recipe = Recipe.dummyRecipes[0]
        
     var body: some View {
         NavigationStack {
             List {
-                // ==========================================
-                // SECTION 1: HEADER (Gambar, Judul, Tombol)
-                // ==========================================
+                // MARK: - Header (Image, Title, Button)
                 VStack(alignment: .leading) {
                     RecipeHeaderImage(imageName: recipeAssetImage)
                     
-                    Text(dummyData.title)
+                    Text(recipe.title)
                         .lineLimit(2)
                         .font(.largeTitle)
                         .fontWeight(.bold)
+                        .foregroundColor(Color.labelDark!)
                         .padding(.vertical, 24)
                     
-                    ButtonApp(title: "Mulai Masak", iconButton: "frying.pan", action: {
+                    ButtonApp(title: "Mulai Masak", iconButton: AppIcon.fryingPan, action: {
                         print("Mulai masak ditekan!")
                     })
                     .padding(.bottom, 8)
@@ -62,59 +57,77 @@ struct DetailRecipeView: View {
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .listRowSeparator(.hidden)
                 
-                // ==========================================
-                // SECTION 2: ATRIBUT RESEP (Porsi & Waktu)
-                // ==========================================
-                Section() {
+                // MARK: - Atribut Resep (Porsi & Waktu)
+                Section {
                     HStack {
                         Text("Jumlah Porsi")
+                            .foregroundColor(Color.labelDark!)
                         Spacer()
-                        Text("\(dummyData.portion) Orang")
-                            .foregroundColor(.secondary)
+                        Text("\(recipe.portion) Orang")
+                            .foregroundColor(Color.labelLight!)
                     }
                     HStack {
                         Text("Lama Memasak")
+                            .foregroundColor(Color.labelDark!)
                         Spacer()
-                        Text("\(dummyData.durationInMinutes) Menit")
-                            .foregroundColor(.secondary)
+                        Text("\(recipe.durationInMinutes) Menit")
+                            .foregroundColor(Color.labelLight!)
                     }
                 }
                 
-                // ==========================================
-                // SECTION 3: BAHAN - BAHAN
-                // ==========================================
-                // Kita buat satu Section besar dengan header "Bahan-bahan"
-                Section(header: Text("Bahan-bahan").font(.title3).fontWeight(.semibold).foregroundColor(.primary)) {
-                    
-                    ForEach(dummyData.ingredientGroups) { group in
-                        
-                        // Jika ada nama grup (misal: "Bumbu Halus")
-                        if let namaGrup = group.groupName, !namaGrup.isEmpty {
-                            Text(namaGrup)
+                // MARK: - Bahan-bahan
+                Section(header: Text("Bahan-bahan")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color.labelDark!)
+                ) {
+                    ForEach(recipe.ingredients) { ingredient in
+                        if let subIngredients = ingredient.groupIngredients {
+                            
+                            Text(ingredient.name)
                                 .font(.headline)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color.labelDark!)
                                 .padding(.top, 8)
                                 .padding(.bottom, 2)
-                                .listRowSeparator(.hidden) // Hilangkan garis atasnya
+                                .listRowSeparator(.hidden)
                             
-                            RenderIngredientGroupItems(items: group.items)
+                            RenderIngredientGroupItems(items: subIngredients)
                             
                         } else {
-                            // Jika tidak ada nama grup (List biasa)
-                            RenderIngredientItems(items: group.items)
+                            RenderSingleIngredientItem(ingredient: ingredient)
                         }
                     }
                 }
                 
-                // ==========================================
-                // SECTION 4: LANGKAH - LANGKAH
-                // ==========================================
-                Section(header: Text("Langkah-langkah").font(.title3).fontWeight(.semibold).foregroundColor(.primary)) {
-                    
-                    ForEach(dummyData.instructions) { step in
-                        // Memanggil struct terpisah agar isExpanded independen tiap baris
+                // MARK: - Langkah-langkah
+                Section(header: Text("Langkah-langkah")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color.labelDark!)
+                ) {
+                    ForEach(recipe.instructions) { step in
                         InstructionRowView(instruction: step)
                             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    }
+                }
+                
+                Section(
+                ) {
+                    HStack {
+                        Text("Jumlah Porsi")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight!)
+                            
+                        Spacer()
+                        Text("4 Orang")
+                    }
+                    HStack {
+                        Text("Lama Memasak")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight!)
+                            
+                        Spacer()
+                        Text("30 Menit")
                     }
                 }
                 
@@ -123,7 +136,10 @@ struct DetailRecipeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                    NavigationLink(destination: EditDetailRecipeView(editRecipeData: recipe)) {
+                        Text("Edit")
+                            .foregroundColor(Color.brandPrimary!)
+                    }
                 }
             }
         }
@@ -132,11 +148,15 @@ struct DetailRecipeView: View {
     // MARK: - ViewBuilders untuk Bahan
     
     @ViewBuilder
-    func RenderIngredientItems(items: [Ingredient]) -> some View {
-        ForEach(items) { ingredient in
-            Text("\(ingredient.quantity) \(ingredient.name)")
-                .padding(.vertical, 4)
+    func RenderSingleIngredientItem(ingredient: Ingredient) -> some View {
+        HStack {
+            Text(ingredient.quantity)
+                .font(.body)
+            
+            Text(ingredient.name)
+                .font(.body)
         }
+        .padding(.vertical, 4)
     }
     
     @ViewBuilder
@@ -144,10 +164,16 @@ struct DetailRecipeView: View {
         ForEach(items) { ingredient in
             HStack(alignment: .center, spacing: 12) {
                 Circle()
-                    .fill(Color.gray.opacity(0.4))
-                    .frame(width: 5, height: 5)
+                    .fill(Color.labelDark!)
+                    .frame(width: 3, height: 3)
                 
-                Text("\(ingredient.quantity) \(ingredient.name)")
+                HStack {
+                    Text(ingredient.quantity)
+                        .font(.body)
+                    
+                    Text(ingredient.name)
+                        .font(.body)
+                }
                 
                 Spacer()
             }
@@ -157,8 +183,7 @@ struct DetailRecipeView: View {
 }
 
 
-// MARK: - Struct Terpisah untuk Baris Instruksi (WAJIB TERPISAH)
-// Mengapa? Karena setiap baris butuh status 'isExpanded' masing-masing.
+// MARK: - Struct Terpisah untuk Baris Instruksi
 struct InstructionRowView: View {
     let instruction: Instruction
     @State private var isExpanded: Bool = false
@@ -175,62 +200,54 @@ struct InstructionRowView: View {
     
     @ViewBuilder
     private func MainInstructionRow() -> some View {
-        // 1. UBAH ALIGNMENT MENJADI .center
         HStack(alignment: .center, spacing: 12) {
             
             Text("\(instruction.sequenceNumber)")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-//                .frame(width: 40, alignment: .leading)
-                .padding(.leading, 20)
-                .padding(.trailing,10)
-//                .background(.red)
-                // HAPUS padding(.top, 12) di sini!
-            
+                .font(.footnote)
+                .foregroundColor(Color.labelDark!)
+                .frame(width: 22, height: 22)
+                .background(Color.brandSecondary)
+                .clipShape(Circle())
+                .padding(.leading, 30)
+                .padding(.trailing, 10)
             
             Text(instruction.text)
                 .font(.body)
-                .foregroundColor(.primary)
-                // Teks inilah yang menentukan total tinggi baris ini
+                .foregroundColor(Color.labelDark!)
                 .padding(.vertical, 16)
             
             Spacer()
             
             if !instruction.breakdownInstruction.isEmpty {
-                Divider()
                 
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isExpanded.toggle()
                     }
                 }) {
-                    Image(systemName: "chevron.right.circle.fill")
+                    Image(systemName: "chevron.right.circle")
                         .font(.title2)
-                        .foregroundColor(isExpanded ? Color.accentColor : Color.gray.opacity(0.4))
+                        .foregroundColor(isExpanded ? Color.brandPrimary! : Color.labelLight)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                         .padding(.trailing, 16)
-                        // HAPUS padding(.top, 12) di sini juga!
                 }
                 .buttonStyle(.plain)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-//        .background(.yellow)
     }
     
     @ViewBuilder
     private func BreakdownSection() -> some View {
         VStack(spacing: 0) {
-            Divider()
-                .padding(.leading, 76)
+            
             
             VStack(alignment: .leading, spacing: 14) {
                 ForEach(instruction.breakdownInstruction) { subStep in
                     SubStepRow(subStep: subStep)
                 }
             }
-            .padding(.leading, 50)
+            .padding(.leading, 40)
             .padding(.trailing, 16)
             .padding(.top, 16)
             .padding(.bottom, 20)
@@ -240,14 +257,14 @@ struct InstructionRowView: View {
     
     @ViewBuilder
     private func SubStepRow(subStep: Instruction) -> some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: 32) {
             Circle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 6, height: 6)
+                .fill(Color.labelLight!)
+                .frame(width: 3, height: 3)
             
             Text(subStep.text)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(Color.labelLight!)
         }
     }
 }

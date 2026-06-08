@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct EditIngredientsRow: View {
-    var isBreakdown : Bool = false
-    @State var ingredientsItemsName : String = "5 siung bawang putih"
+    var isBreakdown: Bool = false
+    @Binding var ingredientsItemsName: String
+    @Binding var ingredientsItemsQty: String
     
     var body: some View {
         HStack {
@@ -21,75 +22,79 @@ struct EditIngredientsRow: View {
             }
             
             if isBreakdown {
-                HStack(alignment: .center, spacing: 15) {
+                HStack(alignment: .center, ) {
                     Circle()
-                        .fill(.black)
-                        .frame(width: 5, height: 5)
-                        .padding(.horizontal,5)
+                        .fill(Color.labelDark!)
+                        .frame(width: 3, height: 3)
+                        .padding(.horizontal, 5)
                     
-                    TextField("", text: $ingredientsItemsName)
+                    TextField("Jumlah", text: $ingredientsItemsQty)
+                        .font(.body)
+                        .frame(width: 65)
+                
+                    
+                    TextField("Nama Bahan", text: $ingredientsItemsName)
                         .font(.body)
                     
                     Spacer()
                 }
             } else {
-                TextField("", text: $ingredientsItemsName)
-                    .font(.body)
+                HStack(spacing: 8) {
+                    TextField("Jumlah", text: $ingredientsItemsQty)
+                        .font(.body)
+                        .frame(width: 65)
+                    
+                    TextField("Nama Bahan", text: $ingredientsItemsName)
+                        .font(.body)
+                }
             }
-            
-            
-        
-            
             
             Spacer()
             
             Image(systemName: AppIcon.line3Horizontal)
                 .font(.body)
-                .foregroundStyle(Color.labelLight!) // Mengatur warna
+                .foregroundStyle(Color.labelLight!)
 
         }
-        .padding(.horizontal,10)
+        .padding(.horizontal, 10)
     }
 }
 
 struct EditIngredientsGroupRow: View {
-    @State var ingredientsGroupName : String = "5 siung bawang putih"
+    @Binding var ingredients: [Ingredient]
     
     var body: some View {
-        VStack {
+        ForEach($ingredients) { $ingredient in
             HStack {
                 Button {
-                    print("deleted group ingredients")
+                    print("deleted group")
                 } label: {
                     Image(systemName: AppIcon.minusFill)
                         .foregroundStyle(Color.actionDelete!)
                 }
                 
-                TextField("", text: $ingredientsGroupName)
+                TextField("Nama Grup", text: $ingredient.name)
                     .font(.headline)
                 
                 Spacer()
                 
                 Image(systemName: AppIcon.line3Horizontal)
                     .font(.body)
-                    .foregroundStyle(Color.labelLight!)// Mengatur ukuran
-                    // Mengatur warna
+                    .foregroundStyle(Color.labelLight!)
             }
-            
-
         }
-        .padding(.horizontal,10)
     }
 }
 
 
-
-
-
 #Preview {
-    VStack(spacing:20) {
-        EditIngredientsRow()
-        EditIngredientsGroupRow()
-        EditIngredientsRow(isBreakdown: true)
+    @Previewable @State var name = "Bawang Merah"
+    @Previewable @State var qty = "10 siung"
+    @Previewable @State var ingredients = Recipe.dummyRecipes[0].ingredients
+    
+    VStack(spacing: 20) {
+        EditIngredientsGroupRow(ingredients: $ingredients)
+        EditIngredientsRow(isBreakdown: true, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
+        EditIngredientsRow(isBreakdown: false, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
     }
 }

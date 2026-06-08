@@ -16,6 +16,8 @@ struct HomeView: View {
     
     // 1. TAMBAHKAN STATE INI
     @State private var navigateToManual = false
+    @State private var navigateToDetail = false
+    @State private var navigateToLoading = false
     
     @State private var isShowingImportSheet = false
     
@@ -102,7 +104,12 @@ struct HomeView: View {
                     
                 }
                 .sheet(isPresented: $isShowingImportSheet) {
-                    ImportRecipeSheet()
+                    ImportRecipeSheet(onImportFinished: {
+                        // Menunggu sejenak sampai animasi sheet selesai menutup
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            navigateToLoading = true
+                        }
+                    })
                         .presentationDetents([.fraction(0.5), .large])
                         .presentationDragIndicator(.visible)
                 }
@@ -128,6 +135,17 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $navigateToManual) {
                 AddManualRecipeView()
+            }
+            .navigationDestination(isPresented: $navigateToDetail) {
+                DetailRecipeView()
+            }
+            .navigationDestination(isPresented: $navigateToLoading) {
+                LoadingView(text: "Mengloding", onSave: {
+                    navigateToLoading = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        navigateToDetail = true
+                    }
+                })
             }
             
             
