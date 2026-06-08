@@ -52,6 +52,7 @@ struct HomeView: View {
                                 .foregroundStyle(Color.brandAccent!)
                         }
                     }
+                    .padding(.horizontal,14)
                     
                     if !allRecipes.isEmpty {
                         ScrollView {

@@ -8,7 +8,9 @@
 import SwiftUI
 
 extension Color {
-    
+    // Action
+    static let actionDelete = Color("#FF383C")
+    static let actionSuccess = Color("#34C759")
     
     // Brand
     static let brandAccent = Color("#004820")
@@ -22,8 +24,9 @@ extension Color {
     
     // Surface
     static let surfaceDefault = Color("#F2F2F7")
-    static let surfaceElevated = Color("#FAFFFC")
+    static let surfaceElevated = Color("#FFFFFF")
     static let surfaceBrand = Color("#EFF8D5")
+    static let surfaceBrandElevated = Color("#FAFFFC")
     
     // Recipe Card
     static let recipeCardGreen = Color("#60A624")
@@ -31,6 +34,9 @@ extension Color {
     static let recipeCardPurple = Color("#6B24A6")
     static let recipeCardCyan = Color("#24A690")
     static let recipeCardRed = Color("#FF383C")
+    
+    // Oval
+    static let ovalGreen = Color("#B9E340")
 }
 
 extension Color {
