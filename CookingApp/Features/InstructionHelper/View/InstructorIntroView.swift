@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct InstructorIntroView: View {
-    @State private var showIntro: Bool = true
+    @State private var showIntro: Bool = false
+    @State private var showInfoSheet: Bool = false
     
     private var guides = [
         "Lanjut": "Langkah Berikutnya",
@@ -88,16 +89,34 @@ struct InstructorIntroView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Image(systemName: "xmark")
+                    Button {
+                        print("Tutup ditekan")
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Image(systemName: "speaker.slash")
+                    Button {
+                        print("Speaker ditekan")
+                    } label: {
+                        Image(systemName: "speaker.slash")
+                    }
                 }
+                
                 ToolbarItem(placement: .topBarTrailing) {
-                    Image(systemName: "info.circle")
+                    Button {
+                        showInfoSheet = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
                 }
             }
+        }
+        .sheet(isPresented: $showInfoSheet) {
+            InstructionHelperSheet()
+                .presentationDetents([.fraction(0.75)])
+                .presentationDragIndicator(.visible)
         }
         
     }
