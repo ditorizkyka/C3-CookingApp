@@ -8,10 +8,8 @@
 import SwiftUI
 
 struct TotalPortionRow: View {
-    let categories = ["1 Orang", "2 Orang", "3 Orang", "4 Orang", "5 Orang", "6-10 Orang", "lebih dari 10 Orang"]
-    
-    
-    @State private var selectedCategory = "1 Orang"
+    let portionOptions = [1, 2, 3, 4, 5, 6, 8, 10]
+    @Binding var selectedPortion: Int
     
     var body: some View {
         HStack {
@@ -19,57 +17,47 @@ struct TotalPortionRow: View {
                 .font(.body)
                 .foregroundStyle(Color.labelLight!)
             Spacer()
-            // 3. Membuat Picker
-            Picker("", selection: $selectedCategory) {
-                // Looping data kategori
-                ForEach(categories, id: \.self) { category in
-                    Text(category).tag(category)
+            Picker("", selection: $selectedPortion) {
+                ForEach(portionOptions, id: \.self) { portion in
+                    Text("\(portion) Orang").tag(portion)
                 }
             }
-//            .accentColor(Color.black)
             .pickerStyle(.menu)
-            .tint(.black)
-            
+            .tint(Color.labelDark!)
         }
-        .padding(.horizontal,10)
-        
+        .padding(.horizontal, 10)
     }
-    
 }
 
 struct TotalDurationRow: View {
-    let categories = ["5 Menit", "10 Menit", "15 Menit", "30 Menit", "45 Menit", "60 Menit", "Lebih Dari 60 Menit"]
-    
-    
-    @State private var selectedCategory = "5 Menit"
+    let durationOptions = [5, 10, 15, 30, 45, 60, 90, 120]
+    @Binding var selectedDuration: Int
     
     var body: some View {
         HStack {
-            Text("Jumlah Durasi")
+            Text("Lama Memasak")
                 .font(.body)
                 .foregroundStyle(Color.labelLight!)
             Spacer()
-            // 3. Membuat Picker
-            Picker("", selection: $selectedCategory) {
-                // Looping data kategori
-                ForEach(categories, id: \.self) { category in
-                    Text(category).tag(category)
+            Picker("", selection: $selectedDuration) {
+                ForEach(durationOptions, id: \.self) { duration in
+                    Text("\(duration) Menit").tag(duration)
                 }
             }
-//            .accentColor(Color.black)
             .pickerStyle(.menu)
-            .tint(.black)
-            
+            .tint(Color.labelDark!)
         }
-        .padding(.horizontal,10)
-        
+        .padding(.horizontal, 10)
     }
-    
 }
 
 
-
 #Preview {
-    TotalPortionRow()
-    TotalDurationRow()
+    @Previewable @State var portion = 1
+    @Previewable @State var duration = 10
+    
+    VStack {
+        TotalPortionRow(selectedPortion: $portion)
+        TotalDurationRow(selectedDuration: $duration)
+    }
 }
