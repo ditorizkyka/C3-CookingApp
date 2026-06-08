@@ -45,11 +45,13 @@ struct AddManualRecipeView: View {
                         )
                     }
                     
+                    ButtonAddIngredientsRow(isGroup: false)
+                        .listRowBackground(Color.surfaceBrand)
+                    
                     ButtonAddIngredientsRow(isGroup: true)
                         .listRowBackground(Color.surfaceBrand)
                     
-                    ButtonAddIngredientsRow(isGroup: false)
-                        .listRowBackground(Color.surfaceBrand)
+                    
                 }
                 
                 Section(header: Text("Langkah")

@@ -30,7 +30,7 @@ struct EditIngredientsRow: View {
                     
                     TextField("Jumlah", text: $ingredientsItemsQty)
                         .font(.body)
-                        .frame(width: 80)
+                        .frame(width: 65)
                 
                     
                     TextField("Nama Bahan", text: $ingredientsItemsName)
@@ -42,7 +42,7 @@ struct EditIngredientsRow: View {
                 HStack(spacing: 8) {
                     TextField("Jumlah", text: $ingredientsItemsQty)
                         .font(.body)
-                        .frame(width: 70)
+                        .frame(width: 65)
                     
                     TextField("Nama Bahan", text: $ingredientsItemsName)
                         .font(.body)

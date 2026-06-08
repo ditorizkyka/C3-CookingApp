@@ -18,12 +18,13 @@ struct ButtonApp: View {
             action()
         }) {
             HStack(spacing: 12) {
-                if let icon = iconButton {
-                    Image(systemName: icon)
-                }
+                
                 
                 Text(title)
                     .font(.headline)
+                if let icon = iconButton {
+                    Image(systemName: icon)
+                }
             }
             
             .foregroundColor(textColor)
