@@ -111,17 +111,23 @@ struct DetailRecipeView: View {
                     }
                 }
                 
-                // MARK: - Tips
-                if let tips = recipe.tips, !tips.isEmpty {
-                    Section(header: Text("Tips")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(Color.labelDark!)
-                    ) {
-                        Text(tips)
+                Section(
+                ) {
+                    HStack {
+                        Text("Jumlah Porsi")
                             .font(.body)
-                            .foregroundColor(Color.labelLight!)
-                            .padding(.vertical, 4)
+                            .foregroundStyle(Color.labelLight!)
+                            
+                        Spacer()
+                        Text("4 Orang")
+                    }
+                    HStack {
+                        Text("Lama Memasak")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight!)
+                            
+                        Spacer()
+                        Text("30 Menit")
                     }
                 }
                 
@@ -145,9 +151,10 @@ struct DetailRecipeView: View {
     func RenderSingleIngredientItem(ingredient: Ingredient) -> some View {
         HStack {
             Text(ingredient.quantity)
-                .foregroundColor(Color.labelLight!)
+                .font(.body)
+            
             Text(ingredient.name)
-                .foregroundColor(Color.labelDark!)
+                .font(.body)
         }
         .padding(.vertical, 4)
     }
@@ -157,14 +164,16 @@ struct DetailRecipeView: View {
         ForEach(items) { ingredient in
             HStack(alignment: .center, spacing: 12) {
                 Circle()
-                    .fill(Color.labelLight!.opacity(0.4))
-                    .frame(width: 5, height: 5)
+                    .fill(Color.labelDark!)
+                    .frame(width: 3, height: 3)
                 
-                Text(ingredient.quantity)
-                    .foregroundColor(Color.labelLight!)
-                
-                Text(ingredient.name)
-                    .foregroundColor(Color.labelDark!)
+                HStack {
+                    Text(ingredient.quantity)
+                        .font(.body)
+                    
+                    Text(ingredient.name)
+                        .font(.body)
+                }
                 
                 Spacer()
             }
@@ -194,10 +203,12 @@ struct InstructionRowView: View {
         HStack(alignment: .center, spacing: 12) {
             
             Text("\(instruction.sequenceNumber)")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(.footnote)
                 .foregroundColor(Color.labelDark!)
-                .padding(.leading, 20)
+                .frame(width: 22, height: 22)
+                .background(Color.brandSecondary)
+                .clipShape(Circle())
+                .padding(.leading, 30)
                 .padding(.trailing, 10)
             
             Text(instruction.text)
@@ -208,16 +219,15 @@ struct InstructionRowView: View {
             Spacer()
             
             if !instruction.breakdownInstruction.isEmpty {
-                Divider()
                 
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isExpanded.toggle()
                     }
                 }) {
-                    Image(systemName: "chevron.right.circle.fill")
+                    Image(systemName: "chevron.right.circle")
                         .font(.title2)
-                        .foregroundColor(isExpanded ? Color.brandPrimary! : Color.labelLight!.opacity(0.4))
+                        .foregroundColor(isExpanded ? Color.brandPrimary! : Color.labelLight)
                         .rotationEffect(.degrees(isExpanded ? 90 : 0))
                         .padding(.trailing, 16)
                 }
@@ -230,15 +240,14 @@ struct InstructionRowView: View {
     @ViewBuilder
     private func BreakdownSection() -> some View {
         VStack(spacing: 0) {
-            Divider()
-                .padding(.leading, 76)
+            
             
             VStack(alignment: .leading, spacing: 14) {
                 ForEach(instruction.breakdownInstruction) { subStep in
                     SubStepRow(subStep: subStep)
                 }
             }
-            .padding(.leading, 50)
+            .padding(.leading, 40)
             .padding(.trailing, 16)
             .padding(.top, 16)
             .padding(.bottom, 20)
@@ -248,14 +257,14 @@ struct InstructionRowView: View {
     
     @ViewBuilder
     private func SubStepRow(subStep: Instruction) -> some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: 32) {
             Circle()
-                .fill(Color.labelLight!.opacity(0.3))
-                .frame(width: 6, height: 6)
+                .fill(Color.labelLight!)
+                .frame(width: 3, height: 3)
             
             Text(subStep.text)
                 .font(.subheadline)
-                .foregroundColor(Color.labelLight!)
+                .foregroundStyle(Color.labelLight!)
         }
     }
 }

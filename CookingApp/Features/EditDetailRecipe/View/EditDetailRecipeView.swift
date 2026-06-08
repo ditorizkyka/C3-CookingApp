@@ -9,6 +9,8 @@ import SwiftUI
 
 
 struct EditDetailRecipeView: View {
+    @Environment(\.dismiss) private var dismiss
+    var onSave: (() -> Void)? = nil
    
     @State var editRecipeData: Recipe = Recipe.dummyRecipes[0]
     
@@ -105,7 +107,7 @@ struct EditDetailRecipeView: View {
                 }
                 
                 // MARK: - Simpan
-                ButtonApp(title: "Simpan", action: { print("save") })
+                ButtonApp(title: "Simpan", action: { handleSave() })
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .listRowSeparator(.hidden)
@@ -114,6 +116,23 @@ struct EditDetailRecipeView: View {
             .background(Color.surfaceDefault)
         }
         .toolbarRole(.editor)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Save") {
+                    handleSave()
+                }
+                .font(.headline)
+                .tint(.brandPrimary)
+            }
+        }
+    }
+    
+    private func handleSave() {
+        if let onSave = onSave {
+            onSave()
+        } else {
+            dismiss()
+        }
     }
 }
 

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ImportRecipeSheet: View {
+    var onImportFinished: (() -> Void)? = nil
     
     @State var link: String = ""
     @State private var showPreviewSheet = false
@@ -41,7 +42,7 @@ struct ImportRecipeSheet: View {
                                 .font(.headline)
                                 .foregroundColor(.primary)
                                 .frame(width: 45, height: 45)
-                                .background(Color(UIColor.tertiarySystemFill)) // Warna bulat abu-abu
+                                .background(Color(UIColor.secondarySystemFill)) // Warna bulat abu-abu
                                 .clipShape(Circle())
                         }
                         Spacer() // Mendorong tombol ke ujung kiri
@@ -79,12 +80,8 @@ struct ImportRecipeSheet: View {
                     urlString: previewUrlString,
                     onImport: {
                         showPreviewSheet = false
-                        //                    recipeLink = previewUrlString
-                        //                    Task {
-                        //                        // Small delay to allow sheet to dismiss before starting async scrape
-                        //                        try? await Task.sleep(nanoseconds: 300_000_000)
-                        //                        await startScraping()
-                        //                    }
+                        dismiss() // Tutup ImportRecipeSheet
+                        onImportFinished?() // Beritahu HomeView untuk pindah ke DetailRecipeView
                     },
                     onDismiss: {
                         showPreviewSheet = false

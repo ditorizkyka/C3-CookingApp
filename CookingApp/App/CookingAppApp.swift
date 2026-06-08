@@ -23,7 +23,7 @@ struct CookingAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
     }
 }

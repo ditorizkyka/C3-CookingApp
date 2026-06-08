@@ -15,14 +15,16 @@ struct AddRecipeButton: View {
                 if isManual {
                     Image(systemName: AppIcon.importRecipeIcon)
                         .font(.headline)
-                        .frame(width: 45, height: 45)
+                        .padding(10)
                         .background(Color.labelLightest.opacity(0.25))
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 } else {
                     Image(systemName: AppIcon.manualImportIcon)
-                        .font(.system(size: 20, weight: .medium))
-                        .frame(width: 45, height: 45)
+                        .font(.headline)
+                        .padding(10)
+//                        .frame(width: 45, height: 45)
                         .background(Color.labelLightest.opacity(0.13))
+                    
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
                 
@@ -39,9 +41,13 @@ struct AddRecipeButton: View {
                 }
  
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 148)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            
+            
             .background(isManual ? Color.brandSecondary : Color.brandPrimary)
             .cornerRadius(Radius.large)
             .foregroundStyle((isManual ? Color.labelDark : Color.labelLightest) ?? .white)
@@ -59,5 +65,5 @@ struct AddRecipeButton: View {
             print("add manual")
         })
     }
-    .padding()
+//    .padding()
 }
