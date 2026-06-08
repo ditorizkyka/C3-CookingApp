@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 enum AppIcon {
     // MARK: - Line Icons
     static let fryingPan = "frying.pan"

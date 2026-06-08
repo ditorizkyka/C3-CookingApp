@@ -8,29 +8,28 @@
 import SwiftUI
 
 struct EditInstructionRow: View {
+    @Binding var instruction: Instruction
+    
     var body: some View {
         VStack(alignment: .leading) {
-            HStack() {
+            HStack {
                 Button {
-                    print("deleted group ingredients")
+                    print("deleted instruction")
                 } label: {
                     Image(systemName: AppIcon.minusFill)
                         .foregroundStyle(Color.actionDelete!)
                 }
                 
                 HStack {
-                    Text("1")
+                    Text("\(instruction.sequenceNumber)")
                         .font(.footnote)
-                               .foregroundColor(.black)
-                             
-                               .frame(width: 20, height: 20)
-                               
-                               .background(Color.brandSecondary)
-                               
-                               .clipShape(Circle())
-                    Text("Blender bawang merah, lengkuas, air dan serai sampai halus.")
-                        .font(.body)
+                        .foregroundColor(Color.labelDark!)
+                        .frame(width: 20, height: 20)
+                        .background(Color.brandSecondary)
+                        .clipShape(Circle())
                     
+                    TextField("Tulis langkah...", text: $instruction.text)
+                        .font(.body)
                 }
                 
                 Spacer()
@@ -38,16 +37,12 @@ struct EditInstructionRow: View {
                 Image(systemName: AppIcon.line3Horizontal)
                     .font(.body)
                     .foregroundStyle(Color.labelLight!)
-                   
-               
             }
             
             PhotoPickerHStack()
-                .padding(.leading,50)
+                .padding(.leading, 50)
         }
-        .padding(.horizontal,10)
-        
-        
+        .padding(.horizontal, 10)
     }
 }
 
@@ -66,7 +61,7 @@ struct PhotoPickerHStack: View {
                         .scaledToFill()
                         .frame(width: 100, height: 100)
                         .foregroundColor(.gray)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     
                     if selectedImage != nil {
                         Button(action: {
@@ -76,9 +71,9 @@ struct PhotoPickerHStack: View {
                         }) {
                             Image(systemName: "minus")
                                 .font(.caption2.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(Color.labelLightest!)
                                 .padding(8)
-                                .background(Color.red)
+                                .background(Color.actionDelete!)
                                 .clipShape(Circle())
                         }
                         .offset(x: 10, y: -10)
@@ -93,26 +88,26 @@ struct PhotoPickerHStack: View {
                         ZStack(alignment: .bottomTrailing) {
                             Image(systemName: "photo")
                                 .font(.system(size: 40))
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color.labelLight!)
                             
-                            Image(systemName: "plus.circle.fill")
+                            Image(systemName: AppIcon.plusFill)
                                 .font(.title3)
-                                .foregroundColor(.gray)
-                                .background(Color.white)
+                                .foregroundColor(Color.labelLight!)
+                                .background(Color.surfaceElevated!)
                                 .clipShape(Circle())
                                 .offset(x: 5, y: 5)
                         }
                         
                         Text("Tambah Foto")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.labelLight!)
                     }
                     .frame(width: 100, height: 100)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .background(Color.surfaceElevated!)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray, style: StrokeStyle(lineWidth: 1, dash: [5]))
+                        RoundedRectangle(cornerRadius: Radius.small)
+                            .stroke(Color.labelLight!, style: StrokeStyle(lineWidth: 1, dash: [5]))
                     )
                 }
                 .buttonStyle(.plain)
@@ -129,17 +124,7 @@ struct PhotoPickerHStack: View {
     }
 }
 
-//// MARK: - Preview
-//struct PhotoPickerHStack_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ZStack {
-//            // Background abu-abu muda seperti di gambar agar kotak putih terlihat menonjol
-//            Color(UIColor.secondarySystemBackground).ignoresSafeArea()
-//            PhotoPickerHStack()
-//        }
-//    }
-//}
-
 #Preview {
-    EditInstructionRow()
+    @Previewable @State var instruction = Recipe.dummyRecipes[0].instructions[0]
+    EditInstructionRow(instruction: $instruction)
 }
