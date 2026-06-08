@@ -7,22 +7,12 @@
 
 import SwiftUI
 
-let mockRecipes: [RecipeCard] = [
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.recipeCardBronze!),
-    
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.recipeCardCyan!),
-    
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.recipeCardGreen!),
-    
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.recipeCardPurple!),
-    
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.recipeCardRed!)
-]
+// Mock recipes removed in favor of Recipe.dummyRecipes
 
 struct HomeView: View {
     @State private var searchRecipe: String = ""
     @State private var selectedIndex: Int? = nil
-    @State private var allRecipes: [RecipeCard] = mockRecipes
+    @State private var allRecipes: [Recipe] = Recipe.dummyRecipes
     
     // 1. TAMBAHKAN STATE INI
     @State private var navigateToManual = false
@@ -71,16 +61,23 @@ struct HomeView: View {
                     if !allRecipes.isEmpty {
                         ScrollView {
                             VStack(spacing: -120) {
-                                ForEach(mockRecipes.indices, id: \.self) { index in
+                                ForEach(allRecipes.indices, id: \.self) { index in
                                     let isSelected = selectedIndex == index
+                                    let recipe = allRecipes[index]
+                                    let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
+                                    let color = colors[index % colors.count]
                                     
-                                    mockRecipes[index]
+                                    RecipeCard(
+                                        recipeTitle: recipe.title,
+                                        recipeCategoryIcon: "🍲",
+                                        recipeImage: "img_test",
+                                        recipeColor: color,
+                                        recipePortion: recipe.portion,
+                                        recipeDuration: recipe.durationInMinutes
+                                    )
                                         .zIndex(Double(index))
-                                    //                                    .scaleEffect(!isSelected ? 1.0 - (CGFloat(mockRecipes.count - index) * 0.01) : 1.0)
-                                        .brightness(!isSelected ? -Double(mockRecipes.count - index) * 0.02 : 0)
-                                    
+                                        .brightness(!isSelected ? -Double(allRecipes.count - index) * 0.02 : 0)
                                         .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
-                                    
                                         .onTapGesture {
                                             withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
                                                 if selectedIndex == index {

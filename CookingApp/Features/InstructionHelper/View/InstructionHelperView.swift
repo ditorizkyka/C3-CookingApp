@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct InstructionView: View {
+struct InstructionHelperView: View {
     @State private var showIntro: Bool = false
     @State private var showInfoSheet: Bool = false
     @State private var showStepSheet: Bool = false
@@ -128,5 +128,5 @@ struct InstructionView: View {
 }
 
 #Preview {
-    InstructionView()
+    InstructionHelperView()
 }
