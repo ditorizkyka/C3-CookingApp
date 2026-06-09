@@ -15,6 +15,8 @@ struct RecipeLibrary: View {
     
     @State private var searchRecipe = ""
     @State private var sortOption: SortOption = .name
+    @State private var selectedIndex: Int? = nil
+    @State private var navigateToDetail = false
     
     let columns = [
         GridItem(.flexible()),
@@ -39,10 +41,9 @@ struct RecipeLibrary: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(filteredRecipes.indices, id: \.self) { index in
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(filteredRecipes.indices, id: \.self) { index in
                         let recipe = filteredRecipes[index]
                         let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
                         let color = colors[index % colors.count]
@@ -55,6 +56,10 @@ struct RecipeLibrary: View {
                             recipePortion: recipe.portion,
                             recipeDuration: recipe.durationInMinutes
                         )
+                        .onTapGesture {
+                            selectedIndex = index
+                            navigateToDetail = true
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -96,7 +101,12 @@ struct RecipeLibrary: View {
                 placement: .navigationBarDrawer(displayMode: .always),
                 prompt: "Cari resep..."
             )
-        }
+            .navigationDestination(isPresented: $navigateToDetail) {
+                if let index = selectedIndex, index < filteredRecipes.count {
+                    let selectedRecipe = filteredRecipes[index]
+                    DetailRecipeView(recipe: selectedRecipe)
+                }
+            }
     }
 }
 
