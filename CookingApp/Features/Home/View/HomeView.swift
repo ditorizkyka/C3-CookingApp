@@ -7,14 +7,11 @@
 
 import SwiftUI
 
-// Mock recipes removed in favor of Recipe.dummyRecipes
-
 struct HomeView: View {
     @State private var searchRecipe: String = ""
     @State private var selectedIndex: Int? = nil
     @State private var allRecipes: [Recipe] = Recipe.dummyRecipes
     
-    // 1. TAMBAHKAN STATE INI
     @State private var navigateToManual = false
     @State private var navigateToDetail = false
     @State private var navigateToLoading = false
@@ -50,8 +47,8 @@ struct HomeView: View {
                         
                         Spacer()
                         
-                        Button {
-                            print("Lihat Semua")
+                        NavigationLink {
+                            RecipeLibrary()
                         } label: {
                             Text("Lihat Semua")
                                 .font(Font.subheadline)
@@ -81,10 +78,10 @@ struct HomeView: View {
                                         .brightness(!isSelected ? -Double(allRecipes.count - index) * 0.02 : 0)
                                         .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
                                         .onTapGesture {
-                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
-                                                if selectedIndex == index {
-                                                    selectedIndex = nil
-                                                } else {
+                                            if selectedIndex == index {
+                                                navigateToDetail = true
+                                            } else {
+                                                withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
                                                     selectedIndex = index
                                                 }
                                             }
@@ -105,7 +102,6 @@ struct HomeView: View {
                 }
                 .sheet(isPresented: $isShowingImportSheet) {
                     ImportRecipeSheet(onImportFinished: {
-                        // Menunggu sejenak sampai animasi sheet selesai menutup
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             navigateToLoading = true
                         }

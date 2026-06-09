@@ -9,6 +9,8 @@ import SwiftUI
 
 struct DisclosureStyle: DisclosureGroupStyle {
     let stepNumber: Int
+    var isCurrent: Bool = false
+    var hasSubInstructions: Bool = true
     
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -33,10 +35,11 @@ struct DisclosureStyle: DisclosureGroupStyle {
                         configuration.isExpanded.toggle()
                     }
                 } label: {
-                    Image(systemName: configuration.isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                    Image(systemName: hasSubInstructions ? (configuration.isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill") : "chevron.down.circle")
                         .font(.title2)
-                        .foregroundStyle(Color.brandPrimary ?? .green)
+                        .foregroundStyle(hasSubInstructions ? (Color.brandPrimary ?? .green) : Color.gray.opacity(0.5))
                 }
+                .disabled(!isCurrent || !hasSubInstructions)
                 .padding(.top, 16)
             }
             .padding(16)
@@ -50,7 +53,7 @@ struct DisclosureStyle: DisclosureGroupStyle {
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.brandPrimary ?? .green, lineWidth: 2)
+                .stroke(isCurrent ? (Color.brandPrimary ?? .green) : Color.clear, lineWidth: 2)
         )
     }
 }

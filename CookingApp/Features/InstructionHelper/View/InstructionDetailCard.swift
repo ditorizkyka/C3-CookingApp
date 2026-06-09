@@ -11,8 +11,17 @@ struct InstructionDetailCard: View {
     let stepNumber: Int
     let mainInstruction: String
     let subInstructions: [String]
+    var isCurrent: Bool = false
     
-    @State private var isExpanded: Bool = true
+    @State private var isExpanded: Bool
+    
+    init(stepNumber: Int, mainInstruction: String, subInstructions: [String], isCurrent: Bool = false) {
+        self.stepNumber = stepNumber
+        self.mainInstruction = mainInstruction
+        self.subInstructions = subInstructions
+        self.isCurrent = isCurrent
+        self._isExpanded = State(initialValue: isCurrent && !subInstructions.isEmpty)
+    }
     
     var body: some View {
         DisclosureGroup(isExpanded: $isExpanded) {
@@ -38,7 +47,7 @@ struct InstructionDetailCard: View {
         } label: {
             Text(mainInstruction)
         }
-        .disclosureGroupStyle(DisclosureStyle(stepNumber: stepNumber))
+        .disclosureGroupStyle(DisclosureStyle(stepNumber: stepNumber, isCurrent: isCurrent, hasSubInstructions: !subInstructions.isEmpty))
     }
 }
 
@@ -50,6 +59,7 @@ struct InstructionDetailCard: View {
             "Bersihkan ayam.",
             "Masukan bumbu halus juga bumbu marinasi.",
             "Aduk rata."
-        ]
+        ],
+        isCurrent: true
     )
 }
