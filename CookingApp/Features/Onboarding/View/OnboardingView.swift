@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 48) {
             // Icon
@@ -78,21 +80,11 @@ struct OnboardingView: View {
             }
             
             // Button
-            Button {
-                print("Coba Sekarang")
-            } label: {
-                HStack {
-                    Text("Yuk! Coba Sekarang")
-                    
-                    Image(systemName: "frying.pan")
+            ButtonApp(title: "Yuk! Coba Sekarang", iconButton: "frying.pan", type: .primary, action: {
+                withAnimation {
+                    hasSeenOnboarding = true
                 }
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(Color.labelLightest!)
-            .padding()
-            .background(Color.brandAccent)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.large))
-            .frame(maxWidth: .infinity, alignment: .center)
+            })
             
         }
         .padding(32)

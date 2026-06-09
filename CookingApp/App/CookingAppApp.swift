@@ -20,10 +20,15 @@ struct CookingAppApp: App {
             .datastoreLocation(.applicationDefault)
         ])
     }
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            if hasSeenOnboarding {
+                HomeView()
+            } else {
+                OnboardingView()
+            }
         }
     }
 }
