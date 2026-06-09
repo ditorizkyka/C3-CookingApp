@@ -17,6 +17,7 @@ struct InstructionHelperView: View {
     @State private var showIntro: Bool = true
     @State private var showInfoSheet: Bool = false
     @State private var showStepSheet: Bool = false
+    @State private var navigateToComplete: Bool = false
     
     private var guides = [
         "Lanjut": "Langkah Berikutnya",
@@ -87,7 +88,10 @@ struct InstructionHelperView: View {
                                 }
                             }
                         },
-                        onRepeat: { print("Ulangi Step") }
+                        onRepeat: { print("Ulangi Step") },
+                        onComplete: {
+                            navigateToComplete = true
+                        }
                     )          }
             .ignoresSafeArea(.container, edges: .bottom)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -117,6 +121,9 @@ struct InstructionHelperView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $navigateToComplete) {
+            InstructionHelperCompleteView(recipe: recipe)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {

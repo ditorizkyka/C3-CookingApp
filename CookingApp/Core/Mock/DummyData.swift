@@ -59,10 +59,16 @@ extension Recipe {
                 Instruction(
                     id: UUID(),
                     sequenceNumber: 2,
-                    text: "Siapkan bumbu halus dan tumis hingga harum.",
+                    text: "Siapkan bumbu halus.",
                     photoUrl: nil,
                     breakdownInstruction: [
                         Instruction(
+                            id: UUID(),
+                            sequenceNumber: 1,
+                            text: "Kupas bawang merah dan bawang putih.",
+                            photoUrl: nil,
+                            breakdownInstruction: []
+                        ),Instruction(
                             id: UUID(),
                             sequenceNumber: 1,
                             text: "Kupas bawang merah dan bawang putih.",
@@ -89,14 +95,28 @@ extension Recipe {
                 Instruction(
                     id: UUID(),
                     sequenceNumber: 3,
-                    text: "Masukkan mie instan dan irisan cabai rawit ke dalam air rebusan. Masak selama 1 menit.",
+                    text: "Masukkan mie instan dan irisan cabai rawit ke dalam air rebusan.",
                     photoUrl: nil,
                     breakdownInstruction: []
                 ),
                 Instruction(
                     id: UUID(),
                     sequenceNumber: 4,
-                    text: "Campurkan tumisan bumbu halus ke dalam panci mie. Aduk rata dan sajikan selagi hangat.",
+                    text: "Masak selama 1 menit.",
+                    photoUrl: nil,
+                    breakdownInstruction: []
+                ),
+                Instruction(
+                    id: UUID(),
+                    sequenceNumber: 5,
+                    text: "Campurkan tumisan bumbu halus ke dalam panci mie",
+                    photoUrl: nil,
+                    breakdownInstruction: []
+                ),
+                Instruction(
+                    id: UUID(),
+                    sequenceNumber: 6,
+                    text: "Aduk rata dan sajikan selagi hangat.",
                     photoUrl: nil,
                     breakdownInstruction: []
                 )

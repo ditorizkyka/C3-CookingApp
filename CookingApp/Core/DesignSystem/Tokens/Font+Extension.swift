@@ -9,8 +9,8 @@ import SwiftUI
 
 extension Font {
     static let xXXLargeTitle = Font.system(size: 68, weight: .bold)
-    static let xXLargeTitle = Font.system(size: 57.87, weight: .bold)
-    static let xLargeTitle = Font.system(size: 48.7, weight: .bold)
+    static let xXLargeTitle = Font.system(size: 58, weight: .bold)
+    static let xLargeTitle = Font.system(size: 48, weight: .bold)
     static let largeTitle = Font.system(size: 34, weight: .bold)
     static let title = Font.system(size: 22, weight: .bold)
     static let headline = Font.system(size: 17, weight: .semibold)
