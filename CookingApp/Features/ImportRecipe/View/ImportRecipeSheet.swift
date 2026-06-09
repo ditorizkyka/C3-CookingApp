@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import TipKit
 
 struct ImportRecipeSheet: View {
     var onImportFinished: (() -> Void)? = nil
@@ -22,6 +23,10 @@ struct ImportRecipeSheet: View {
     // Untuk menutup sheet
     @Environment(\.dismiss) private var dismiss
     
+    @AppStorage("onboardingStep") private var onboardingStep = 0
+    @State private var textFieldFrame: CGRect = .zero
+    
+    let pasteLinkTip = ToolTip(tipTitle: "Tempel Link", tipSubtitle: "Gunakan link resep yang sudah terisi otomatis di sini ini untuk mencoba fitur ekstrak resep.", iconName: "doc.on.clipboard.fill", buttonTitle: "")
     
     var body: some View {
         ZStack {
@@ -60,6 +65,13 @@ struct ImportRecipeSheet: View {
                             Color(UIColor.tertiarySystemFill)
                         )
                         .cornerRadius(Radius.infinity)
+                        .trackFrame(in: .named("SheetSpace"), $textFieldFrame)
+                        .onChange(of: link) { _, _ in
+                            if onboardingStep == 1 {
+                                onboardingStep = 2 
+                            }
+                        }
+                        .conditionalPopoverTip(onboardingStep == 1, tip: pasteLinkTip, arrowEdge: .top)
                     
                     
                 }
@@ -94,9 +106,9 @@ struct ImportRecipeSheet: View {
             }
             
         }
+        .coordinateSpace(name: "SheetSpace")
         .ignoresSafeArea()
-        
-        
+        .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 1 }, set: { if !$0 && onboardingStep == 1 { onboardingStep = 2 } }), holeFrame: textFieldFrame, cornerRadius: Radius.infinity)
     }
     
     //    // MARK: - Start Scraping

@@ -19,9 +19,10 @@ struct HomeView: View {
     
     @State private var isShowingImportSheet = false
     
-    @State private var showOnboardingTooltip = true
+    @AppStorage("onboardingStep") private var onboardingStep = 0
+    
     @State private var buttonFrame: CGRect = .zero
-    let importRecipeTip = ToolTip(tipTitle: "Siapkan Panduan Masak", tipSubtitle: "Simpan untuk menyusun resep ini menjadi langkah-langkah yang lebih mudah diikuti.", iconName: "square.and.arrow.down.on.square.fill", buttonTitle: "")
+    let importRecipeTip = ToolTip(tipTitle: "Ambil Resep dari Web", tipSubtitle: "Tempel link resep pilihanmu di sini. Kami akan menyusun bahan dan langkah masaknya secara otomatis.", iconName: "link.badge.plus", buttonTitle: "")
     
     var body: some View {
         NavigationStack {
@@ -31,22 +32,13 @@ struct HomeView: View {
                     HStack() {
                         AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website",
                                         action: {
-                            isShowingImportSheet = true
-                            showOnboardingTooltip = false
-                        })
-                        .background(
-                            GeometryReader { geo in
-                                Color.clear
-                                    .onAppear {
-                                        buttonFrame = geo.frame(in: .global)
-                                    }
-                                    .onChange(of: geo.frame(in: .global)) { _, newFrame in
-                                        buttonFrame = newFrame
-                                    }
+                            if onboardingStep == 0 {
+                                onboardingStep = 1
                             }
-                        )
-                        .popoverTip(importRecipeTip, arrowEdge: .top)
-                        .tipViewStyle(ToolTipStyle())
+                            isShowingImportSheet = true
+                        })
+                        .trackGlobalFrame($buttonFrame)
+                        .conditionalPopoverTip(onboardingStep == 0, tip: importRecipeTip, arrowEdge: .top)
                         AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu",
                                         action: {
                             navigateToManual = true
@@ -157,22 +149,11 @@ struct HomeView: View {
                         navigateToDetail = true
                     }
                 })
+            }.onTapGesture {
+                onboardingStep = 0 // Klik teks judul untuk mereset memori ke 0
             }
         }
-        .overlay {
-            if showOnboardingTooltip {
-                GeometryReader { geo in
-                    Path { path in
-                        path.addRect(geo.frame(in: .local))
-                        if buttonFrame != .zero {
-                            path.addRoundedRect(in: buttonFrame, cornerSize: CGSize(width: Radius.small, height: Radius.small))
-                        }
-                    }
-                    .fill(Color.black.opacity(0.6), style: FillStyle(eoFill: true))
-                }
-                .ignoresSafeArea()
-            }
-        }
+        .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
     }
 }
 
