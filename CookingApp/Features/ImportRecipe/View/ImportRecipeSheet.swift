@@ -71,7 +71,7 @@ struct ImportRecipeSheet: View {
                                 onboardingStep = 2 
                             }
                         }
-                        .conditionalPopoverTip(onboardingStep == 1, tip: pasteLinkTip, arrowEdge: .top)
+                        .conditionalPopoverTip(onboardingStep == 1, tip: pasteLinkTip, arrowEdge: .bottom)
                     
                     
                 }

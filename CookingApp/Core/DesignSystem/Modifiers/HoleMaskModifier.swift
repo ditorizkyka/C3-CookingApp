@@ -1,7 +1,6 @@
 import SwiftUI
 
 extension View {
-    /// Melacak frame dari view ini di dalam ruang koordinat (coordinate space) tertentu.
     func trackFrame(in coordinateSpace: CoordinateSpace = .global, _ frame: Binding<CGRect>) -> some View {
         self.background(
             GeometryReader { geo in
@@ -16,14 +15,10 @@ extension View {
         )
     }
     
-    /// Melacak frame global dari view ini dan menyimpannya ke dalam binding.
-    /// Sangat berguna untuk mendapatkan frame target yang akan dilubangi oleh HoleMask.
     func trackGlobalFrame(_ frame: Binding<CGRect>) -> some View {
         self.trackFrame(in: .global, frame)
     }
     
-    /// Menambahkan overlay gelap (masking) ke seluruh layar, 
-    /// namun memberikan efek "lubang" transparan (eoFill) tepat di atas frame yang diberikan.
     func holeMaskOverlay(isActive: Binding<Bool>, holeFrame: CGRect, cornerRadius: CGFloat = 16, opacity: Double = 0.6) -> some View {
         self.modifier(HoleMaskModifier(isActive: isActive, holeFrame: holeFrame, cornerRadius: cornerRadius, maskOpacity: opacity))
     }
