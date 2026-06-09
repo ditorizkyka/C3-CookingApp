@@ -113,18 +113,22 @@ struct EditDetailRecipeView: View {
                     .listRowSeparator(.hidden)
                 
             }
-            .background(Color.surfaceDefault)
-        }
-        .toolbarRole(.editor)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Save") {
-                    handleSave()
+            .toolbarRole(.editor)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        handleSave()
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.headline)
+                            .foregroundStyle(Color.brandAccent!)
+                    }
                 }
-                .font(.headline)
-                .tint(.brandPrimary)
+                
             }
+
         }
+        
     }
     
     private func handleSave() {

@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct InstructionHelperCompleteView: View {
+    var recipe: Recipe
+    
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         VStack(alignment: .center, spacing: 64) {
             // Affirmation
@@ -23,7 +27,7 @@ struct InstructionHelperCompleteView: View {
             // Recipe
             VStack(spacing: 16) {
                 // Title
-                Text("Ayam Bakar Madu")
+                Text(recipe.title)
                     .font(Font.title)
                 
                 // Image
@@ -34,13 +38,13 @@ struct InstructionHelperCompleteView: View {
                     HStack(spacing: 2) {
                         Image(systemName: "person.fill")
                         
-                        Text("6")
+                        Text("\(recipe.portion)")
                     }
                     
                     HStack(spacing: 2) {
                         Image(systemName: "clock.fill")
                         
-                        Text("10 min")
+                        Text("\(recipe.durationInMinutes) min")
                     }
                 }
                 .font(Font.headline)
@@ -49,7 +53,13 @@ struct InstructionHelperCompleteView: View {
             
             // Button
             Button {
-                print("Kembali ke Halaman Utama")
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        dismiss()
+                    }
+                }
             } label: {
                 Text("Kembali ke Halaman Utama")
             }
@@ -59,6 +69,16 @@ struct InstructionHelperCompleteView: View {
             .background(Color.brandAccent)
             .foregroundStyle(Color.labelLightest!)
             .clipShape(RoundedRectangle(cornerRadius: Radius.large))
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "chevron.left")
+                }
+            }
         }
         .background(
             VStack {
@@ -74,5 +94,5 @@ struct InstructionHelperCompleteView: View {
 }
 
 #Preview {
-    InstructionHelperCompleteView()
+    InstructionHelperCompleteView(recipe: Recipe.dummyRecipes.first!)
 }

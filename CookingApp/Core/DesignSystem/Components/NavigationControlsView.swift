@@ -13,6 +13,11 @@ struct NavigationControlsView: View {
     var onPrevious: () -> Void
     var onNext: () -> Void
     var onRepeat: () -> Void
+    var onComplete: (() -> Void)? = nil
+    
+    private var isLastStep: Bool {
+        totalPages > 0 && currentPage == totalPages - 1
+    }
     
     var body: some View {
         HStack {
@@ -48,15 +53,20 @@ struct NavigationControlsView: View {
             Spacer()
             
             Button {
-                onNext()
+                if isLastStep {
+                    onComplete?()
+                } else {
+                    onNext()
+                }
             } label: {
-                Image(systemName: "arrow.right")
+                Image(systemName: isLastStep ? "checkmark" : "arrow.right")
                     .font(.title3)
                     .fontWeight(.bold)
                     .padding(16)
-                    .background(Color.brandPrimary!)
+                    .background(isLastStep ? Color.brandAccent! : Color.brandPrimary!)
                     .foregroundStyle(.white)
                     .clipShape(Circle())
+                    .animation(.easeInOut(duration: 0.2), value: isLastStep)
             }
         }
         .padding(.horizontal, 24)

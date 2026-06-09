@@ -13,13 +13,13 @@ struct AddRecipeButton: View {
                 
                 // Bagian Ikon
                 if isManual {
-                    Image(systemName: AppIcon.importRecipeIcon)
+                    Image(systemName: AppIcon.manualImportIcon)
                         .font(.headline)
                         .padding(10)
                         .background(Color.labelLightest.opacity(0.25))
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 } else {
-                    Image(systemName: AppIcon.manualImportIcon)
+                    Image(systemName: AppIcon.importRecipeIcon)
                         .font(.headline)
                         .padding(10)
 //                        .frame(width: 45, height: 45)
