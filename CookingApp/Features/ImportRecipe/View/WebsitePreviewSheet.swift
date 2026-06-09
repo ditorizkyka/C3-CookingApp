@@ -15,7 +15,6 @@ struct WebsitePreviewSheet: View {
         NavigationStack {
             ZStack {
                 VStack(spacing: 0) {
-                    // The actual website preview
                     if let url = URL(string: urlString) {
                         WebView(url: url)
                             .edgesIgnoringSafeArea(.bottom)
@@ -26,7 +25,7 @@ struct WebsitePreviewSheet: View {
                     }
                     
                     ButtonApp(title: "Simpan Resep", type: .primary) {
-                        isLoading = true
+                        
                         Task {
                             await MainActor.run {
                                 if onboardingStep == 2 {
@@ -41,10 +40,6 @@ struct WebsitePreviewSheet: View {
                    
                 }
                 .padding(.horizontal, 16)
-                
-//                if isLoading {
-//                    LoadingView(text: "Memproses...")
-//                }
             }
             .navigationTitle("Preview")
             .navigationBarTitleDisplayMode(.inline)

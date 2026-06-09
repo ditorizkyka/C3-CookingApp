@@ -143,7 +143,7 @@ struct HomeView: View {
                 DetailRecipeView()
             }
             .navigationDestination(isPresented: $navigateToLoading) {
-                LoadingView(text: "Mengloding", onSave: {
+                LoadingView(text: "Menganalisis resep...", onSave: {
                     navigateToLoading = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         navigateToDetail = true
