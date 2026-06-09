@@ -15,6 +15,7 @@ struct ToolTipStyle: TipViewStyle {
             if let image = configuration.image {
                 image
                     .font(Font.title)
+                    .foregroundStyle(Color.brandAccent!)
             }
             
             // Content

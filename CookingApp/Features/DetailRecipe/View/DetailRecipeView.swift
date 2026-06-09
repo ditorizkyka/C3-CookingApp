@@ -35,6 +35,10 @@ struct DetailRecipeView: View {
     var recipe: Recipe = Recipe.dummyRecipes[0]
     
     @State private var showInstructionHelper: Bool = false
+    
+    let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
+    
+    @AppStorage("onboardingStep") private var onboardingStep = 0
        
     var body: some View {
         NavigationStack {
@@ -51,9 +55,13 @@ struct DetailRecipeView: View {
                         .padding(.vertical, 24)
                     
                     ButtonApp(title: "Mulai Masak", iconButton: AppIcon.fryingPan, action: {
+                        if onboardingStep == 3 {
+                            onboardingStep = 4
+                        }
                         showInstructionHelper = true
                     })
                     .padding(.bottom, 8)
+                    .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
