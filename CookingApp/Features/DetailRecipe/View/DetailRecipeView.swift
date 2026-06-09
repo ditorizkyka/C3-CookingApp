@@ -41,120 +41,118 @@ struct DetailRecipeView: View {
     @AppStorage("onboardingStep") private var onboardingStep = 0
        
     var body: some View {
-        NavigationStack {
-            List {
-                // MARK: - Header (Image, Title, Button)
-                VStack(alignment: .leading) {
-                    RecipeHeaderImage(imageName: recipeAssetImage)
-                    
-                    Text(recipe.title)
-                        .lineLimit(2)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+        List {
+            // MARK: - Header (Image, Title, Button)
+            VStack(alignment: .leading) {
+                RecipeHeaderImage(imageName: recipeAssetImage)
+                
+                Text(recipe.title)
+                    .lineLimit(2)
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.labelDark!)
+                    .padding(.vertical, 24)
+                
+                ButtonApp(title: "Mulai Masak", iconButton: AppIcon.fryingPan, action: {
+                    if onboardingStep == 3 {
+                        onboardingStep = 4
+                    }
+                    showInstructionHelper = true
+                })
+                .padding(.bottom, 8)
+                .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowSeparator(.hidden)
+            
+            // MARK: - Atribut Resep (Porsi & Waktu)
+            Section {
+                HStack {
+                    Text("Jumlah Porsi")
                         .foregroundColor(Color.labelDark!)
-                        .padding(.vertical, 24)
-                    
-                    ButtonApp(title: "Mulai Masak", iconButton: AppIcon.fryingPan, action: {
-                        if onboardingStep == 3 {
-                            onboardingStep = 4
-                        }
-                        showInstructionHelper = true
-                    })
-                    .padding(.bottom, 8)
-                    .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
+                    Spacer()
+                    Text("\(recipe.portion) Orang")
+                        .foregroundColor(Color.labelLight!)
                 }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .listRowSeparator(.hidden)
-                
-                // MARK: - Atribut Resep (Porsi & Waktu)
-                Section {
-                    HStack {
-                        Text("Jumlah Porsi")
+                HStack {
+                    Text("Lama Memasak")
+                        .foregroundColor(Color.labelDark!)
+                    Spacer()
+                    Text("\(recipe.durationInMinutes) Menit")
+                        .foregroundColor(Color.labelLight!)
+                }
+            }
+            
+            // MARK: - Bahan-bahan
+            Section(header: Text("Bahan-bahan")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(Color.labelDark!)
+            ) {
+                ForEach(recipe.ingredients) { ingredient in
+                    if let subIngredients = ingredient.groupIngredients {
+                        
+                        Text(ingredient.name)
+                            .font(.headline)
                             .foregroundColor(Color.labelDark!)
-                        Spacer()
-                        Text("\(recipe.portion) Orang")
-                            .foregroundColor(Color.labelLight!)
-                    }
-                    HStack {
-                        Text("Lama Memasak")
-                            .foregroundColor(Color.labelDark!)
-                        Spacer()
-                        Text("\(recipe.durationInMinutes) Menit")
-                            .foregroundColor(Color.labelLight!)
-                    }
-                }
-                
-                // MARK: - Bahan-bahan
-                Section(header: Text("Bahan-bahan")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.labelDark!)
-                ) {
-                    ForEach(recipe.ingredients) { ingredient in
-                        if let subIngredients = ingredient.groupIngredients {
-                            
-                            Text(ingredient.name)
-                                .font(.headline)
-                                .foregroundColor(Color.labelDark!)
-                                .padding(.top, 8)
-                                .padding(.bottom, 2)
-                                .listRowSeparator(.hidden)
-                            
-                            RenderIngredientGroupItems(items: subIngredients)
-                            
-                        } else {
-                            RenderSingleIngredientItem(ingredient: ingredient)
-                        }
-                    }
-                }
-                
-                // MARK: - Langkah-langkah
-                Section(header: Text("Langkah-langkah")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.labelDark!)
-                ) {
-                    ForEach(recipe.instructions) { step in
-                        InstructionRowView(instruction: step)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    }
-                }
-                
-                Section(
-                ) {
-                    HStack {
-                        Text("Jumlah Porsi")
-                            .font(.body)
-                            .foregroundStyle(Color.labelLight!)
-                            
-                        Spacer()
-                        Text("4 Orang")
-                    }
-                    HStack {
-                        Text("Lama Memasak")
-                            .font(.body)
-                            .foregroundStyle(Color.labelLight!)
-                            
-                        Spacer()
-                        Text("30 Menit")
-                    }
-                }
-                
-            }
-            .listStyle(.insetGrouped)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: EditDetailRecipeView(editRecipeData: recipe)) {
-                        Text("Ubah")
-                            .foregroundColor(Color.brandPrimary!)
+                            .padding(.top, 8)
+                            .padding(.bottom, 2)
+                            .listRowSeparator(.hidden)
+                        
+                        RenderIngredientGroupItems(items: subIngredients)
+                        
+                    } else {
+                        RenderSingleIngredientItem(ingredient: ingredient)
                     }
                 }
             }
-            .navigationDestination(isPresented: $showInstructionHelper) {
-                InstructionHelperView(recipe: recipe)
+            
+            // MARK: - Langkah-langkah
+            Section(header: Text("Langkah-langkah")
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(Color.labelDark!)
+            ) {
+                ForEach(recipe.instructions) { step in
+                    InstructionRowView(instruction: step)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                }
             }
+            
+            Section(
+            ) {
+                HStack {
+                    Text("Jumlah Porsi")
+                        .font(.body)
+                        .foregroundStyle(Color.labelLight!)
+                        
+                    Spacer()
+                    Text("4 Orang")
+                }
+                HStack {
+                    Text("Lama Memasak")
+                        .font(.body)
+                        .foregroundStyle(Color.labelLight!)
+                        
+                    Spacer()
+                    Text("30 Menit")
+                }
+            }
+            
+        }
+        .listStyle(.insetGrouped)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                NavigationLink(destination: EditDetailRecipeView(editRecipeData: recipe)) {
+                    Text("Ubah")
+                        .foregroundColor(Color.brandPrimary!)
+                }
+            }
+        }
+        .navigationDestination(isPresented: $showInstructionHelper) {
+            InstructionHelperView(recipe: recipe)
         }
     }
     
