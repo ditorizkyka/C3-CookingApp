@@ -10,7 +10,6 @@ struct WebsitePreviewSheet: View {
         NavigationStack {
             ZStack {
                 VStack(spacing: 0) {
-                    // The actual website preview
                     if let url = URL(string: urlString) {
                         WebView(url: url)
                             .edgesIgnoringSafeArea(.bottom)
@@ -21,13 +20,11 @@ struct WebsitePreviewSheet: View {
                     }
                     
                     ButtonApp(title: "Simpan Resep", type: .primary) {
-                        isLoading = true
+                        
                         Task {
-//                            // Tahan selama 4 detik
-//                            try? await Task.sleep(nanoseconds: 4_000_000_000)
-                            
+                        
                             await MainActor.run {
-//                                isLoading = false
+//                               isLoading = false
                                 onImport()
                             }
                         }
@@ -36,10 +33,6 @@ struct WebsitePreviewSheet: View {
                    
                 }
                 .padding(.horizontal, 16)
-                
-//                if isLoading {
-//                    LoadingView(text: "Memproses...")
-//                }
             }
             .navigationTitle("Preview")
             .navigationBarTitleDisplayMode(.inline)

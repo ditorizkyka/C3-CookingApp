@@ -11,7 +11,8 @@ struct EditInstructionRow: View {
     @Binding var instruction: Instruction
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 0) {
+            // MARK: - Main Instruction Row
             HStack {
                 Button {
                     print("deleted instruction")
@@ -28,7 +29,7 @@ struct EditInstructionRow: View {
                         .background(Color.brandSecondary)
                         .clipShape(Circle())
                     
-                    TextField("Tulis langkah...", text: $instruction.text)
+                    TextField("Tulis langkah...", text: $instruction.text, axis: .vertical)
                         .font(.body)
                 }
                 
@@ -39,13 +40,81 @@ struct EditInstructionRow: View {
                     .foregroundStyle(Color.labelLight!)
             }
             
+            // MARK: - Breakdown Instructions
+            if !instruction.breakdownInstruction.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach($instruction.breakdownInstruction) { $subStep in
+                        EditBreakdownInstructionRow(subInstruction: $subStep)
+                    }
+                }
+//                .padding(.leading, 28)
+                .padding(.top, 8)
+            }
+            
+            // MARK: - Tambah Langkah Breakdown
+            Button {
+                let newBreakdown = Instruction(
+                    id: UUID(),
+                    sequenceNumber: instruction.breakdownInstruction.count + 1,
+                    text: "",
+                    photoUrl: nil,
+                    breakdownInstruction: []
+                )
+                instruction.breakdownInstruction.append(newBreakdown)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: AppIcon.plusFill)
+                        .foregroundStyle(Color.brandPrimary!)
+                    Text("Tambah Langkah Breakdown")
+                        .font(.body)
+                        .foregroundStyle(Color.brandPrimary!)
+                }
+            }
+            .buttonStyle(.plain)
+//            .padding(.leading, 28)
+            .padding(.top, 12)
+            
+            // MARK: - Photo Picker
             PhotoPickerHStack()
-                .padding(.leading, 50)
+                .padding(.leading, 28)
         }
         .padding(.horizontal, 10)
     }
 }
 
+// MARK: - Breakdown Instruction Row
+struct EditBreakdownInstructionRow: View {
+    @Binding var subInstruction: Instruction
+    
+    var body: some View {
+        HStack(alignment: .center) {
+            Button {
+                print("deleted breakdown instruction")
+            } label: {
+                Image(systemName: AppIcon.minusFill)
+                    .foregroundStyle(Color.actionDelete!)
+            }
+            
+            Circle()
+                .fill(Color.labelDark!)
+                .frame(width: 3, height: 3)
+                .padding(.horizontal,10)
+            
+            TextField("Tulis sub-langkah...", text: $subInstruction.text, axis: .vertical)
+                .font(.subheadline)
+                .foregroundStyle(Color.labelLight!)
+            
+            Spacer()
+            
+            Image(systemName: AppIcon.line3Horizontal)
+                .font(.body)
+                .foregroundStyle(Color.labelLight!)
+        }
+        .padding(.vertical, 6)
+    }
+}
+
+// MARK: - Photo Picker
 struct PhotoPickerHStack: View {
   
     @State private var selectedImage: Image? = Image("image_preview")
@@ -60,7 +129,7 @@ struct PhotoPickerHStack: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.labelLight!)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     
                     if selectedImage != nil {
@@ -111,8 +180,6 @@ struct PhotoPickerHStack: View {
                     )
                 }
                 .buttonStyle(.plain)
-            
-                
             }
      
             .padding(.top, 12)
@@ -125,6 +192,6 @@ struct PhotoPickerHStack: View {
 }
 
 #Preview {
-    @Previewable @State var instruction = Recipe.dummyRecipes[0].instructions[0]
+    @Previewable @State var instruction = Recipe.dummyRecipes[0].instructions[1]
     EditInstructionRow(instruction: $instruction)
 }

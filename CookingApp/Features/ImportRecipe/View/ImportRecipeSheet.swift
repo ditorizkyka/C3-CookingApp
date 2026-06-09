@@ -13,8 +13,6 @@ struct ImportRecipeSheet: View {
     @State var link: String = ""
     @State private var showPreviewSheet = false
     @State private var previewUrlString: String = ""
-    //    @State private var scrapedRecipe: Recipe?
-    @State private var recipeLink = "https://cookpad.com/id/resep/17154212-nasi-goreng-kampung"
     
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -72,7 +70,7 @@ struct ImportRecipeSheet: View {
                     })
                 }
             }
-//            .padding(.vertical, 8)
+
             .padding(.horizontal,24)
             // Preview Sheet
             .sheet(isPresented: $showPreviewSheet) {
@@ -80,8 +78,8 @@ struct ImportRecipeSheet: View {
                     urlString: previewUrlString,
                     onImport: {
                         showPreviewSheet = false
-                        dismiss() // Tutup ImportRecipeSheet
-                        onImportFinished?() // Beritahu HomeView untuk pindah ke DetailRecipeView
+                        dismiss()
+                        onImportFinished?()
                     },
                     onDismiss: {
                         showPreviewSheet = false

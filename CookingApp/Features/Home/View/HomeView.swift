@@ -31,7 +31,6 @@ struct HomeView: View {
                     AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu",
                                     action: {
                         navigateToManual = true
-                        
                     })
                     
                 }
@@ -74,18 +73,18 @@ struct HomeView: View {
                                         recipePortion: recipe.portion,
                                         recipeDuration: recipe.durationInMinutes
                                     )
-                                        .zIndex(Double(index))
-                                        .brightness(!isSelected ? -Double(allRecipes.count - index) * 0.02 : 0)
-                                        .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
-                                        .onTapGesture {
-                                            if selectedIndex == index {
-                                                navigateToDetail = true
-                                            } else {
-                                                withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
-                                                    selectedIndex = index
-                                                }
+                                    .zIndex(Double(index))
+                                    .brightness(!isSelected ? -Double(allRecipes.count - index) * 0.02 : 0)
+                                    .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
+                                    .onTapGesture {
+                                        if selectedIndex == index {
+                                            navigateToDetail = true
+                                        } else {
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
+                                                selectedIndex = index
                                             }
                                         }
+                                    }
                                 }
                                 
                                 
@@ -100,14 +99,16 @@ struct HomeView: View {
                     Spacer()
                     
                 }
+//
+                
                 .sheet(isPresented: $isShowingImportSheet) {
                     ImportRecipeSheet(onImportFinished: {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             navigateToLoading = true
                         }
                     })
-                        .presentationDetents([.fraction(0.5), .large])
-                        .presentationDragIndicator(.visible)
+                    .presentationDetents([.fraction(0.5), .large])
+                    .presentationDragIndicator(.visible)
                 }
                 .padding(.horizontal)
                 .padding(.vertical, 24)
@@ -136,7 +137,7 @@ struct HomeView: View {
                 DetailRecipeView()
             }
             .navigationDestination(isPresented: $navigateToLoading) {
-                LoadingView(text: "Mengloding", onSave: {
+                LoadingView(text: "Menganalisis resep...", onSave: {
                     navigateToLoading = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         navigateToDetail = true

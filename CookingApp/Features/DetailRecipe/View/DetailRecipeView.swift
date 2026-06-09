@@ -139,14 +139,12 @@ struct DetailRecipeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: EditDetailRecipeView(editRecipeData: recipe)) {
-                        Text("Edit")
+                        Text("Ubah")
                             .foregroundColor(Color.brandPrimary!)
                     }
                 }
             }
             .navigationDestination(isPresented: $showInstructionHelper) {
-                // MARK: - Mengirim Data ke Panduan
-                // Object `recipe` ini diteruskan ke InstructionHelperView agar tersinkronisasi
                 InstructionHelperView(recipe: recipe)
             }
         }
