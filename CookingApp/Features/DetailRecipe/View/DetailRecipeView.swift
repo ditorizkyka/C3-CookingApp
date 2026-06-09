@@ -53,7 +53,7 @@ struct DetailRecipeView: View {
                     .foregroundColor(Color.labelDark!)
                     .padding(.vertical, 24)
                 
-                ButtonApp(title: "Mulai Masak", iconButton: AppIcon.fryingPan, action: {
+                ButtonApp(title: "Mulai Masak", action: {
                     if onboardingStep == 3 {
                         onboardingStep = 4
                     }
