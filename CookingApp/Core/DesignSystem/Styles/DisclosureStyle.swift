@@ -14,21 +14,18 @@ struct DisclosureStyle: DisclosureGroupStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Label (Header)
             HStack(alignment: .top, spacing: 16) {
                 Text("\(stepNumber)")
                     .font(.title3)
                     .fontWeight(.bold)
                     .padding(.top, 2)
                 
-                // Ini merepresentasikan `label` dari DisclosureGroup
                 configuration.label
                     .font(.body)
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Divider()
-                    .frame(height: 60)
                 
                 Button {
                     withAnimation(.easeInOut(duration: 0.3)) {
