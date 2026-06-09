@@ -27,12 +27,16 @@ struct ToolTip: Tip {
         }
             
         var actions: [Action] {
-            [
-                Tip.Action(
-                    id: "main-action",
-                    title: buttonTitle
-                )
-            ]
+            if buttonTitle.isEmpty {
+                return []
+            } else {
+                return [
+                    Tip.Action(
+                        id: "main-action",
+                        title: buttonTitle
+                    )
+                ]
+            }
         }
 }
 
@@ -55,5 +59,17 @@ struct TestView: View {
 
 #Preview("Test View") {
     TestView()
+}
+
+extension View {
+    @ViewBuilder
+    func conditionalPopoverTip(_ condition: Bool, tip: ToolTip, arrowEdge: Edge) -> some View {
+        if condition {
+            self.popoverTip(tip, arrowEdge: arrowEdge)
+                .tipViewStyle(ToolTipStyle())
+        } else {
+            self
+        }
+    }
 }
 
