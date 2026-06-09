@@ -33,6 +33,8 @@ struct RecipeHeaderImage: View {
 struct DetailRecipeView: View {
     var recipeAssetImage: String? = nil
     var recipe: Recipe = Recipe.dummyRecipes[0]
+    
+    @State private var showInstructionHelper: Bool = false
        
     var body: some View {
         NavigationStack {
@@ -49,7 +51,7 @@ struct DetailRecipeView: View {
                         .padding(.vertical, 24)
                     
                     ButtonApp(title: "Mulai Masak", iconButton: AppIcon.fryingPan, action: {
-                        print("Mulai masak ditekan!")
+                        showInstructionHelper = true
                     })
                     .padding(.bottom, 8)
                 }
@@ -141,6 +143,11 @@ struct DetailRecipeView: View {
                             .foregroundColor(Color.brandPrimary!)
                     }
                 }
+            }
+            .navigationDestination(isPresented: $showInstructionHelper) {
+                // MARK: - Mengirim Data ke Panduan
+                // Object `recipe` ini diteruskan ke InstructionHelperView agar tersinkronisasi
+                InstructionHelperView(recipe: recipe)
             }
         }
     }

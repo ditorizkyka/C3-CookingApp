@@ -20,28 +20,22 @@ struct StepInstructionView: View {
             Button {
                 onStep()
             } label: {
-                Text("Langkah \(currentStep) dari \(totalSteps)")
-                    .font(Font.title)
-                    .foregroundStyle(Color.labelLight!)
+                HStack {
+                    Text("Langkah \(currentStep) dari \(totalSteps)")
+                        .font(Font.title)
+                        .foregroundStyle(Color.labelLight!)
+                    
+                    Image(systemName: "chevron.down.circle.fill")
+                        .foregroundStyle(Color.labelLight!)
+                }
             }
+            
             
             // Instruction
             Text(instruction)
                 .font(Font.largeTitle)
                 .multilineTextAlignment(.center)
-            
-            // Repeat
-            Button {
-                onRepeat()
-            } label: {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                    Text("ulangi")
-                }
-                .font(Font.headline)
-                .foregroundStyle(Color.labelLight!)
-            }
-            .buttonStyle(.plain)
+                .lineLimit(4)
         }
     }
 }

@@ -61,9 +61,6 @@ struct RecipeLibrary: View {
             }
             .navigationTitle("Semua Resep")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Image(systemName: "chevron.backward")
-                }
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {

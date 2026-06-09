@@ -110,7 +110,7 @@ extension Recipe {
             coverImageUrl: nil,
             portion: 4,
             durationInMinutes: 45,
-            ingredientGroups: [],
+            ingredients : [],
             instructions: [],
             tips: "Goreng dengan api sedang agar matang merata."
         ),
@@ -121,7 +121,7 @@ extension Recipe {
             coverImageUrl: nil,
             portion: 5,
             durationInMinutes: 20,
-            ingredientGroups: [],
+            ingredients : [],
             instructions: [],
             tips: "Masukkan seledri dan daun bawang di akhir agar tetap segar."
         ),
@@ -132,7 +132,7 @@ extension Recipe {
             coverImageUrl: nil,
             portion: 2,
             durationInMinutes: 15,
-            ingredientGroups: [],
+            ingredients : [],
             instructions: [],
             tips: "Gunakan cabai keriting agar tidak terlalu pedas."
         ),
@@ -143,7 +143,7 @@ extension Recipe {
             coverImageUrl: nil,
             portion: 3,
             durationInMinutes: 10,
-            ingredientGroups: [],
+            ingredients: [],
             instructions: [],
             tips: "Gunakan api besar saat menumis kangkung."
         )

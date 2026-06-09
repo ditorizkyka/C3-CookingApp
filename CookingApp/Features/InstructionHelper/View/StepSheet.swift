@@ -8,25 +8,38 @@
 import SwiftUI
 
 struct StepSheet: View {
+    @Environment(\.dismiss) var dismiss
+    
     var instructions: [Instruction] = Recipe.dummyRecipes.first?.instructions ?? []
+    var currentStep: Int = 1
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Langkah-Langkah")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .padding(.bottom, 8)
-                
-                ForEach(instructions, id: \.id) { instruction in
-                    InstructionDetailCard(
-                        stepNumber: instruction.sequenceNumber,
-                        mainInstruction: instruction.text,
-                        subInstructions: instruction.breakdownInstruction.map { $0.text }
-                    )
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .center, spacing: 16) {
+                    ForEach(instructions, id: \.id) { instruction in
+                        InstructionDetailCard(
+                            stepNumber: instruction.sequenceNumber,
+                            mainInstruction: instruction.text,
+                            subInstructions: instruction.breakdownInstruction.map { $0.text },
+                            isCurrent: instruction.sequenceNumber == currentStep
+                        )
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 16)
+            }
+            .navigationTitle("Preview")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
                 }
             }
-            .padding()
         }
     }
 }
