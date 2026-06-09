@@ -27,12 +27,16 @@ struct ToolTip: Tip {
         }
             
         var actions: [Action] {
-            [
-                Tip.Action(
-                    id: "main-action",
-                    title: buttonTitle
-                )
-            ]
+            if buttonTitle.isEmpty {
+                return []
+            } else {
+                return [
+                    Tip.Action(
+                        id: "main-action",
+                        title: buttonTitle
+                    )
+                ]
+            }
         }
 }
 
