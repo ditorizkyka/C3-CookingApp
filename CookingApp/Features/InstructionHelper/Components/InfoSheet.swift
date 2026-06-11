@@ -15,15 +15,17 @@ struct InfoSheet: View {
     ]
     
     var body: some View {
-        VStack {
+        VStack(spacing: 16) {
             // Sheet Title
             VStack {
-                Image(systemName: "waveform.badge.microphone")
-                    .font(Font.xXXLargeTitle)
-                    .foregroundStyle(Color.brandPrimary!)
+                Text("Perintah Suara")
+                    .font(Font.title)
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, 7)
                 
-                Text("Masak Praktis Lewat Suara")
-                    .font(Font.largeTitle)
+                Text("Gunakan perintah suara berikut untuk mengontrol langkah memasak tanpa menyentuh layar")
+                    .font(Font.footnote)
+                    .foregroundStyle(Color.labelLight!)
                     .multilineTextAlignment(.center)
             }
             

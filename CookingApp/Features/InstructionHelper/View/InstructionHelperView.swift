@@ -9,8 +9,8 @@ import SwiftUI
 
 struct InstructionHelperView: View {
     @Environment(\.dismiss) var dismiss
+    @StateObject private var speechManager = SpeechManager()
     
-    // MARK: - Sinkronisasi Data
     var recipe: Recipe
     @State private var currentStepIndex: Int = 0
     
@@ -25,26 +25,30 @@ struct InstructionHelperView: View {
         "Balik": "Langkah Sebelumnya"
     ]
     
-    // MARK: - Explicit Initializer
-    // Ditambahkan agar DetailRecipeView bisa mengirim data `recipe`, karena Swift menyembunyikan
-    // auto-generated init jika ada private property (@State private var) dengan default value.
     init(recipe: Recipe = Recipe.dummyRecipes.first!) {
         self.recipe = recipe
     }
     
+    private func dismissIntro() {
+        withAnimation(.easeInOut(duration: 0.4)) {
+            showIntro = false
+        }
+        
+        speechManager.stopListening()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            speechManager.startListening()
+            if !recipe.instructions.isEmpty {
+                speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+            }
+        }
+    }
+    
     var body: some View {
-        ZStack {
+        NavigationStack {
             VStack {
-                // Image
-                Rectangle()
-                    .fill(
-                        Color.gray.opacity(0.5)
-                    )
-                    .frame(height: 250)
+                Spacer()
                 
                 VStack(alignment: .center, spacing: 16) {
-                    // MARK: - Konten Instruksi Dinamis
-                    // Menampilkan instruksi yang sesuai dengan `currentStepIndex`
                     if currentStepIndex >= 0 && currentStepIndex < recipe.instructions.count {
                         let instruction = recipe.instructions[currentStepIndex]
                         StepInstructionView(
@@ -58,113 +62,153 @@ struct InstructionHelperView: View {
                                 showStepSheet = true
                             }
                         )
+                        .padding(.horizontal, 32)
                     }
                     
-                    Spacer()
-                    
-                    PulsingMicView()
+                    PulsingMicView(audioLevel: speechManager.audioLevel, isListening: speechManager.isListening)
                     
                     VoiceCommandGuideCard(guides: guides)
                 }
                 .padding()
                 
                 Spacer()
-                                // MARK: - Logika Tombol Next/Previous Dinamis
-                                // Menambah atau mengurangi `currentStepIndex` agar instruksi berubah
-                    NavigationControlsView(
-                        currentPage: currentStepIndex,
-                        totalPages: recipe.instructions.count,
-                        onPrevious: {
-                            if currentStepIndex > 0 {
-                                withAnimation {
-                                    currentStepIndex -= 1
-                                }
+                
+                NavigationControlsView(
+                    currentPage: currentStepIndex,
+                    totalPages: recipe.instructions.count,
+                    onPrevious: {
+                        if currentStepIndex > 0 {
+                            withAnimation {
+                                currentStepIndex -= 1
                             }
-                        },
-                        onNext: {
-                            if currentStepIndex < recipe.instructions.count - 1 {
-                                withAnimation {
-                                    currentStepIndex += 1
-                                }
-                            }
-                        },
-                        onRepeat: { print("Ulangi Step") },
-                        onComplete: {
-                            navigateToComplete = true
                         }
-                    )          }
-            .ignoresSafeArea(.container, edges: .bottom)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    },
+                    onNext: {
+                        if currentStepIndex < recipe.instructions.count - 1 {
+                            withAnimation {
+                                currentStepIndex += 1
+                            }
+                        }
+                    },
+                    onRepeat: { print("Ulangi Step") },
+                    onComplete: {
+                        navigateToComplete = true
+                    }
+                )
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .background {
                 VStack {
-                    RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125)
+                    RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -300, width: 600, height: 600)
                     
                     Spacer()
-                    
-                    RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125)
                 }
                 .ignoresSafeArea()
             }
-            
-            if showIntro {
-                Color.labelDark.opacity(0.25)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                
-                IntroCard() {
-                    withAnimation(.easeInOut(duration: 0.4)) {
-                        showIntro = false
+            .overlay {
+                if showIntro {
+                    ZStack {
+                        Color.labelDark.opacity(0.25)
+                            .ignoresSafeArea()
+                            .transition(.opacity)
+                        
+                        IntroCard(
+                            onDismiss: { dismissIntro() },
+                            audioLevel: speechManager.audioLevel,
+                            isListening: speechManager.isListening
+                        )
+                        .onAppear {
+                            speechManager.requestPermissions()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                speechManager.startListening()
+                            }
+                        }
+                        .padding()
+                        .transition(.opacity.combined(with: .scale(scale: 0.1)))
                     }
                 }
-                .padding()
-                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
-        }
-        .navigationBarBackButtonHidden(true)
-        .navigationDestination(isPresented: $navigateToComplete) {
-            InstructionHelperCompleteView(recipe: recipe)
-        }
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
+            .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $navigateToComplete) {
+                InstructionHelperCompleteView(recipe: recipe)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        print("Speaker ditekan")
+                    } label: {
+                        Image(systemName: "speaker.slash")
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showInfoSheet = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
                 }
             }
-            
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    print("Speaker ditekan")
-                } label: {
-                    Image(systemName: "speaker.slash")
-                }
-            }
-            
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showInfoSheet = true
-                } label: {
-                    Image(systemName: "info.circle")
-                }
-            }
-        }
-        .sheet(isPresented: $showInfoSheet) {
-            InfoSheet()
-                .presentationDetents([.fraction(0.75)])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(Color.surfaceElevated!)
-            
-        }
-        .sheet(isPresented: $showStepSheet) {
-            // MARK: - Kirim Data Penuh ke Sheet
-            if currentStepIndex >= 0 && currentStepIndex < recipe.instructions.count {
-                StepSheet(instructions: recipe.instructions, currentStep: recipe.instructions[currentStepIndex].sequenceNumber)
-                    .presentationDetents([.large])
+            .sheet(isPresented: $showInfoSheet) {
+                InfoSheet()
+                    .presentationDetents([.fraction(0.6)])
                     .presentationDragIndicator(.visible)
-                    .presentationBackground(Color.surfaceElevated ?? .white)
+                    .presentationBackground(Color.surfaceElevated!)
+                
+            }
+            .sheet(isPresented: $showStepSheet) {
+                if currentStepIndex >= 0 && currentStepIndex < recipe.instructions.count {
+                    StepSheet(instructions: recipe.instructions, currentStep: recipe.instructions[currentStepIndex].sequenceNumber)
+                        .presentationDetents([.large])
+                        .presentationDragIndicator(.visible)
+                        .presentationBackground(Color.surfaceElevated ?? .white)
+                }
             }
         }
+        .onDisappear {
+            speechManager.stopListening(permanent: true)
+            speechManager.stopSpeaking()
+        }
+        .onChange(of: speechManager.recognizedText) { newValue in
+            let text = newValue.lowercased()
+            
+            if showIntro && text.contains("mulai") {
+                speechManager.recognizedText = ""
+                dismissIntro()
+                
+            } else if text.contains("lanjut") {
+                if currentStepIndex < recipe.instructions.count - 1 {
+                    withAnimation {
+                        currentStepIndex += 1
+                    }
+                    speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                } else {
+                    navigateToComplete = true
+                }
+                speechManager.recognizedText = "" 
+            } else if text.contains("balik") {
+                if currentStepIndex > 0 {
+                    withAnimation {
+                        currentStepIndex -= 1
+                    }
+                    speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                }
+                speechManager.recognizedText = ""
+                
+            } else if text.contains("ulangi") {
+                speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                speechManager.recognizedText = ""
+            }
+        }
+        
     }
 }
 

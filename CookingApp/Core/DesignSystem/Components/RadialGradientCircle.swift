@@ -10,6 +10,8 @@ import SwiftUI
 struct RadialGradientCircle: View {
     var color: Color
     var offset: CGFloat
+    var width: CGFloat
+    var height: CGFloat
     
     var body: some View {
         Circle()
@@ -24,11 +26,11 @@ struct RadialGradientCircle: View {
                     endRadius: 250
                 )
             )
-            .frame(width: 600, height: 600)
+            .frame(width: width, height: height)
             .offset(y: offset)
     }
 }
 
 #Preview {
-    RadialGradientCircle(color: Color.ovalGreen!, offset: 0)
+    RadialGradientCircle(color: Color.ovalGreen!, offset: 0, width: 600, height: 600)
 }

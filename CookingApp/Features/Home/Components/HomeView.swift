@@ -123,9 +123,6 @@ struct HomeView: View {
                     .padding(.horizontal)
                     .padding(.vertical, 24)
                     .frame(maxHeight: .infinity)
-                    .background(Color.surfaceElevated)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.xLarge))
-                    .ignoresSafeArea()
             }
             .background(Color.surfaceBrand.ignoresSafeArea())
             .searchable(

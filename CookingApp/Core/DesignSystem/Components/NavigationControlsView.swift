@@ -28,10 +28,10 @@ struct NavigationControlsView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                     .padding(16)
-                    .background(Color.brandPrimary!)
-                    .foregroundStyle(.white)
                     .clipShape(Circle())
             }
+            .buttonStyle(.plain)
+            .glassEffect()
             
             Spacer()
             
@@ -46,9 +46,9 @@ struct NavigationControlsView: View {
                 .foregroundStyle(Color.brandPrimary ?? .green)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
-                .glassEffect()
-                .clipShape(Capsule())
             }
+            .glassEffect()
+            .clipShape(Capsule())
             
             Spacer()
             
@@ -63,11 +63,11 @@ struct NavigationControlsView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                     .padding(16)
-                    .background(isLastStep ? Color.brandAccent! : Color.brandPrimary!)
-                    .foregroundStyle(.white)
                     .clipShape(Circle())
                     .animation(.easeInOut(duration: 0.2), value: isLastStep)
             }
+            .buttonStyle(.plain)
+            .glassEffect()
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 16)
