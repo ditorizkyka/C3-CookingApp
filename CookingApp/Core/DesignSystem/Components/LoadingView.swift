@@ -53,7 +53,7 @@ struct LoadingView: View {
         }
         .navigationDestination(isPresented: $navigateToEdit) {
             DetailRecipeView()
-                .navigationb
+                
                 .navigationBarBackButtonHidden(true) // Sembunyikan back agar tidak kembali ke loading
         }
     }

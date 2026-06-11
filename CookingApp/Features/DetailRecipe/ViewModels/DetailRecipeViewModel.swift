@@ -11,7 +11,7 @@ import Combine
 
 class DetailRecipeViewModel: ObservableObject {
     @Published var recipe: Recipe
-    @Published var isEdited : Bool = true
+    @Published var isEdited : Bool = false
     
     init(recipe: Recipe) {
             self.recipe = recipe

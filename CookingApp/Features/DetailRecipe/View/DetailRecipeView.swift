@@ -3,16 +3,31 @@ import SwiftUI
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
     
-    @StateObject private var viewModel = DetailRecipeViewModel(recipe: Recipe.dummyRecipes[0])
+    @StateObject private var viewModel: DetailRecipeViewModel
     
     var recipeAssetImage: String? = nil
-    var recipe: Recipe = Recipe.dummyRecipes[0]
+    var isFromImport: Bool = false
     
     @State private var showInstructionHelper: Bool = false
+    @Environment(\.dismiss) private var dismiss
     
     let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
     
     @AppStorage("onboardingStep") private var onboardingStep = 0
+    
+    // MARK: - Initializers
+    
+    /// Initialize with a Recipe model (used for import flow and when passing a recipe directly)
+    init(recipe: Recipe, isFromImport: Bool = false) {
+        self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe))
+        self.isFromImport = isFromImport
+    }
+    
+    /// Initialize with default dummy data (for previews and existing usage)
+    init() {
+        self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: Recipe.dummyRecipes[0]))
+        self.isFromImport = false
+    }
        
     var body: some View {
         NavigationStack {
@@ -233,7 +248,7 @@ struct DetailRecipeView: View {
                                .foregroundStyle(Color.labelLight!)
                            
                            Spacer()
-                           Text("4 Orang")
+                           Text("\(viewModel.recipe.portion) Orang")
                        }
                        HStack {
                            Text("Lama Memasak")
@@ -241,7 +256,7 @@ struct DetailRecipeView: View {
                                .foregroundStyle(Color.labelLight!)
                            
                            Spacer()
-                           Text("30 Menit")
+                           Text("\(viewModel.recipe.durationInMinutes) Menit")
                        }
                    }
                     
@@ -275,7 +290,7 @@ struct DetailRecipeView: View {
                 }
             }
             .navigationDestination(isPresented: $showInstructionHelper) {
-                InstructionHelperView(recipe: recipe)
+                InstructionHelperView(recipe: viewModel.recipe)
             }
         }
     }

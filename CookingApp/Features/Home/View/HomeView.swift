@@ -20,6 +20,10 @@ struct HomeView: View {
     
     @State private var isShowingImportSheet = false
     
+    // Import flow state
+    @State private var urlToScrape: String = ""
+    @State private var importedRecipe: Recipe?
+    
     @AppStorage("onboardingStep") private var onboardingStep = 0
     
     
@@ -123,7 +127,8 @@ struct HomeView: View {
                         
                     }
                     .sheet(isPresented: $isShowingImportSheet) {
-                        ImportRecipeSheet(onImportFinished: {
+                        ImportRecipeSheet(onImport: { url in
+                            urlToScrape = url
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToLoading = true
                             }
@@ -151,14 +156,15 @@ struct HomeView: View {
                     AddManualRecipeView()
                 }
                 .navigationDestination(isPresented: $navigateToDetail) {
-                    DetailRecipeView()
+                    if let recipe = importedRecipe {
+                        DetailRecipeView(recipe: recipe, isFromImport: true)
+                    } else {
+                        DetailRecipeView()
+                    }
                 }
                 .navigationDestination(isPresented: $navigateToLoading) {
-                    LoadingView(text: "Menganalisis resep...", onSave: {
-                        navigateToLoading = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigateToDetail = true
-                        }
+                    LoadingRecipeView(urlToScrape: urlToScrape, onScrapingComplete: { recipe in
+                        importedRecipe = recipe
                     })
                 }.onTapGesture {
                     onboardingStep = 0 // Klik teks judul untuk mereset memori ke 0
@@ -196,6 +202,7 @@ struct HomeView: View {
                 urlString: importedLink,
                 onImport: {
                     showWebPreviewFromClipboard = false
+                    urlToScrape = importedLink
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         navigateToLoading = true
                     }
