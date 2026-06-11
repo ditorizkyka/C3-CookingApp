@@ -186,7 +186,7 @@ struct InstructionHelperView: View {
             speechManager.stopListening(permanent: true)
             speechManager.stopSpeaking()
         }
-        .onChange(of: speechManager.recognizedText) { newValue in
+        .onChange(of: speechManager.recognizedText) { _, newValue in
             let text = newValue.lowercased()
             
             if showIntro && text.contains("mulai") {

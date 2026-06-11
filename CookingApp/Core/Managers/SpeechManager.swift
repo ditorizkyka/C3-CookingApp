@@ -10,7 +10,7 @@ import AVFoundation
 import Speech
 import Combine
 
-class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
+class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
     // Text-to-Speech
     private let synthesizer = AVSpeechSynthesizer()
     
