@@ -19,9 +19,9 @@ struct EditDetailRecipeView: View {
             List {
                 // MARK: - Header (Image + Title)
                 VStack {
-                    EditAddHeaderRecipe(
-                        titleRecipe: $editRecipeData.title
-                    )
+//                    EditAddHeaderRecipe(
+//                        titleRecipe: $editRecipeData.title
+//                    )
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))

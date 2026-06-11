@@ -9,6 +9,7 @@ import SwiftUI
 import TipKit
 
 struct HomeView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var searchRecipe: String = ""
     @State private var selectedIndex: Int? = nil
     @State private var allRecipes: [Recipe] = Recipe.dummyRecipes
@@ -19,14 +20,28 @@ struct HomeView: View {
     
     @State private var isShowingImportSheet = false
     
+    // Import flow state
+    @State private var urlToScrape: String = ""
+    @State private var importedRecipe: Recipe?
+    
     @AppStorage("onboardingStep") private var onboardingStep = 0
+    
+    
+    //    MARK : CLIPBOARD VARIABLE
+    @StateObject private var clipboardManager = ClipboardManager()
+    @State private var importedLink: String = ""
+    
+    // Controls whether the WebsitePreviewSheet is shown for a clipboard-detected URL
+    @State private var showWebPreviewFromClipboard = false
+    
     
     @State private var buttonFrame: CGRect = .zero
     let importRecipeTip = ToolTip(tipTitle: "Ambil Resep dari Web", tipSubtitle: "Tempel link resep pilihanmu di sini. Kami akan menyusun bahan dan langkah masaknya secara otomatis.", iconName: "link.badge.plus", buttonTitle: "")
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
+            ZStack {
+                VStack(alignment: .leading, spacing: 24) {
                     
                     // Add Recipe Button
                     HStack() {
@@ -112,7 +127,8 @@ struct HomeView: View {
                         
                     }
                     .sheet(isPresented: $isShowingImportSheet) {
-                        ImportRecipeSheet(onImportFinished: {
+                        ImportRecipeSheet(onImport: { url in
+                            urlToScrape = url
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 navigateToLoading = true
                             }
@@ -126,34 +142,88 @@ struct HomeView: View {
                     .background(Color.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.xLarge))
                     .ignoresSafeArea()
-            }
-            .background(Color.surfaceBrand.ignoresSafeArea())
-            .searchable(
-                text: $searchRecipe,
-                placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Cari resep..."
-            )
-            .searchDictationBehavior(.inline(activation: .onSelect))
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $navigateToManual) {
-                AddManualRecipeView()
-            }
-            .navigationDestination(isPresented: $navigateToDetail) {
-                DetailRecipeView()
-            }
-            .navigationDestination(isPresented: $navigateToLoading) {
-                LoadingView(text: "Menganalisis resep...", onSave: {
-                    navigateToLoading = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        navigateToDetail = true
+                }
+                .background(Color.surfaceBrand.ignoresSafeArea())
+                .searchable(
+                    text: $searchRecipe,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: "Cari resep..."
+                )
+                .searchDictationBehavior(.inline(activation: .onSelect))
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationDestination(isPresented: $navigateToManual) {
+                    AddManualRecipeView()
+                }
+                .navigationDestination(isPresented: $navigateToDetail) {
+                    if let recipe = importedRecipe {
+                        DetailRecipeView(recipe: recipe, isFromImport: true)
+                    } else {
+                        DetailRecipeView()
                     }
-                })
-            }.onTapGesture {
-                onboardingStep = 0 // Klik teks judul untuk mereset memori ke 0
+                }
+                .navigationDestination(isPresented: $navigateToLoading) {
+                    LoadingRecipeView(urlToScrape: urlToScrape, onScrapingComplete: { recipe in
+                        importedRecipe = recipe
+                    })
+                }.onTapGesture {
+                    onboardingStep = 0 // Klik teks judul untuk mereset memori ke 0
+                }
+                
+                // MARK: - Clipboard Toast pinned to bottom
+                VStack {
+                    Spacer()
+                    if clipboardManager.showClipboardToast, let detectedURL = clipboardManager.detectedURL {
+                        ClipboardToastView(
+                            url: detectedURL,
+                            onImport: {
+                                self.importedLink = detectedURL
+                                clipboardManager.dismissToast()
+                                showWebPreviewFromClipboard = true
+                            },
+                            onDismiss: {
+                                clipboardManager.dismissToast()
+                            }
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .padding(.bottom, 20)
+                    }
+                }
+                .zIndex(1)
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: clipboardManager.showClipboardToast)
             }
+            
+            
         }
         .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
+        // MARK: - Clipboard → Website Preview Sheet
+        .sheet(isPresented: $showWebPreviewFromClipboard) {
+            WebsitePreviewSheet(
+                urlString: importedLink,
+                onImport: {
+                    showWebPreviewFromClipboard = false
+                    urlToScrape = importedLink
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        navigateToLoading = true
+                    }
+                },
+                onDismiss: {
+                    showWebPreviewFromClipboard = false
+                }
+            )
+        }
+        .onAppear {
+            clipboardManager.startMonitoring()
+        }
+        .onDisappear {
+            clipboardManager.stopMonitoring()
+        }
+        // Re-check clipboard immediately when app comes back to foreground
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                clipboardManager.checkNow()
+            }
+        }
     }
 }
 
