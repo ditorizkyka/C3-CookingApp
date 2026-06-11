@@ -56,7 +56,8 @@ struct InstructionHelperView: View {
                             totalSteps: recipe.instructions.count,
                             instruction: instruction.text,
                             onRepeat: {
-                                print("Tombol ulangi ditekan")
+                                speechManager.stopSpeaking()
+                                speechManager.speak(text: instruction.text)
                             },
                             onStep: {
                                 showStepSheet = true
@@ -81,6 +82,8 @@ struct InstructionHelperView: View {
                             withAnimation {
                                 currentStepIndex -= 1
                             }
+                            speechManager.stopSpeaking()
+                            speechManager.speak(text: recipe.instructions[currentStepIndex].text)
                         }
                     },
                     onNext: {
@@ -88,10 +91,16 @@ struct InstructionHelperView: View {
                             withAnimation {
                                 currentStepIndex += 1
                             }
+                            speechManager.stopSpeaking()
+                            speechManager.speak(text: recipe.instructions[currentStepIndex].text)
                         }
                     },
-                    onRepeat: { print("Ulangi Step") },
+                    onRepeat: {
+                        speechManager.stopSpeaking()
+                        speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                    },
                     onComplete: {
+                        speechManager.stopSpeaking()
                         navigateToComplete = true
                     }
                 )

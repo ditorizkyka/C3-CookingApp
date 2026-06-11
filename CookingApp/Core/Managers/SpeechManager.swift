@@ -66,6 +66,9 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     
     // Text-to-Speech
     func speak(text: String) {
+        // Stop listening right away to prevent overlapping audio issues
+        stopListening()
+        
         // Mematikan suara
         synthesizer.stopSpeaking(at: .immediate)
         
@@ -99,7 +102,20 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         if shouldBeListening {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.startListening()
+                if !self.synthesizer.isSpeaking {
+                    self.startListening()
+                }
+            }
+        }
+    }
+    
+    // Dipanggil otomatis saat TTS dibatalkan
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        if shouldBeListening {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                if !self.synthesizer.isSpeaking {
+                    self.startListening()
+                }
             }
         }
     }
@@ -108,7 +124,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     func startListening() {
         shouldBeListening = true
         
-        if audioEngine.isRunning {
+        if audioEngine.isRunning || synthesizer.isSpeaking {
             return
         }
         
