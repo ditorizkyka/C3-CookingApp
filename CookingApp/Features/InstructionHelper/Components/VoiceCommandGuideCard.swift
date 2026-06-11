@@ -46,9 +46,9 @@ struct VoiceCommandGuideCard: View {
     ZStack {
         Color.black.ignoresSafeArea()
         VoiceCommandGuideCard(guides: [
-            "Lanjut": "Langkah Berikutnya",
+            "Kembali": "Langkah Sebelumnya",
             "Ulangi": "Langkah Saat Ini",
-            "Balik": "Langkah Sebelumnya"
+            "Lanjut": "Langkah Berikutnya",
         ])
     }
 }
