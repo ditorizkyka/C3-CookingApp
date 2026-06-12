@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
@@ -46,7 +47,12 @@ struct DetailRecipeView: View {
                             showInstructionHelper = true
                         })
                         .padding(.bottom, 8)
-                        .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
+                        .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top) { action in
+                            if action.id == "main-action" {
+                                onboardingStep = 4
+                                dismiss()
+                            }
+                        }
                     }
 
                     

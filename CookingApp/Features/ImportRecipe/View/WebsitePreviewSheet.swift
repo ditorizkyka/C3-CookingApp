@@ -48,9 +48,10 @@ struct WebsitePreviewSheet: View {
                     Button("Cancel") {
                         onDismiss()
                     }
-                    .disabled(isLoading)
+                    .disabled(isLoading || onboardingStep == 2)
                 }
             }
         }
+        .interactiveDismissDisabled(onboardingStep == 2)
     }
 }
