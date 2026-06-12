@@ -193,8 +193,6 @@ struct HomeView: View {
                     LoadingRecipeView(urlToScrape: urlToScrape, onScrapingComplete: { recipe in
                         importedRecipe = recipe
                     })
-                }.onTapGesture {
-                    onboardingStep = 0 // Klik teks judul untuk mereset memori ke 0
                 }
                 
                 // MARK: - Clipboard Toast pinned to bottom
