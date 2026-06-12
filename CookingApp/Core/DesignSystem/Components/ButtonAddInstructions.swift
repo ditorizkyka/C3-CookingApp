@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct ButtonAddInstructions: View {
+    var action: (() -> Void)? = nil
+    
     var body: some View {
         
         Button { 
-            print("tambah Langkah")
+            action?()
         } label: {
             HStack {
                 Image(systemName: AppIcon.plusFill)

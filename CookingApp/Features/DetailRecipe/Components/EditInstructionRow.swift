@@ -9,13 +9,14 @@ import SwiftUI
 
 struct EditInstructionRow: View {
     @Binding var instruction: Instruction
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Main Instruction Row
             HStack {
                 Button {
-                    print("deleted instruction")
+                    onDelete?()
                 } label: {
                     Image(systemName: AppIcon.minusFill)
                         .foregroundStyle(Color.actionDelete!)
@@ -60,7 +61,9 @@ struct EditInstructionRow: View {
                     photoUrl: nil,
                     breakdownInstruction: []
                 )
-                instruction.breakdownInstruction.append(newBreakdown)
+                withAnimation {
+                    instruction.breakdownInstruction.append(newBreakdown)
+                }
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: AppIcon.plusFill)
@@ -81,11 +84,12 @@ struct EditInstructionRow: View {
 // MARK: - Breakdown Instruction Row
 struct EditBreakdownInstructionRow: View {
     @Binding var subInstruction: Instruction
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
         HStack(alignment: .center) {
             Button {
-                print("deleted breakdown instruction")
+                onDelete?()
             } label: {
                 Image(systemName: AppIcon.minusFill)
                     .foregroundStyle(Color.actionDelete!)
@@ -188,6 +192,19 @@ struct PhotoPickerHStack: View {
 }
 
 #Preview {
-    @Previewable @State var instruction = Recipe.dummyRecipes[0].instructions[1]
-    EditInstructionRow(instruction: $instruction)
+//    let container = PreviewContainer.shared
+//    let ctx = container.mainContext
+//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+//    let instruction = recipes.first?.instructions.first(where: { !$0.breakdownInstruction.isEmpty })
+//        ?? recipes.first?.instructions.first
+//    
+//    return Group {
+//        if let instr = instruction {
+//            @State var editableInstruction = instr
+//            EditInstructionRow(instruction: $editableInstruction)
+//        } else {
+//            Text("No instructions in sample data")
+//        }
+//    }
+//    .modelContainer(container)
 }

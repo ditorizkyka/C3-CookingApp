@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundleDisplayName</key>
+    <string>CookingApp</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Menggunakan mikrofon Anda untuk memungkinkan Anda mengontrol langkah-langkah memasak dengan perintah suara — sehingga Anda dapat memasak tanpa menggunakan tangan.
+</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Menggunakan pengenalan ucapan untuk memahami perintah suara Anda saat Anda mengikuti resep langkah demi langkah.</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+</dict>
+</plist>

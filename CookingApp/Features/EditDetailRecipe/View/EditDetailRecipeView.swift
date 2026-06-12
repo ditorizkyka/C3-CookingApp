@@ -12,7 +12,12 @@ struct EditDetailRecipeView: View {
     @Environment(\.dismiss) private var dismiss
     var onSave: (() -> Void)? = nil
    
-    @State var editRecipeData: Recipe = Recipe.dummyRecipes[0]
+    @State var editRecipeData: Recipe
+    
+    init(recipe: Recipe, onSave: (() -> Void)? = nil) {
+        self._editRecipeData = State(wrappedValue: recipe)
+        self.onSave = onSave
+    }
     
     var body: some View {
         NavigationStack {
@@ -151,5 +156,15 @@ extension Binding where Value == [Ingredient]? {
 }
 
 #Preview {
-    EditDetailRecipeView()
+//    let container = PreviewContainer.shared
+//    let ctx = container.mainContext
+//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+//    return NavigationStack {
+//        if let first = recipes.first {
+//            EditDetailRecipeView(recipe: first)
+//        } else {
+//            Text("No sample data")
+//        }
+//    }
+//    .modelContainer(container)
 }

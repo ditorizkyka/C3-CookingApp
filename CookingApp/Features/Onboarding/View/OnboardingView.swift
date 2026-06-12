@@ -88,6 +88,7 @@ struct OnboardingView: View {
             
         }
         .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 400, width: 600, height: 600)
             .ignoresSafeArea()

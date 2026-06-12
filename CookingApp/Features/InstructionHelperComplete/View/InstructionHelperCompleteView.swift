@@ -95,5 +95,9 @@ struct InstructionHelperCompleteView: View {
 }
 
 #Preview {
-    InstructionHelperCompleteView(recipe: Recipe.dummyRecipes.first!)
+//    let container = PreviewContainer.shared
+//    let ctx = container.mainContext
+//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+//    return InstructionHelperCompleteView(recipe: recipes.first!)
+//        .modelContainer(container)
 }

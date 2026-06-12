@@ -86,14 +86,21 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
         // Clean up the URL string
         let cleaned = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
         
+        print("\n🌐 [SCRAPER] Starting scrape...")
+        print("🌐 [SCRAPER] URL: \(cleaned)")
+        
         guard let url = URL(string: cleaned), url.scheme != nil else {
+            print("❌ [SCRAPER] Invalid URL format")
             throw ScraperError.invalidURL
         }
         
         // Validate it's a Cookpad URL
         guard CookpadScraperService.isValidCookpadURL(cleaned) else {
+            print("❌ [SCRAPER] Not a Cookpad URL")
             throw ScraperError.notCookpadURL
         }
+        
+        print("✅ [SCRAPER] URL validated. Loading page with WKWebView...")
         
         // Bridge the callback-based WKNavigationDelegate into async/await
         return try await withCheckedThrowingContinuation { continuation in
@@ -108,6 +115,7 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: UInt64(self.timeoutDuration * 1_000_000_000))
                 if self.continuation != nil {
+                    print("⏰ [SCRAPER] Timeout after \(self.timeoutDuration)s")
                     self.continuation?.resume(throwing: ScraperError.timeout)
                     self.continuation = nil
                     self.webView.stopLoading()
@@ -119,19 +127,23 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
     // MARK: - WKNavigationDelegate Methods
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        print("📄 [SCRAPER] Page finished loading. Waiting \(postLoadDelay)s for JS rendering...")
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(self.postLoadDelay * 1_000_000_000))
             guard self.continuation != nil else { return }
+            print("🔍 [SCRAPER] Extracting LD+JSON recipe data via JavaScript...")
             self.extractRecipeData(from: webView)
         }
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        print("❌ [SCRAPER] Navigation failed: \(error.localizedDescription)")
         self.continuation?.resume(throwing: ScraperError.networkFailed(error))
         self.continuation = nil
     }
     
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        print("❌ [SCRAPER] Provisional navigation failed: \(error.localizedDescription)")
         self.continuation?.resume(throwing: ScraperError.networkFailed(error))
         self.continuation = nil
     }
@@ -198,17 +210,29 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
             guard self.continuation != nil else { return }
             
             if let jsonString = result as? String, let jsonData = jsonString.data(using: .utf8) {
+                print("📦 [SCRAPER] Raw JSON found (\(jsonData.count) bytes)")
+                // Print first 500 chars of raw JSON for debugging
+                let preview = String(jsonString.prefix(500))
+                print("📦 [SCRAPER] JSON preview: \(preview)\(jsonString.count > 500 ? "..." : "")")
+                
                 do {
                     let decoder = JSONDecoder()
                     // Decode into intermediate Codable struct first
                     let rawRecipe = try decoder.decode(CookpadRawRecipe.self, from: jsonData)
-                    // Map to SwiftData model
+                    print("✅ [SCRAPER] Successfully decoded CookpadRawRecipe")
+                    // Map to SwiftData model (this prints detailed scrape report)
                     let recipe = rawRecipe.toRecipe()
+                    print("✅ [SCRAPER] Successfully mapped to Recipe model")
                     self.continuation?.resume(returning: recipe)
                 } catch {
+                    print("❌ [SCRAPER] Decoding failed: \(error)")
                     self.continuation?.resume(throwing: ScraperError.decodingFailed(error))
                 }
             } else {
+                print("❌ [SCRAPER] No JSON data found in page")
+                if let error = error {
+                    print("❌ [SCRAPER] JS error: \(error)")
+                }
                 let err = error ?? ScraperError.noRecipeFound
                 self.continuation?.resume(throwing: err)
             }

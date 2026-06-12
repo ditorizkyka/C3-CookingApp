@@ -10,8 +10,6 @@ import SwiftUI
 
 struct LoadingView: View {
     var text: String // Bisa custom kata-katanya
-    @State private var navigateToEdit = false
-    var onSave: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -44,17 +42,6 @@ struct LoadingView: View {
                 RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125, width: 600, height: 600)
             }
             .ignoresSafeArea()
-        }
-//        Sembunyikan tombol back saat loading
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-                navigateToEdit = true
-            }
-        }
-        .navigationDestination(isPresented: $navigateToEdit) {
-            DetailRecipeView()
-                
-                .navigationBarBackButtonHidden(true) // Sembunyikan back agar tidak kembali ke loading
         }
     }
 }

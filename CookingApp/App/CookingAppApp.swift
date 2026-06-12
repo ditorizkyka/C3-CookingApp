@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import TipKit
 
 @main
@@ -30,5 +31,6 @@ struct CookingAppApp: App {
                 OnboardingView()
             }
         }
+        .modelContainer(for: [Recipe.self, Author.self, Ingredient.self, Instruction.self])
     }
 }
