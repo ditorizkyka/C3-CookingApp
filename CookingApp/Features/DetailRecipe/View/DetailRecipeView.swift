@@ -11,6 +11,7 @@ struct DetailRecipeView: View {
     
     @State private var showInstructionHelper: Bool = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.popToRoot) private var popToRoot
     
     let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
     
@@ -31,8 +32,7 @@ struct DetailRecipeView: View {
     }
        
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 // MARK: - Header (Image, Title, Button)
                 VStack(alignment: .leading) {
                     
@@ -50,7 +50,7 @@ struct DetailRecipeView: View {
                         .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top) { action in
                             if action.id == "main-action" {
                                 onboardingStep = 4
-                                dismiss()
+                                popToRoot()
                             }
                         }
                     }
@@ -298,7 +298,6 @@ struct DetailRecipeView: View {
             .navigationDestination(isPresented: $showInstructionHelper) {
                 InstructionHelperView(recipe: viewModel.recipe)
             }
-        }
     }
     
     
@@ -439,6 +438,8 @@ struct SeparatorView: View {
 // MARK: - Preview
 struct DetailRecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailRecipeView()
+        NavigationStack {
+            DetailRecipeView()
+        }
     }
 }

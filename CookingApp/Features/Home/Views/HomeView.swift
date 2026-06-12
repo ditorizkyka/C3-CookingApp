@@ -8,18 +8,6 @@
 import SwiftUI
 import TipKit
 
-struct SearchStateObserver: View {
-    @Environment(\.isSearching) var isSearching
-    @Binding var isSearchActive: Bool
-    
-    var body: some View {
-        Color.clear
-            .frame(width: 0, height: 0)
-            .onChange(of: isSearching) { _, newValue in
-                isSearchActive = newValue
-            }
-    }
-}
 
 struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -69,7 +57,16 @@ struct HomeView: View {
                 
                 if isSearchActive {
                     // Tampilan saat search aktif (mirip RecipeLibrary)
-                    searchResultsView()
+                    RecipeGridSearchResultView(
+                        searchQuery: searchRecipe,
+                        filteredRecipes: filteredRecipes,
+                        onTapRecipe: { recipe in
+                            if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
+                                selectedIndex = originalIndex
+                                navigateToDetail = true
+                            }
+                        }
+                    )
                 } else {
                     // Tampilan default HomeView
                     // Add Recipe Button
@@ -220,6 +217,10 @@ struct HomeView: View {
             
             
         }
+        .environment(\.popToRoot) {
+            navigateToDetail = false
+            navigateToLoading = false
+        }
         .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
         // MARK: - Clipboard → Website Preview Sheet
         .sheet(isPresented: $showWebPreviewFromClipboard) {
@@ -251,45 +252,7 @@ struct HomeView: View {
         }
     }
     
-    @ViewBuilder
-    private func searchResultsView() -> some View {
-        if filteredRecipes.isEmpty {
-            Spacer()
-            ContentUnavailableView.search(text: searchRecipe)
-            Spacer()
-        } else {
-            ScrollView {
-                let columns = [
-                    GridItem(.flexible()),
-                    GridItem(.flexible()),
-                ]
-                
-                LazyVGrid(columns: columns, spacing: 10) {
-                    ForEach(filteredRecipes.indices, id: \.self) { index in
-                        let recipe = filteredRecipes[index]
-                        let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
-                        let color = colors[index % colors.count]
-                        
-                        RecipeCardSmall(
-                            recipeTitle: recipe.title,
-                            recipeCategoryIcon: "🍲",
-                            recipeImage: "img_test",
-                            recipeColor: color,
-                            recipePortion: recipe.portion,
-                            recipeDuration: recipe.durationInMinutes
-                        )
-                        .onTapGesture {
-                            if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
-                                selectedIndex = originalIndex
-                                navigateToDetail = true
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
-        }
-    }
+
 }
 
 #Preview {

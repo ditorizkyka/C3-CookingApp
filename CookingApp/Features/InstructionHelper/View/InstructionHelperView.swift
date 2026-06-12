@@ -44,8 +44,7 @@ struct InstructionHelperView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack {
+        VStack {
                 Spacer()
                 
                 VStack(alignment: .center, spacing: 16) {
@@ -181,7 +180,6 @@ struct InstructionHelperView: View {
                         .presentationBackground(Color.surfaceElevated ?? .white)
                 }
             }
-        }
         .onDisappear {
             speechManager.stopListening(permanent: true)
             speechManager.stopSpeaking()
@@ -222,5 +220,7 @@ struct InstructionHelperView: View {
 }
 
 #Preview {
-    InstructionHelperView()
+    NavigationStack {
+        InstructionHelperView()
+    }
 }
