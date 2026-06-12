@@ -131,7 +131,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         do {
             // Minta izin microphone dan pastikan bisa play suara (TTS)
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .defaultToSpeaker])
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.duckOthers, .defaultToSpeaker])
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             
             // Buat wadah penampung suara

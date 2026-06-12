@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct AddManualRecipeView: View {
+    @Environment(\.popToRoot) private var popToRoot
+
     @State var newRecipeData: Recipe = Recipe(
         id: UUID(),
         title: "",
@@ -21,8 +23,7 @@ struct AddManualRecipeView: View {
     )
     
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 VStack {
                     
                 }
@@ -70,18 +71,22 @@ struct AddManualRecipeView: View {
                     TotalDurationRow(selectedDuration: $newRecipeData.durationInMinutes)
                 }
                 
-                ButtonApp(title: "Simpan", action: { print("save") })
+                ButtonApp(title: "Simpan", action: { 
+                    print("save")
+                    popToRoot()
+                })
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .listRowSeparator(.hidden)
                 
             }
             .background(Color.surfaceDefault)
-        }
         .toolbarRole(.editor)
     }
 }
 
 #Preview {
-    AddManualRecipeView()
+    NavigationStack {
+        AddManualRecipeView()
+    }
 }
