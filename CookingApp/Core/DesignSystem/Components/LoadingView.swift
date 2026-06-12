@@ -34,6 +34,7 @@ struct LoadingView: View {
             
             .cornerRadius(16)
         }
+        .navigationBarBackButtonHidden(true)
         .background {
             VStack {
                 RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125, width: 600, height: 600)
@@ -51,7 +52,8 @@ struct LoadingView: View {
             }
         }
         .navigationDestination(isPresented: $navigateToEdit) {
-            EditDetailRecipeView(onSave: onSave)
+            DetailRecipeView()
+                
                 .navigationBarBackButtonHidden(true) // Sembunyikan back agar tidak kembali ke loading
         }
     }

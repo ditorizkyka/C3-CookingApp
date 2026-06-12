@@ -1,160 +1,300 @@
 import SwiftUI
 
-// MARK: - Komponen Reusable Gambar
-struct RecipeHeaderImage: View {
-    var imageName: String?
-    var height: CGFloat = 221
-    
-    var body: some View {
-        Group {
-            if let name = imageName, !name.isEmpty {
-                Image(name)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                VStack(spacing: 8) {
-                    Image(systemName: "photo")
-                        .font(.largeTitle)
-                    Text("No Image")
-                        .font(.caption)
-                }
-                .foregroundColor(Color.labelLight!)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.surfaceDefault!)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: height)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.small))
-    }
-}
-
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
+    
+    @StateObject private var viewModel: DetailRecipeViewModel
+    
     var recipeAssetImage: String? = nil
-    var recipe: Recipe = Recipe.dummyRecipes[0]
+    var isFromImport: Bool = false
     
     @State private var showInstructionHelper: Bool = false
+    @Environment(\.dismiss) private var dismiss
     
     let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
     
     @AppStorage("onboardingStep") private var onboardingStep = 0
+    
+    // MARK: - Initializers
+    
+    /// Initialize with a Recipe model (used for import flow and when passing a recipe directly)
+    init(recipe: Recipe, isFromImport: Bool = false) {
+        self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe))
+        self.isFromImport = isFromImport
+    }
+    
+    /// Initialize with default dummy data (for previews and existing usage)
+    init() {
+        self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: Recipe.dummyRecipes[0]))
+        self.isFromImport = false
+    }
        
     var body: some View {
-        List {
-            // MARK: - Header (Image, Title, Button)
-            VStack(alignment: .leading) {
-                RecipeHeaderImage(imageName: recipeAssetImage)
-                
-                Text(recipe.title)
-                    .lineLimit(2)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color.labelDark!)
-                    .padding(.vertical, 24)
-                
-                ButtonApp(title: "Mulai Masak", action: {
-                    if onboardingStep == 3 {
-                        onboardingStep = 4
-                    }
-                    showInstructionHelper = true
-                })
-                .padding(.bottom, 8)
-                .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
-            }
-            .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowSeparator(.hidden)
-            
-            // MARK: - Atribut Resep (Porsi & Waktu)
-            Section {
-                HStack {
-                    Text("Jumlah Porsi")
-                        .foregroundColor(Color.labelDark!)
-                    Spacer()
-                    Text("\(recipe.portion) Orang")
-                        .foregroundColor(Color.labelLight!)
-                }
-                HStack {
-                    Text("Lama Memasak")
-                        .foregroundColor(Color.labelDark!)
-                    Spacer()
-                    Text("\(recipe.durationInMinutes) Menit")
-                        .foregroundColor(Color.labelLight!)
-                }
-            }
-            
-            // MARK: - Bahan-bahan
-            Section(header: Text("Bahan-bahan")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(Color.labelDark!)
-            ) {
-                ForEach(recipe.ingredients) { ingredient in
-                    if let subIngredients = ingredient.groupIngredients {
-                        
-                        Text(ingredient.name)
-                            .font(.headline)
-                            .foregroundColor(Color.labelDark!)
-                            .padding(.top, 8)
-                            .padding(.bottom, 2)
-                            .listRowSeparator(.hidden)
-                        
-                        RenderIngredientGroupItems(items: subIngredients)
-                        
+        NavigationStack {
+            List {
+                // MARK: - Header (Image, Title, Button)
+                VStack(alignment: .leading) {
+                    
+                    if viewModel.isEdited {
+                        RecipeHeader(isEdited: viewModel.isEdited)
                     } else {
-                        RenderSingleIngredientItem(ingredient: ingredient)
+                        RecipeHeader(isEdited: viewModel.isEdited)
+                        ButtonApp(title: "Mulai Masak", action: {
+                            if onboardingStep == 3 {
+                                onboardingStep = 4
+                            }
+                            showInstructionHelper = true
+                        })
+                        .padding(.bottom, 8)
+                        .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
+                    }
+
+                    
+                    
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .listRowSeparator(.hidden)
+                
+//                // MARK: - Atribut Resep (Porsi & Waktu)
+//                Section {
+//                    HStack {
+//                        Text("Jumlah Porsi")
+//                            .foregroundColor(Color.labelDark!)
+//                        Spacer()
+//                        Text("\(recipe.portion) Orang")
+//                            .foregroundColor(Color.labelLight!)
+//                    }
+//                    HStack {
+//                        Text("Lama Memasak")
+//                            .foregroundColor(Color.labelDark!)
+//                        Spacer()
+//                        Text("\(recipe.durationInMinutes) Menit")
+//                            .foregroundColor(Color.labelLight!)
+//                    }
+//                }
+                
+                // MARK: - Bahan-bahan
+                Section(header: Text("Bahan-bahan")
+                    .font(.body)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color.labelLight!)
+                ) {
+                    
+                    if !viewModel.recipe.ingredients.isEmpty {
+                        ForEach(viewModel.recipe.ingredients.indices, id: \.self) { index in
+                            let ingredient = viewModel.recipe.ingredients[index]
+                            
+                            if ingredient.groupIngredients != nil {
+                                // --- Group Header ---
+                                if viewModel.isEdited {
+                                    HStack {
+                                        Button {
+                                            viewModel.deleteIngredient(at: IndexSet(integer: index))
+                                        } label: {
+                                            Image(systemName: AppIcon.minusFill)
+                                                .foregroundStyle(Color.actionDelete!)
+                                        }
+                                        TextField("Nama Grup", text: Binding(
+                                            get: { viewModel.recipe.ingredients[index].name },
+                                            set: { viewModel.recipe.ingredients[index].name = $0 }
+                                        ))
+                                        .font(.headline)
+                                        .foregroundColor(Color.labelDark!)
+                                        Spacer()
+                                        Image(systemName: AppIcon.line3Horizontal)
+                                            .foregroundStyle(Color.labelLight!)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .listRowSeparator(.hidden)
+                                } else {
+                                    Text(ingredient.name)
+                                        .font(.headline)
+                                        .foregroundColor(Color.labelDark!)
+                                        .padding(.top, 8)
+                                        .padding(.bottom, 2)
+                                        .listRowSeparator(.hidden)
+                                }
+                                
+                                // --- Sub-ingredients ---
+                                let subCount = ingredient.groupIngredients?.count ?? 0
+                                ForEach(0..<subCount, id: \.self) { subIndex in
+                                    if viewModel.isEdited {
+                                        EditIngredientsRow(
+                                            isBreakdown: true,
+                                            ingredientsItemsName: Binding(
+                                                get: { viewModel.recipe.ingredients[index].groupIngredients?[subIndex].name ?? "" },
+                                                set: { viewModel.recipe.ingredients[index].groupIngredients?[subIndex].name = $0 }
+                                            ),
+                                            ingredientsItemsQty: Binding(
+                                                get: { viewModel.recipe.ingredients[index].groupIngredients?[subIndex].quantity ?? "" },
+                                                set: { viewModel.recipe.ingredients[index].groupIngredients?[subIndex].quantity = $0 }
+                                            )
+                                        )
+                                    } else {
+                                        let sub = ingredient.groupIngredients![subIndex]
+                                        HStack(alignment: .center, spacing: 12) {
+                                            Circle()
+                                                .fill(Color.labelDark!)
+                                                .frame(width: 3, height: 3)
+                                            Text(sub.quantity).font(.body)
+                                            Text(sub.name).font(.body)
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 4)
+                                    }
+                                }
+                                
+                            } else {
+                                // --- Single ingredient ---
+                                if viewModel.isEdited {
+                                    EditIngredientsRow(
+                                        isBreakdown: false,
+                                        ingredientsItemsName: Binding(
+                                            get: { viewModel.recipe.ingredients[index].name },
+                                            set: { viewModel.recipe.ingredients[index].name = $0 }
+                                        ),
+                                        ingredientsItemsQty: Binding(
+                                            get: { viewModel.recipe.ingredients[index].quantity },
+                                            set: { viewModel.recipe.ingredients[index].quantity = $0 }
+                                        )
+                                    )
+                                } else {
+                                    HStack {
+                                        Text(ingredient.quantity).font(.body)
+                                        Text(ingredient.name).font(.body)
+                                    }
+                                    .padding(.vertical, 4)
+                                }
+                            }
+                        
+                        }
+                    }
+                    
+                    if viewModel.isEdited {
+                        ButtonAddIngredientsRow(isGroup: true)
+                            .listRowBackground(Color.surfaceBrand)
+                            
+                        ButtonAddIngredientsRow(isGroup: false)
+                            .listRowBackground(Color.surfaceBrand)
+                    }
+                    
+                }
+                
+                // MARK: - Langkah-langkah
+                Section(header: Text("Langkah-langkah")
+                    .font(.body)
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color.labelLight!)
+                ) {
+                    if !viewModel.recipe.instructions.isEmpty {
+                        ForEach(viewModel.recipe.instructions.indices, id: \.self) { index in
+                            if viewModel.isEdited {
+                                // Edit mode: use EditInstructionRow which handles
+                                // the main step text + breakdown sub-steps internally
+                                EditInstructionRow(
+                                    instruction: Binding(
+                                        get: { viewModel.recipe.instructions[index] },
+                                        set: { viewModel.recipe.instructions[index] = $0 }
+                                    )
+                                )
+                                .listRowSeparator(.hidden)
+                            } else {
+                                // View mode: use InstructionRowView which shows
+                                // numbered step + expandable breakdown sub-steps
+                                InstructionRowView(instruction: viewModel.recipe.instructions[index])
+                                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                            }
+                        }
+                    }
+
+                    if viewModel.isEdited {
+                        // Add a new instruction step
+                        Button {
+                            let newInstruction = Instruction(
+                                id: UUID(),
+                                sequenceNumber: viewModel.recipe.instructions.count + 1,
+                                text: "",
+                                photoUrl: nil,
+                                breakdownInstruction: []
+                            )
+                            withAnimation {
+                                viewModel.recipe.instructions.append(newInstruction)
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: AppIcon.plusFill)
+                                    .foregroundStyle(Color.brandPrimary!)
+                                Text("Tambah Langkah")
+                                    .font(.body)
+                                    .foregroundStyle(Color.brandPrimary!)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 10)
+                        }
+                        .listRowBackground(Color.surfaceBrand)
+                    }
+                }
+                
+                Section(
+                ) {
+                   if viewModel.isEdited {
+                        TotalPortionRow(selectedPortion: $viewModel.recipe.portion)
+                        TotalDurationRow(selectedDuration: $viewModel.recipe.durationInMinutes)
+                   } else {
+                       HStack {
+                           Text("Jumlah Porsi")
+                               .font(.body)
+                               .foregroundStyle(Color.labelLight!)
+                           
+                           Spacer()
+                           Text("\(viewModel.recipe.portion) Orang")
+                       }
+                       HStack {
+                           Text("Lama Memasak")
+                               .font(.body)
+                               .foregroundStyle(Color.labelLight!)
+                           
+                           Spacer()
+                           Text("\(viewModel.recipe.durationInMinutes) Menit")
+                       }
+                   }
+                    
+                }
+                
+                Section() {
+                    if viewModel.isEdited {
+                        ButtonApp(title: "Simpan") {
+                            viewModel.isEdited.toggle()
+                        }
+                    }
+                }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .listRowSeparator(.hidden)
+                
+                
+            }
+            .listStyle(.insetGrouped)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        viewModel.toggleEditMode()
+                    } label: {
+                        Text(viewModel.isEdited ? "Selesai" : "Ubah")
+                            .font(.body)
+                            .fontWeight(viewModel.isEdited ? .semibold : .regular)
+                            .foregroundStyle(Color.brandPrimary!)
                     }
                 }
             }
-            
-            // MARK: - Langkah-langkah
-            Section(header: Text("Langkah-langkah")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(Color.labelDark!)
-            ) {
-                ForEach(recipe.instructions) { step in
-                    InstructionRowView(instruction: step)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                }
+            .navigationDestination(isPresented: $showInstructionHelper) {
+                InstructionHelperView(recipe: viewModel.recipe)
             }
-            
-            Section(
-            ) {
-                HStack {
-                    Text("Jumlah Porsi")
-                        .font(.body)
-                        .foregroundStyle(Color.labelLight!)
-                        
-                    Spacer()
-                    Text("4 Orang")
-                }
-                HStack {
-                    Text("Lama Memasak")
-                        .font(.body)
-                        .foregroundStyle(Color.labelLight!)
-                        
-                    Spacer()
-                    Text("30 Menit")
-                }
-            }
-            
-        }
-        .listStyle(.insetGrouped)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                NavigationLink(destination: EditDetailRecipeView(editRecipeData: recipe)) {
-                    Text("Ubah")
-                        .foregroundColor(Color.brandPrimary!)
-                }
-            }
-        }
-        .navigationDestination(isPresented: $showInstructionHelper) {
-            InstructionHelperView(recipe: recipe)
         }
     }
+    
     
     // MARK: - ViewBuilders untuk Bahan
     

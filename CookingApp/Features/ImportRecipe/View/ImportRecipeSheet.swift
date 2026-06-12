@@ -9,14 +9,9 @@ import SwiftUI
 import TipKit
 
 struct ImportRecipeSheet: View {
-    var onImportFinished: (() -> Void)? = nil
+    var onImport: ((String) -> Void)
     
-    @State var link: String = ""
-    @State private var showPreviewSheet = false
-    @State private var previewUrlString: String = ""
-    
-    @State private var isLoading = false
-    @State private var errorMessage: String?
+    @StateObject private var viewModel = ImportRecipeViewModel()
     
     // Untuk menutup sheet
     @Environment(\.dismiss) private var dismiss
@@ -29,6 +24,7 @@ struct ImportRecipeSheet: View {
     var body: some View {
         ZStack {
             Color.surfaceElevated
+                        .ignoresSafeArea()
             VStack(spacing: 32) {
                 ZStack {
                     // Judul di tengah
@@ -55,7 +51,7 @@ struct ImportRecipeSheet: View {
                 VStack(spacing:16) {
                     Text("Masukkan link resep (cth: Cookpad) untuk memproses bahan dan panduan masak secara otomatis")
                         .font(.body)
-                    TextField("", text: $link)
+                    TextField("https://cookpad.com/id/resep/...", text: $viewModel.link)
                         .padding(.horizontal,15)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
@@ -63,74 +59,69 @@ struct ImportRecipeSheet: View {
                             Color(UIColor.tertiarySystemFill)
                         )
                         .cornerRadius(Radius.infinity)
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
                         .trackFrame(in: .named("SheetSpace"), $textFieldFrame)
-                        .onChange(of: link) { _, _ in
+                        .onChange(of: viewModel.link) { _, _ in
+                            // Clear error when user edits the link
+                            viewModel.errorMessage = nil
                             if onboardingStep == 1 {
-                                onboardingStep = 2 
+                                onboardingStep = 2
                             }
                         }
                         .conditionalPopoverTip(onboardingStep == 1, tip: pasteLinkTip, arrowEdge: .bottom)
                     
+                    // Error message
+                    if let errorMessage = viewModel.errorMessage {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .font(.footnote)
+                            Text(errorMessage)
+                                .font(.footnote)
+                        }
+                        .foregroundColor(Color.actionDelete!)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
                     
                 }
-                VStack(spacing: 8,) {
+                VStack(spacing: 8) {
                     ButtonApp(title: "Import Recipe", action: {
-                        showPreviewSheet = true
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.validateAndShowPreview()
+                        }
                     })
                     ButtonApp(title: "Cancel", type: .tertiary, action: {
-                        print("cancel")
+                        dismiss()
                     })
                 }
             }
 
             .padding(.horizontal,24)
+//            .padding(.bottom, 36) 
             // Preview Sheet
-            .sheet(isPresented: $showPreviewSheet) {
+            .sheet(isPresented: $viewModel.showWebPreview) {
                 WebsitePreviewSheet(
-                    urlString: previewUrlString,
+                    urlString: viewModel.link,
                     onImport: {
-                        showPreviewSheet = false
+                        viewModel.showWebPreview = false
                         dismiss()
-                        onImportFinished?()
+                        // Tell parent to navigate to LoadingRecipeView with the URL
+                        onImport(viewModel.link)
                     },
                     onDismiss: {
-                        showPreviewSheet = false
+                        viewModel.showWebPreview = false
                     }
                 )
-                
-                
-                
-                
             }
             
         }
         .coordinateSpace(name: "SheetSpace")
-        .ignoresSafeArea()
         .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 1 }, set: { if !$0 && onboardingStep == 1 { onboardingStep = 2 } }), holeFrame: textFieldFrame, cornerRadius: Radius.infinity)
     }
-    
-    //    // MARK: - Start Scraping
-    //    @MainActor
-    //    private func startScraping() async {
-    //        isLoading = true
-    //        scrapedRecipe = nil
-    //        errorMessage = nil
-    //
-    //        do {
-    //            let result = try await CookpadScraperService.shared.scrape(urlString: recipeLink)
-    //            scrapedRecipe = result
-    //        } catch let error as ScraperError {
-    //            errorMessage = error.errorDescription
-    //        } catch {
-    //            errorMessage = error.localizedDescription
-    //        }
-    //
-    //        isLoading = false
-    //    }
-    
-    
 }
 
-#Preview {
-    ImportRecipeSheet()
-}
+//#Preview {
+//    ImportRecipeSheet()
+//}
