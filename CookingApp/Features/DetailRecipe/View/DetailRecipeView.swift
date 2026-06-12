@@ -31,8 +31,7 @@ struct DetailRecipeView: View {
     }
        
     var body: some View {
-        NavigationStack {
-            List {
+        List {
                 // MARK: - Header (Image, Title, Button)
                 VStack(alignment: .leading) {
                     
@@ -298,7 +297,6 @@ struct DetailRecipeView: View {
             .navigationDestination(isPresented: $showInstructionHelper) {
                 InstructionHelperView(recipe: viewModel.recipe)
             }
-        }
     }
     
     
@@ -439,6 +437,8 @@ struct SeparatorView: View {
 // MARK: - Preview
 struct DetailRecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        DetailRecipeView()
+        NavigationStack {
+            DetailRecipeView()
+        }
     }
 }
