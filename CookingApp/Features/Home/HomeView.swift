@@ -8,11 +8,34 @@
 import SwiftUI
 import TipKit
 
+struct SearchStateObserver: View {
+    @Environment(\.isSearching) var isSearching
+    @Binding var isSearchActive: Bool
+    
+    var body: some View {
+        Color.clear
+            .frame(width: 0, height: 0)
+            .onChange(of: isSearching) { _, newValue in
+                isSearchActive = newValue
+            }
+    }
+}
+
 struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var searchRecipe: String = ""
+    @State private var isSearchActive: Bool = false
     @State private var selectedIndex: Int? = nil
     @State private var allRecipes: [Recipe] = Recipe.dummyRecipes
+    
+    var filteredRecipes: [Recipe] {
+        if searchRecipe.isEmpty {
+            return allRecipes
+        } else {
+            return allRecipes.filter { $0.title.localizedCaseInsensitiveContains(searchRecipe) }
+        }
+    }
+    
     
     @State private var navigateToManual = false
     @State private var navigateToDetail = false
@@ -42,7 +65,13 @@ struct HomeView: View {
         NavigationStack {
             ZStack {
                 VStack(alignment: .leading, spacing: 24) {
-                    
+                SearchStateObserver(isSearchActive: $isSearchActive)
+                
+                if isSearchActive {
+                    // Tampilan saat search aktif (mirip RecipeLibrary)
+                    searchResultsView()
+                } else {
+                    // Tampilan default HomeView
                     // Add Recipe Button
                     HStack() {
                         AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website",
@@ -139,9 +168,7 @@ struct HomeView: View {
                     .padding(.horizontal)
                     .padding(.vertical, 24)
                     .frame(maxHeight: .infinity)
-                    .background(Color.surfaceElevated)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.xLarge))
-                    .ignoresSafeArea()
+                }
                 }
                 .background(Color.surfaceBrand.ignoresSafeArea())
                 .searchable(
@@ -222,6 +249,46 @@ struct HomeView: View {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 clipboardManager.checkNow()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func searchResultsView() -> some View {
+        if filteredRecipes.isEmpty {
+            Spacer()
+            ContentUnavailableView.search(text: searchRecipe)
+            Spacer()
+        } else {
+            ScrollView {
+                let columns = [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                ]
+                
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(filteredRecipes.indices, id: \.self) { index in
+                        let recipe = filteredRecipes[index]
+                        let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
+                        let color = colors[index % colors.count]
+                        
+                        RecipeCardSmall(
+                            recipeTitle: recipe.title,
+                            recipeCategoryIcon: "🍲",
+                            recipeImage: "img_test",
+                            recipeColor: color,
+                            recipePortion: recipe.portion,
+                            recipeDuration: recipe.durationInMinutes
+                        )
+                        .onTapGesture {
+                            if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
+                                selectedIndex = originalIndex
+                                navigateToDetail = true
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
             }
         }
     }

@@ -26,21 +26,18 @@ struct GuideCard: View {
                 Text(guide.title)
                     .font(Font.headline)
                 
-                Divider()
-                    .foregroundStyle(Color.labelLight!)
+                Rectangle()
+                    .fill(Color.labelDark!)
+                    .frame(height: 1)
                 
                 // Description
                 Text(LocalizedStringKey(guide.description))
                     .font(Font.body)
             }
         }
-        .padding(16)
-        .background(Color.surfaceElevated)
+        .padding()
         .clipShape(RoundedRectangle(cornerRadius: Radius.medium))
-        .overlay(
-            RoundedRectangle(cornerRadius: Radius.medium)
-                .stroke(Color.brandPrimary!, lineWidth: 1)
-        )
+        .glassEffect(in: RoundedRectangle(cornerRadius: Radius.large))
     }
 }
 

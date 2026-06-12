@@ -37,11 +37,11 @@ struct LoadingView: View {
         .navigationBarBackButtonHidden(true)
         .background {
             VStack {
-                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125)
+                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125, width: 600, height: 600)
                 
                 Spacer()
                 
-                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125)
+                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125, width: 600, height: 600)
             }
             .ignoresSafeArea()
         }
