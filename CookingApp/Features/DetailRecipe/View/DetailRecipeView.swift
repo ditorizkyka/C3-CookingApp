@@ -10,6 +10,7 @@ struct DetailRecipeView: View {
 
     var recipeAssetImage: String? = nil
     var isFromImport: Bool = false
+    var onDismiss: (() -> Void)? = nil
 
     @State private var showInstructionHelper: Bool = false
     @State private var showImportConfirmation: Bool = false
@@ -29,9 +30,10 @@ struct DetailRecipeView: View {
     // MARK: - Initializers
     
     /// Initialize with a Recipe model (used for import flow and when passing a recipe directly)
-    init(recipe: Recipe, isFromImport: Bool = false) {
+    init(recipe: Recipe, isFromImport: Bool = false, onDismiss: (() -> Void)? = nil) {
         self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe))
         self.isFromImport = isFromImport
+        self.onDismiss = onDismiss
     }
        
     var body: some View {
@@ -43,6 +45,18 @@ struct DetailRecipeView: View {
                     RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
                 } else {
                     RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+                    
+                }
+
+                
+                
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowSeparator(.hidden)
+            
+            Section {
+                if !viewModel.isEdited {
                     ButtonApp(title: "Mulai Masak", action: {
                         if onboardingStep == 3 {
                             onboardingStep = 4
@@ -52,13 +66,14 @@ struct DetailRecipeView: View {
                     .padding(.bottom, 8)
                     .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
                 }
-
-                
-                
             }
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             .listRowSeparator(.hidden)
+            
+            
+            
+            
             
             // MARK: - Bahan-bahan
             ingredientsSection
@@ -95,7 +110,11 @@ struct DetailRecipeView: View {
             Section() {
                 if viewModel.isEdited {
                     ButtonApp(title: "Simpan") {
-                        viewModel.commitEditing()
+                        if viewModel.commitEditing() {
+                            if !isFromImport {
+                                try? modelContext.save()
+                            }
+                        }
                     }
                 }
             }
@@ -106,7 +125,11 @@ struct DetailRecipeView: View {
             
         }
         .listStyle(.insetGrouped)
-        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { viewModel.beginEditing() } } // TEMP REPRO
+        .onAppear { 
+            if isFromImport {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { viewModel.beginEditing() } 
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isFromImport || viewModel.isEdited)
         .toolbar {
@@ -135,7 +158,11 @@ struct DetailRecipeView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.isEdited {
                     Button {
-                        viewModel.commitEditing()
+                        if viewModel.commitEditing() {
+                            if !isFromImport {
+                                try? modelContext.save()
+                            }
+                        }
                     } label: {
                         Text("Selesai")
                             .font(.body)
@@ -154,19 +181,22 @@ struct DetailRecipeView: View {
             }
         }
         .navigationDestination(isPresented: $showInstructionHelper) {
-            InstructionHelperView(recipe: viewModel.recipe)
+            InstructionHelperView(recipe: viewModel.recipe, onGoToHome: {
+                handleDismiss()
+            })
         }
-        // Alert only triggered by back button tap, NOT on page appear
         .alert("Simpan Resep Ini?", isPresented: $showImportConfirmation) {
-            Button("Simpan", role: .none) {
-                // User wants to save — stay on this page
+            Button("Simpan dan Masak Nanti", role: .none) {
+                modelContext.insert(viewModel.recipe)
+                try? modelContext.save()
                 print("✅ User chose to save the imported recipe")
+                handleDismiss()
             }
-            Button("Tidak", role: .destructive) {
-                // User doesn't want to save — go back to home
+            Button("Hapus Perubahan", role: .destructive) {
                 print("↩️ User discarded the imported recipe")
-                dismiss()
+                handleDismiss()
             }
+            Button("Batal", role: .cancel) {}
         } message: {
             Text("Apakah kamu ingin menyimpan resep yang sudah diimpor ke koleksimu?")
         }
@@ -175,12 +205,22 @@ struct DetailRecipeView: View {
             Button("Simpan", role: .none) {
                 // Commit; if validation fails it surfaces its own alert and stays.
                 if viewModel.commitEditing() {
-                    dismiss()
+                    if isFromImport {
+                        modelContext.insert(viewModel.recipe)
+                        try? modelContext.save()
+                        handleDismiss()
+                    } else {
+                        handleDismiss()
+                    }
                 }
             }
             Button("Buang", role: .destructive) {
                 viewModel.cancelEditing()
-                dismiss()
+                if isFromImport {
+                    handleDismiss()
+                } else {
+                    handleDismiss()
+                }
             }
             Button("Batal", role: .cancel) { }
         } message: {
@@ -206,11 +246,19 @@ struct DetailRecipeView: View {
         .alert("Hapus Resep?", isPresented: $showDeleteRecipeConfirmation) {
             Button("Hapus", role: .destructive) {
                 modelContext.delete(viewModel.recipe)
-                dismiss()
+                handleDismiss()
             }
             Button("Batal", role: .cancel) { }
         } message: {
             Text("Resep ini akan dihapus secara permanen.")
+        }
+    }
+
+    private func handleDismiss() {
+        if let onDismiss = onDismiss {
+            onDismiss()
+        } else {
+            dismiss()
         }
     }
 
@@ -224,30 +272,20 @@ struct DetailRecipeView: View {
             .foregroundColor(Color.labelLight!)
         ) {
             if !viewModel.recipe.ingredients.isEmpty {
-                // Iterate over the model objects (not indices). Each closure captures
-                // the object reference, so it stays valid even after the array shrinks.
-                //
-                // Use `isGroup` (non-nil AND non-empty), NOT `groupIngredients != nil`:
-                // SwiftData can lazily materialize an optional to-many relationship as an
-                // empty array, so a single ingredient could otherwise be classified as a
-                // "group" in some frames and "single" in others. That changes the row
-                // count of a ForEach element mid-update and crashes the List
-                // ("invalid number of rows") right as edit mode animates in.
                 ForEach(viewModel.recipe.ingredients) { ingredient in
-                    if ingredient.isGroup {
-                        groupIngredientRows(ingredient)
-                    } else {
-                        singleIngredientRow(ingredient)
+                    if let index = viewModel.recipe.ingredients.firstIndex(where: { $0.id == ingredient.id }) {
+                        Group {
+                            if ingredient.isGroup {
+                                groupIngredientRows(ingredient)
+                            } else {
+                                singleIngredientRow(ingredient)
+                            }
+                        }
                     }
                 }
             }
 
             if viewModel.isEdited {
-                ButtonAddIngredientsRow(isGroup: true) {
-                    withAnimation { viewModel.addIngredientGroup() }
-                }
-                .listRowBackground(Color.surfaceBrand)
-
                 ButtonAddIngredientsRow(isGroup: false) {
                     withAnimation { viewModel.addIngredient() }
                 }
@@ -341,34 +379,34 @@ struct DetailRecipeView: View {
             .foregroundColor(Color.labelLight!)
         ) {
             if !viewModel.recipe.instructions.isEmpty {
-                // Iterate the objects directly (stable identity) — the enumerated form
-                // breaks live drag-reordering. Number is computed from current position.
-                ForEach(viewModel.recipe.instructions) { instruction in
-                    if viewModel.isEdited {
-                        EditInstructionRow(
-                            instruction: instruction,
-                            displayNumber: (viewModel.recipe.instructions.firstIndex(where: { $0.id == instruction.id }) ?? 0) + 1,
-                            onDelete: {
-                                viewModel.deleteInstruction(instruction)
-                            },
-                            onDrag: {
-                                draggingInstructionID = instruction.id
-                                return NSItemProvider(object: instruction.id.uuidString as NSString)
-                            }
-                        )
-                        .listRowSeparator(.hidden)
-                        .onDrop(of: [.text], delegate: ReorderDropDelegate(
-                            item: instruction,
-                            items: instructionsBinding,
-                            draggingID: $draggingInstructionID,
-                            onComplete: { viewModel.renumberInstructions() }
-                        ))
-                    } else {
-                        InstructionRowView(
-                            instruction: instruction,
-                            displayNumber: (viewModel.recipe.instructions.firstIndex(where: { $0.id == instruction.id }) ?? 0) + 1
-                        )
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                ForEach(viewModel.recipe.instructions) { instructionItem in
+                    if let index = viewModel.recipe.instructions.firstIndex(where: { $0.id == instructionItem.id }) {
+                        if viewModel.isEdited {
+                            EditInstructionRow(
+                                instruction: instructionItem,
+                                displayNumber: index + 1,
+                                onDelete: {
+                                    viewModel.deleteInstruction(instructionItem)
+                                },
+                                onDrag: {
+                                    draggingInstructionID = instructionItem.id
+                                    return NSItemProvider(object: instructionItem.id.uuidString as NSString)
+                                }
+                            )
+                            .listRowSeparator(.hidden)
+                            .onDrop(of: [.text], delegate: ReorderDropDelegate(
+                                item: instructionItem,
+                                items: instructionsBinding,
+                                draggingID: $draggingInstructionID,
+                                onComplete: { viewModel.renumberInstructions() }
+                            ))
+                        } else {
+                            InstructionRowView(
+                                instruction: instructionItem,
+                                displayNumber: index + 1
+                            )
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        }
                     }
                 }
             }

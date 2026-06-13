@@ -191,14 +191,18 @@ struct HomeView: View {
                 }
                 .navigationDestination(isPresented: $navigateToDetail) {
                     if let recipe = importedRecipe {
-                        DetailRecipeView(recipe: recipe, isFromImport: true)
+                        DetailRecipeView(recipe: recipe, isFromImport: true, onDismiss: { navigateToDetail = false })
                     } else if let index = selectedIndex, index < allRecipes.count {
-                        DetailRecipeView(recipe: allRecipes[index])
+                        DetailRecipeView(recipe: allRecipes[index], onDismiss: { navigateToDetail = false })
                     }
                 }
                 .navigationDestination(isPresented: $navigateToLoading) {
                     LoadingRecipeView(urlToScrape: urlToScrape, onScrapingComplete: { recipe in
                         importedRecipe = recipe
+                        navigateToLoading = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            navigateToDetail = true
+                        }
                     })
                 }
                 

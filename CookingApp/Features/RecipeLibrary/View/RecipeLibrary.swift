@@ -93,7 +93,7 @@ struct RecipeLibrary: View {
             .navigationDestination(isPresented: $navigateToDetail) {
                 if let index = selectedIndex, index < filteredRecipes.count {
                     let selectedRecipe = filteredRecipes[index]
-                    DetailRecipeView(recipe: selectedRecipe)
+                    DetailRecipeView(recipe: selectedRecipe, onDismiss: { navigateToDetail = false })
                 }
             }
     }

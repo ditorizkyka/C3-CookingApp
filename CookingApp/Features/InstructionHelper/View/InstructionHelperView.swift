@@ -12,6 +12,7 @@ struct InstructionHelperView: View {
     @StateObject private var speechManager = SpeechManager()
     
     var recipe: Recipe
+    var onGoToHome: (() -> Void)? = nil
     @State private var currentStepIndex: Int = 0
     
     @State private var showIntro: Bool = true
@@ -25,8 +26,9 @@ struct InstructionHelperView: View {
         "Balik": "Langkah Sebelumnya"
     ]
     
-    init(recipe: Recipe) {
+    init(recipe: Recipe, onGoToHome: (() -> Void)? = nil) {
         self.recipe = recipe
+        self.onGoToHome = onGoToHome
     }
     
     private func dismissIntro() {
@@ -139,7 +141,7 @@ struct InstructionHelperView: View {
             }
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToComplete) {
-                InstructionHelperCompleteView(recipe: recipe)
+                InstructionHelperCompleteView(recipe: recipe, onGoToHome: onGoToHome)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

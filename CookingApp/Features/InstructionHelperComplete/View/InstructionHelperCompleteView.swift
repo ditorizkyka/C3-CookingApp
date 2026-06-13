@@ -9,6 +9,7 @@ import SwiftUI
 
 struct InstructionHelperCompleteView: View {
     var recipe: Recipe
+    var onGoToHome: (() -> Void)? = nil
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.popToRoot) private var popToRoot
@@ -54,7 +55,11 @@ struct InstructionHelperCompleteView: View {
             
             // Button
             Button {
-                popToRoot()
+                if let onGoToHome = onGoToHome {
+                    onGoToHome()
+                } else {
+                    popToRoot()
+                }
             } label: {
                 Text("Selesai")
                     .font(Font.headline)

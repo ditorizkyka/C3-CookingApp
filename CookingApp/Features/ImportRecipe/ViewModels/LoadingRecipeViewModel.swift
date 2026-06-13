@@ -7,6 +7,7 @@ class LoadingRecipeViewModel: ObservableObject {
     @Published var scrapedRecipe: Recipe?
     @Published var errorMessage: String?
     @Published var navigateToDetail = false
+    private var hasStartedScraping = false
     
     // Translation Configs
     @Published var configIdToEn: TranslationSession.Configuration?
@@ -21,6 +22,9 @@ class LoadingRecipeViewModel: ObservableObject {
     private let nlpService = RecipeNLPService()
     
     func startScraping(url: String, onError: ((String) -> Void)?) {
+        guard !hasStartedScraping else { return }
+        hasStartedScraping = true
+        
         Task {
             do {
                 let result = try await scraperService.scrape(urlString: url)
