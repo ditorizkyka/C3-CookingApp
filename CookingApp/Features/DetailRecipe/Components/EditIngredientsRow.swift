@@ -12,16 +12,15 @@ struct EditIngredientsRow: View {
     @Binding var ingredientsItemsName: String
     @Binding var ingredientsItemsQty: String
     var onDelete: (() -> Void)? = nil
-    
+    /// When set, the ☰ handle becomes a drag source (for live reordering).
+    var onDrag: (() -> NSItemProvider)? = nil
+
     var body: some View {
         HStack {
-            Button {
+            DeleteConfirmButton {
                 onDelete?()
-            } label: {
-                Image(systemName: AppIcon.minusFill)
-                    .foregroundStyle(Color.actionDelete!)
             }
-            
+
             if isBreakdown {
                 HStack(alignment: .center) {
                     Circle()
@@ -51,13 +50,23 @@ struct EditIngredientsRow: View {
             }
             
             Spacer()
-            
-            Image(systemName: AppIcon.line3Horizontal)
-                .font(.body)
-                .foregroundStyle(Color.labelLight!)
 
+            dragHandle
         }
         .padding(.horizontal, 10)
+    }
+
+    @ViewBuilder
+    private var dragHandle: some View {
+        let handle = Image(systemName: AppIcon.line3Horizontal)
+            .font(.body)
+            .foregroundStyle(Color.labelLight!)
+
+        if let onDrag {
+            handle.onDrag(onDrag)
+        } else {
+            handle
+        }
     }
 }
 

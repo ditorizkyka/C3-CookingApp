@@ -97,8 +97,8 @@ struct EditDetailRecipeView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(Color.labelLight!)
                 ) {
-                    ForEach($editRecipeData.instructions) { $instruction in
-                        EditInstructionRow(instruction: $instruction)
+                    ForEach(Array(editRecipeData.instructions.enumerated()), id: \.element.id) { index, instruction in
+                        EditInstructionRow(instruction: instruction, displayNumber: index + 1)
                     }
                         
                     ButtonAddInstructions()
