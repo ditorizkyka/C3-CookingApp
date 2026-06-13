@@ -19,11 +19,15 @@ class Recipe: Identifiable {
     
     var tips: String?
     
-    init(id: UUID = UUID(), title: String, author: Author? = nil, coverImageUrl: URL? = nil, portion: Int, durationInMinutes: Int, ingredients: [Ingredient] = [], instructions: [Instruction] = [], tips: String? = nil) {
+    /// Locally stored cover image data (when user picks a photo from library)
+    var coverImageData: Data?
+    
+    init(id: UUID = UUID(), title: String, author: Author? = nil, coverImageUrl: URL? = nil, coverImageData: Data? = nil, portion: Int, durationInMinutes: Int, ingredients: [Ingredient] = [], instructions: [Instruction] = [], tips: String? = nil) {
         self.id = id
         self.title = title
         self.author = author
         self.coverImageUrl = coverImageUrl
+        self.coverImageData = coverImageData
         self.portion = portion
         self.durationInMinutes = durationInMinutes
         self.ingredients = ingredients

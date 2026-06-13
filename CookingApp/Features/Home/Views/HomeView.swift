@@ -6,15 +6,25 @@
 //
 
 import SwiftUI
+import SwiftData
 import TipKit
 
 
 struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Query private var savedRecipes: [Recipe]
     @State private var searchRecipe: String = ""
     @State private var isSearchActive: Bool = false
     @State private var selectedIndex: Int? = nil
-    @State private var allRecipes: [Recipe] = Recipe.dummyRecipes
+    
+    /// Combined list: SwiftData saved recipes + dummy recipes (fallback when DB is empty)
+    var allRecipes: [Recipe] {
+        if savedRecipes.isEmpty {
+            return Recipe.dummyRecipes
+        } else {
+            return savedRecipes
+        }
+    }
     
     var filteredRecipes: [Recipe] {
         if searchRecipe.isEmpty {
@@ -52,6 +62,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                Color.surfaceBrand.ignoresSafeArea()
                 VStack(alignment: .leading, spacing: 24) {
                 SearchStateObserver(isSearchActive: $isSearchActive)
                 
@@ -167,7 +178,6 @@ struct HomeView: View {
                     .frame(maxHeight: .infinity)
                 }
                 }
-                .background(Color.surfaceBrand.ignoresSafeArea())
                 .searchable(
                     text: $searchRecipe,
                     placement: .navigationBarDrawer(displayMode: .always),
@@ -182,8 +192,8 @@ struct HomeView: View {
                 .navigationDestination(isPresented: $navigateToDetail) {
                     if let recipe = importedRecipe {
                         DetailRecipeView(recipe: recipe, isFromImport: true)
-                    } else {
-                        DetailRecipeView()
+                    } else if let index = selectedIndex, index < allRecipes.count {
+                        DetailRecipeView(recipe: allRecipes[index])
                     }
                 }
                 .navigationDestination(isPresented: $navigateToLoading) {
@@ -257,4 +267,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .modelContainer(PreviewContainer.shared)
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct RecipeLibrary: View {
     enum SortOption {
@@ -13,6 +14,7 @@ struct RecipeLibrary: View {
         case dateAdded
     }
     
+    @Query private var allRecipes: [Recipe]
     @State private var searchRecipe = ""
     @State private var sortOption: SortOption = .name
     @State private var selectedIndex: Int? = nil
@@ -24,7 +26,7 @@ struct RecipeLibrary: View {
     ]
     
     var filteredRecipes: [Recipe] {
-        var result = Recipe.dummyRecipes
+        var result = allRecipes
         
         if !searchRecipe.isEmpty {
             result = result.filter { $0.title.localizedCaseInsensitiveContains(searchRecipe) }
@@ -98,5 +100,8 @@ struct RecipeLibrary: View {
 }
 
 #Preview {
-    RecipeLibrary()
+    NavigationStack {
+        RecipeLibrary()
+    }
+    .modelContainer(PreviewContainer.shared)
 }

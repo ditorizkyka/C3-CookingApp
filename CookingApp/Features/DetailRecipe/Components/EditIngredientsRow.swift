@@ -11,18 +11,19 @@ struct EditIngredientsRow: View {
     var isBreakdown: Bool = false
     @Binding var ingredientsItemsName: String
     @Binding var ingredientsItemsQty: String
+    var onDelete: (() -> Void)? = nil
     
     var body: some View {
         HStack {
             Button {
-                print("deleted items ingredients")
+                onDelete?()
             } label: {
                 Image(systemName: AppIcon.minusFill)
                     .foregroundStyle(Color.actionDelete!)
             }
             
             if isBreakdown {
-                HStack(alignment: .center, ) {
+                HStack(alignment: .center) {
                     Circle()
                         .fill(Color.labelDark!)
                         .frame(width: 3, height: 3)
@@ -90,10 +91,9 @@ struct EditIngredientsGroupRow: View {
 #Preview {
     @Previewable @State var name = "Bawang Merah"
     @Previewable @State var qty = "10 siung"
-    @Previewable @State var ingredients = Recipe.dummyRecipes[0].ingredients
+    @Previewable @State var ingredients: [Ingredient] = []
     
     VStack(spacing: 20) {
-        EditIngredientsGroupRow(ingredients: $ingredients)
         EditIngredientsRow(isBreakdown: true, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
         EditIngredientsRow(isBreakdown: false, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
     }

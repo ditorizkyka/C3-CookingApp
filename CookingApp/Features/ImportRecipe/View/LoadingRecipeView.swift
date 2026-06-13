@@ -59,7 +59,6 @@ struct LoadingRecipeView: View {
         .navigationDestination(isPresented: $navigateToDetail) {
             if let recipe = scrapedRecipe {
                 DetailRecipeView(recipe: recipe, isFromImport: true)
-                    .navigationBarBackButtonHidden(true)
             }
         }
     }

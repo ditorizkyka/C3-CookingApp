@@ -9,15 +9,12 @@ import SwiftUI
 
 struct ButtonAddIngredientsRow: View {
     var isGroup: Bool = false
+    var action: (() -> Void)? = nil
     
     var body: some View {
     
             Button {
-                if isGroup {
-                    print("tambah Group")
-                } else {
-                    print("tambah bahan")
-                }
+                action?()
             } label: {
                 HStack {
                     Image(systemName: AppIcon.plusFill)

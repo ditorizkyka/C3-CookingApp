@@ -25,7 +25,7 @@ struct InstructionHelperView: View {
         "Balik": "Langkah Sebelumnya"
     ]
     
-    init(recipe: Recipe = Recipe.dummyRecipes.first!) {
+    init(recipe: Recipe) {
         self.recipe = recipe
     }
     
@@ -44,7 +44,8 @@ struct InstructionHelperView: View {
     }
     
     var body: some View {
-        VStack {
+        NavigationStack {
+            VStack {
                 Spacer()
                 
                 VStack(alignment: .center, spacing: 16) {
@@ -180,6 +181,7 @@ struct InstructionHelperView: View {
                         .presentationBackground(Color.surfaceElevated ?? .white)
                 }
             }
+        }
         .onDisappear {
             speechManager.stopListening(permanent: true)
             speechManager.stopSpeaking()
@@ -220,7 +222,9 @@ struct InstructionHelperView: View {
 }
 
 #Preview {
-    NavigationStack {
-        InstructionHelperView()
-    }
+//    let container = PreviewContainer.shared
+//    let ctx = container.mainContext
+//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+//    return InstructionHelperView(recipe: recipes.first!)
+//        .modelContainer(container)
 }

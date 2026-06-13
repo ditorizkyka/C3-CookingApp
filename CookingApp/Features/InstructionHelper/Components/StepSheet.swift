@@ -10,7 +10,7 @@ import SwiftUI
 struct StepSheet: View {
     @Environment(\.dismiss) var dismiss
     
-    var instructions: [Instruction] = Recipe.dummyRecipes.first?.instructions ?? []
+    var instructions: [Instruction] = []
     var currentStep: Int = 1
     
     var body: some View {
@@ -45,5 +45,9 @@ struct StepSheet: View {
 }
 
 #Preview {
-    StepSheet()
+//    let container = PreviewContainer.shared
+//    let ctx = container.mainContext
+//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+//    return StepSheet(instructions: recipes.first?.instructions ?? [])
+//        .modelContainer(container)
 }
