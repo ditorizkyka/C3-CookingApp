@@ -35,7 +35,7 @@ final class ClipboardManager: ObservableObject {
         
         // Poll every 1 second for responsiveness
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 self?.checkClipboard()
             }
         }

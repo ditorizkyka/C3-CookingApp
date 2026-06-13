@@ -1,17 +1,16 @@
 import SwiftUI
+import Translation
 
 struct LoadingRecipeView: View {
     let urlToScrape: String
     var onScrapingComplete: ((Recipe) -> Void)? = nil
     var onError: ((String) -> Void)? = nil
     
-    @State private var scrapedRecipe: Recipe?
-    @State private var errorMessage: String?
-    @State private var navigateToDetail = false
+    @StateObject private var viewModel = LoadingRecipeViewModel()
     
     var body: some View {
         VStack(spacing: 24) {
-            if let errorMessage = errorMessage {
+            if let errorMessage = viewModel.errorMessage {
                 // Error state
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -30,8 +29,8 @@ struct LoadingRecipeView: View {
                         .padding(.horizontal, 32)
                     
                     ButtonApp(title: "Coba Lagi", action: {
-                        self.errorMessage = nil
-                        startScraping()
+                        viewModel.errorMessage = nil
+                        viewModel.startScraping(url: urlToScrape, onError: onError)
                     })
                     .padding(.horizontal, 40)
                 }
@@ -54,30 +53,18 @@ struct LoadingRecipeView: View {
         .background(Color.surfaceDefault.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            startScraping()
+            viewModel.startScraping(url: urlToScrape, onError: onError)
         }
-        .navigationDestination(isPresented: $navigateToDetail) {
-            if let recipe = scrapedRecipe {
+        .navigationDestination(isPresented: $viewModel.navigateToDetail) {
+            if let recipe = viewModel.scrapedRecipe {
                 DetailRecipeView(recipe: recipe, isFromImport: true)
             }
         }
-    }
-    
-    // MARK: - Scraping
-    private func startScraping() {
-        Task { @MainActor in
-            do {
-                let result = try await CookpadScraperService.shared.scrape(urlString: urlToScrape)
-                scrapedRecipe = result
-                onScrapingComplete?(result)
-                navigateToDetail = true
-            } catch let error as ScraperError {
-                errorMessage = error.errorDescription
-                onError?(error.errorDescription ?? "Unknown error")
-            } catch {
-                errorMessage = error.localizedDescription
-                onError?(error.localizedDescription)
-            }
+        .translationTask(viewModel.configIdToEn) { session in
+            await viewModel.translateToEnglish(session: session)
+        }
+        .translationTask(viewModel.configEnToId) { session in
+            await viewModel.translateToIndonesian(session: session, onComplete: onScrapingComplete)
         }
     }
 }
