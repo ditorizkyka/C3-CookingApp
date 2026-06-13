@@ -12,6 +12,7 @@ struct InstructionHelperView: View {
     @StateObject private var speechManager = SpeechManager()
     
     var recipe: Recipe
+    let allGranularSteps: [Instruction]
     @State private var currentStepIndex: Int = 0
     
     @State private var showIntro: Bool = true
@@ -27,6 +28,18 @@ struct InstructionHelperView: View {
     
     init(recipe: Recipe) {
         self.recipe = recipe
+        
+        let granular = recipe.instructions.flatMap { $0.breakdownInstruction }
+        if granular.isEmpty {
+            self.allGranularSteps = recipe.instructions
+        } else {
+            var seq = 1
+            self.allGranularSteps = granular.map { orig in
+                let newInst = Instruction(sequenceNumber: seq, text: orig.text, photoUrl: orig.photoUrl)
+                seq += 1
+                return newInst
+            }
+        }
     }
     
     private func dismissIntro() {
@@ -37,8 +50,8 @@ struct InstructionHelperView: View {
         speechManager.stopListening()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             speechManager.startListening()
-            if !recipe.instructions.isEmpty {
-                speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+            if !allGranularSteps.isEmpty {
+                speechManager.speak(text: allGranularSteps[currentStepIndex].text)
             }
         }
     }
@@ -49,11 +62,11 @@ struct InstructionHelperView: View {
                 Spacer()
                 
                 VStack(alignment: .center, spacing: 16) {
-                    if currentStepIndex >= 0 && currentStepIndex < recipe.instructions.count {
-                        let instruction = recipe.instructions[currentStepIndex]
+                    if currentStepIndex >= 0 && currentStepIndex < allGranularSteps.count {
+                        let instruction = allGranularSteps[currentStepIndex]
                         StepInstructionView(
                             currentStep: instruction.sequenceNumber,
-                            totalSteps: recipe.instructions.count,
+                            totalSteps: allGranularSteps.count,
                             instruction: instruction.text,
                             onRepeat: {
                                 speechManager.stopSpeaking()
@@ -76,28 +89,28 @@ struct InstructionHelperView: View {
                 
                 NavigationControlsView(
                     currentPage: currentStepIndex,
-                    totalPages: recipe.instructions.count,
+                    totalPages: allGranularSteps.count,
                     onPrevious: {
                         if currentStepIndex > 0 {
                             withAnimation {
                                 currentStepIndex -= 1
                             }
                             speechManager.stopSpeaking()
-                            speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                            speechManager.speak(text: allGranularSteps[currentStepIndex].text)
                         }
                     },
                     onNext: {
-                        if currentStepIndex < recipe.instructions.count - 1 {
+                        if currentStepIndex < allGranularSteps.count - 1 {
                             withAnimation {
                                 currentStepIndex += 1
                             }
                             speechManager.stopSpeaking()
-                            speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                            speechManager.speak(text: allGranularSteps[currentStepIndex].text)
                         }
                     },
                     onRepeat: {
                         speechManager.stopSpeaking()
-                        speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                        speechManager.speak(text: allGranularSteps[currentStepIndex].text)
                     },
                     onComplete: {
                         speechManager.stopSpeaking()
@@ -174,8 +187,8 @@ struct InstructionHelperView: View {
                 
             }
             .sheet(isPresented: $showStepSheet) {
-                if currentStepIndex >= 0 && currentStepIndex < recipe.instructions.count {
-                    StepSheet(instructions: recipe.instructions, currentStep: recipe.instructions[currentStepIndex].sequenceNumber)
+                if currentStepIndex >= 0 && currentStepIndex < allGranularSteps.count {
+                    StepSheet(instructions: allGranularSteps, currentStep: allGranularSteps[currentStepIndex].sequenceNumber)
                         .presentationDetents([.large])
                         .presentationDragIndicator(.visible)
                         .presentationBackground(Color.surfaceElevated ?? .white)
@@ -194,11 +207,11 @@ struct InstructionHelperView: View {
                 dismissIntro()
                 
             } else if text.contains("lanjut") {
-                if currentStepIndex < recipe.instructions.count - 1 {
+                if currentStepIndex < allGranularSteps.count - 1 {
                     withAnimation {
                         currentStepIndex += 1
                     }
-                    speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                    speechManager.speak(text: allGranularSteps[currentStepIndex].text)
                 } else {
                     navigateToComplete = true
                 }
@@ -208,12 +221,12 @@ struct InstructionHelperView: View {
                     withAnimation {
                         currentStepIndex -= 1
                     }
-                    speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                    speechManager.speak(text: allGranularSteps[currentStepIndex].text)
                 }
                 speechManager.recognizedText = ""
                 
             } else if text.contains("ulangi") {
-                speechManager.speak(text: recipe.instructions[currentStepIndex].text)
+                speechManager.speak(text: allGranularSteps[currentStepIndex].text)
                 speechManager.recognizedText = ""
             }
         }
