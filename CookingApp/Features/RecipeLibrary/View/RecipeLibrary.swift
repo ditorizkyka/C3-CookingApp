@@ -43,29 +43,16 @@ struct RecipeLibrary: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(filteredRecipes.indices, id: \.self) { index in
-                        let recipe = filteredRecipes[index]
-                        let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
-                        let color = colors[index % colors.count]
-                        
-                        RecipeCardSmall(
-                            recipeTitle: recipe.title,
-                            recipeCategoryIcon: "🍲",
-                            recipeImage: "img_test",
-                            recipeColor: color,
-                            recipePortion: recipe.portion,
-                            recipeDuration: recipe.durationInMinutes
-                        )
-                        .onTapGesture {
-                            selectedIndex = index
-                            navigateToDetail = true
-                        }
-                    }
+        RecipeGridSearchResultView(
+            searchQuery: searchRecipe,
+            filteredRecipes: filteredRecipes,
+            onTapRecipe: { recipe in
+                if let index = filteredRecipes.firstIndex(where: { $0.id == recipe.id }) {
+                    selectedIndex = index
+                    navigateToDetail = true
                 }
-                .padding(.horizontal)
             }
+        )
             .navigationTitle("Semua Resep")
             .toolbar {
                 

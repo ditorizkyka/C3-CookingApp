@@ -11,6 +11,7 @@ struct InstructionHelperCompleteView: View {
     var recipe: Recipe
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.popToRoot) private var popToRoot
     
     var body: some View {
         VStack(alignment: .center, spacing: 64) {
@@ -53,13 +54,7 @@ struct InstructionHelperCompleteView: View {
             
             // Button
             Button {
-                dismiss()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                        dismiss()
-                    }
-                }
+                popToRoot()
             } label: {
                 Text("Selesai")
                     .font(Font.headline)

@@ -63,10 +63,15 @@ struct TestView: View {
 
 extension View {
     @ViewBuilder
-    func conditionalPopoverTip(_ condition: Bool, tip: ToolTip, arrowEdge: Edge) -> some View {
+    func conditionalPopoverTip(_ condition: Bool, tip: ToolTip, arrowEdge: Edge, action: ((ToolTip.Action) -> Void)? = nil) -> some View {
         if condition {
-            self.popoverTip(tip, arrowEdge: arrowEdge)
-                .tipViewStyle(ToolTipStyle())
+            if let action = action {
+                self.popoverTip(tip, arrowEdge: arrowEdge, action: action)
+                    .tipViewStyle(ToolTipStyle())
+            } else {
+                self.popoverTip(tip, arrowEdge: arrowEdge)
+                    .tipViewStyle(ToolTipStyle())
+            }
         } else {
             self
         }

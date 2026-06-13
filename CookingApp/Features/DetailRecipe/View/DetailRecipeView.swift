@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
@@ -11,6 +12,7 @@ struct DetailRecipeView: View {
     @State private var showInstructionHelper: Bool = false
     @State private var showImportConfirmation: Bool = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.popToRoot) private var popToRoot
     
     let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
     

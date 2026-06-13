@@ -35,6 +35,7 @@ struct IntroCard: View {
             .buttonStyle(.plain)
             .padding()
             .foregroundStyle(Color.brandAccent!)
+            .frame(maxWidth: .infinity)
             .background(Color.surfaceBrand)
             .clipShape(RoundedRectangle(cornerRadius: Radius.large))
             .overlay(
