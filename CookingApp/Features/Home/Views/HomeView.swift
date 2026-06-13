@@ -62,7 +62,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.surfaceBrand.ignoresSafeArea()
+                Color.surfaceBrandElevated.ignoresSafeArea()
                 VStack(alignment: .leading, spacing: 24) {
                 SearchStateObserver(isSearchActive: $isSearchActive)
                 
