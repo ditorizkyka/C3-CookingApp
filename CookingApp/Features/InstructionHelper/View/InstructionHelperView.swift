@@ -188,7 +188,7 @@ struct InstructionHelperView: View {
             }
             .sheet(isPresented: $showStepSheet) {
                 if currentStepIndex >= 0 && currentStepIndex < allGranularSteps.count {
-                    StepSheet(instructions: allGranularSteps, currentStep: allGranularSteps[currentStepIndex].sequenceNumber)
+                    StepSheet(instructions: recipe.instructions, activeGranularText: allGranularSteps[currentStepIndex].text)
                         .presentationDetents([.large])
                         .presentationDragIndicator(.visible)
                         .presentationBackground(Color.surfaceElevated ?? .white)

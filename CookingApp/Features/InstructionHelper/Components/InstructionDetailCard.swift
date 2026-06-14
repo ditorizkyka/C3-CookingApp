@@ -12,14 +12,16 @@ struct InstructionDetailCard: View {
     let mainInstruction: String
     let subInstructions: [String]
     var isCurrent: Bool = false
+    var activeSubInstruction: String = ""
     
     @State private var isExpanded: Bool
     
-    init(stepNumber: Int, mainInstruction: String, subInstructions: [String], isCurrent: Bool = false) {
+    init(stepNumber: Int, mainInstruction: String, subInstructions: [String], isCurrent: Bool = false, activeSubInstruction: String = "") {
         self.stepNumber = stepNumber
         self.mainInstruction = mainInstruction
         self.subInstructions = subInstructions
         self.isCurrent = isCurrent
+        self.activeSubInstruction = activeSubInstruction
         self._isExpanded = State(initialValue: isCurrent && !subInstructions.isEmpty)
     }
     
@@ -30,15 +32,18 @@ struct InstructionDetailCard: View {
                     Divider()
                         .padding(.horizontal, 16)
                     
+                    let isActiveSub = subInstructions[index] == activeSubInstruction
+                    
                     HStack(alignment: .top, spacing: 12) {
                         Circle()
-                            .fill(Color.gray.opacity(0.3))
+                            .fill(isActiveSub ? (Color.ovalGreen ?? .green) : Color.gray.opacity(0.3))
                             .frame(width: 4, height: 4)
                             .padding(.top, 8)
                         
                         Text(subInstructions[index])
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(isActiveSub ? .primary : .secondary)
+                            .fontWeight(isActiveSub ? .bold : .regular)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
