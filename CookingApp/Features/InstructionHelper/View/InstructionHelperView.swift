@@ -12,6 +12,7 @@ struct InstructionHelperView: View {
     @StateObject private var speechManager = SpeechManager()
     
     var recipe: Recipe
+    let allGranularSteps: [Instruction]
     var onGoToHome: (() -> Void)? = nil
     @State private var currentStepIndex: Int = 0
     
@@ -29,6 +30,18 @@ struct InstructionHelperView: View {
     init(recipe: Recipe, onGoToHome: (() -> Void)? = nil) {
         self.recipe = recipe
         self.onGoToHome = onGoToHome
+        
+        let granular = recipe.instructions.flatMap { $0.breakdownInstruction }
+        if granular.isEmpty {
+            self.allGranularSteps = recipe.instructions
+        } else {
+            var seq = 1
+            self.allGranularSteps = granular.map { orig in
+                let newInst = Instruction(sequenceNumber: seq, text: orig.text, photoUrl: orig.photoUrl)
+                seq += 1
+                return newInst
+            }
+        }
     }
     
     private func dismissIntro() {
