@@ -29,7 +29,6 @@ class LoadingRecipeViewModel: ObservableObject {
             do {
                 let result = try await scraperService.scrape(urlString: url)
                 self.scrapedRecipe = result
-                // Trigger NLP Translation (ID -> EN)
                 self.configIdToEn = TranslationSession.Configuration(
                     source: Locale.Language(identifier: "id-ID"),
                     target: Locale.Language(identifier: "en-US")
@@ -71,7 +70,6 @@ class LoadingRecipeViewModel: ObservableObject {
             
             await MainActor.run {
                 self.intermediateBreakdownsEN = breakdowns
-                // Trigger terjemahan kembali (EN -> ID)
                 self.configEnToId = TranslationSession.Configuration(
                     source: Locale.Language(identifier: "en-US"),
                     target: Locale.Language(identifier: "id-ID")
