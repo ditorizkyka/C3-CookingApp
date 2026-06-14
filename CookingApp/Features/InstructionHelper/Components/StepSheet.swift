@@ -11,18 +11,22 @@ struct StepSheet: View {
     @Environment(\.dismiss) var dismiss
     
     var instructions: [Instruction] = []
-    var currentStep: Int = 1
+    var activeGranularText: String = ""
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .center, spacing: 16) {
                     ForEach(instructions, id: \.id) { instruction in
+                        let subTexts = instruction.breakdownInstruction.map { $0.text }
+                        let isCurrent = subTexts.contains(activeGranularText) || instruction.text == activeGranularText
+                        
                         InstructionDetailCard(
                             stepNumber: instruction.sequenceNumber,
                             mainInstruction: instruction.text,
-                            subInstructions: instruction.breakdownInstruction.map { $0.text },
-                            isCurrent: instruction.sequenceNumber == currentStep
+                            subInstructions: subTexts,
+                            isCurrent: isCurrent,
+                            activeSubInstruction: activeGranularText
                         )
                     }
                 }
