@@ -8,93 +8,115 @@
 import SwiftUI
 
 struct EditInstructionRow: View {
-    @Binding var instruction: Instruction
+    @Bindable var instruction: Instruction
+    /// Position-based number (1, 2, 3 …) so steps always read top-to-bottom,
+    /// regardless of the stored `sequenceNumber`.
+    var displayNumber: Int
     var onDelete: (() -> Void)? = nil
-    
+    /// When set, the ☰ handle becomes a drag source (for live reordering).
+    var onDrag: (() -> NSItemProvider)? = nil
+    /// Whether the breakdown sub-steps (list + "Tambah Langkah Breakdown" button)
+    /// are available. Add Manual sets this to `false`.
+    var allowBreakdown: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Main Instruction Row
             HStack {
-                Button {
+                DeleteConfirmButton {
                     onDelete?()
-                } label: {
-                    Image(systemName: AppIcon.minusFill)
-                        .foregroundStyle(Color.actionDelete!)
                 }
-                
+
                 HStack {
-                    Text("\(instruction.sequenceNumber)")
+                    Text("\(displayNumber)")
                         .font(.footnote)
                         .foregroundColor(Color.labelDark!)
                         .frame(width: 20, height: 20)
                         .background(Color.brandSecondary)
                         .clipShape(Circle())
-                    
+
                     TextField("Tulis langkah...", text: $instruction.text, axis: .vertical)
                         .font(.body)
                 }
-                
+
                 Spacer()
-                
-                Image(systemName: AppIcon.line3Horizontal)
-                    .font(.body)
-                    .foregroundStyle(Color.labelLight!)
+
+                dragHandle
             }
-            
-            // MARK: - Breakdown Instructions
-            if !instruction.breakdownInstruction.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach($instruction.breakdownInstruction) { $subStep in
-                        EditBreakdownInstructionRow(subInstruction: $subStep)
+
+            if allowBreakdown {
+                // MARK: - Breakdown Instructions
+                if !instruction.breakdownInstruction.isEmpty {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(instruction.breakdownInstruction) { subStep in
+                            EditBreakdownInstructionRow(
+                                subInstruction: subStep,
+                                onDelete: {
+                                    withAnimation {
+                                        instruction.breakdownInstruction.removeAll { $0.id == subStep.id }
+                                    }
+                                }
+                            )
+                        }
+                    }
+//                    .padding(.leading, 28)
+                    .padding(.top, 8)
+                }
+
+                // MARK: - Tambah Langkah Breakdown
+                Button {
+                    let newBreakdown = Instruction(
+                        id: UUID(),
+                        sequenceNumber: instruction.breakdownInstruction.count + 1,
+                        text: "",
+                        photoUrl: nil,
+                        breakdownInstruction: []
+                    )
+                    withAnimation {
+                        instruction.breakdownInstruction.append(newBreakdown)
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: AppIcon.plusFill)
+                            .foregroundStyle(Color.brandPrimary!)
+                        Text("Tambah Langkah Breakdown")
+                            .font(.body)
+                            .foregroundStyle(Color.brandPrimary!)
                     }
                 }
+                .buttonStyle(.plain)
 //                .padding(.leading, 28)
-                .padding(.top, 8)
+                .padding(.top, 12)
             }
-            
-            // MARK: - Tambah Langkah Breakdown
-            Button {
-                let newBreakdown = Instruction(
-                    id: UUID(),
-                    sequenceNumber: instruction.breakdownInstruction.count + 1,
-                    text: "",
-                    photoUrl: nil,
-                    breakdownInstruction: []
-                )
-                withAnimation {
-                    instruction.breakdownInstruction.append(newBreakdown)
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: AppIcon.plusFill)
-                        .foregroundStyle(Color.brandPrimary!)
-                    Text("Tambah Langkah Breakdown")
-                        .font(.body)
-                        .foregroundStyle(Color.brandPrimary!)
-                }
-            }
-            .buttonStyle(.plain)
-//            .padding(.leading, 28)
-            .padding(.top, 12)
         }
         .padding(.horizontal, 10)
+    }
+
+    @ViewBuilder
+    private var dragHandle: some View {
+        let handle = Image(systemName: AppIcon.line3Horizontal)
+            .font(.body)
+            .foregroundStyle(Color.labelLight!)
+
+        if let onDrag {
+            handle.onDrag(onDrag)
+        } else {
+            handle
+        }
     }
 }
 
 // MARK: - Breakdown Instruction Row
 struct EditBreakdownInstructionRow: View {
-    @Binding var subInstruction: Instruction
+    @Bindable var subInstruction: Instruction
     var onDelete: (() -> Void)? = nil
-    
+
     var body: some View {
         HStack(alignment: .center) {
-            Button {
+            DeleteConfirmButton {
                 onDelete?()
-            } label: {
-                Image(systemName: AppIcon.minusFill)
-                    .foregroundStyle(Color.actionDelete!)
             }
-            
+
             Circle()
                 .fill(Color.labelDark!)
                 .frame(width: 3, height: 3)

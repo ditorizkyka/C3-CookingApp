@@ -188,16 +188,38 @@ extension CookpadRawRecipe {
         print("   Raw image data: \(String(describing: image))")
         print("   Extracted cover URL: \(coverUrl?.absoluteString ?? "nil")")
         
-        // Map ingredients
-        print("\n🥕 INGREDIENTS (raw → parsed):")
-        let recipeIngredients: [Ingredient] = (recipeIngredient ?? []).enumerated().map { index, rawIngredient in
+        // Map ingredients into groups + members vs. singles.
+        //
+        // GROUPING RULE (from the recipe spec):
+        //   • A line with NO quantity is a GROUP HEADER and opens a new group.
+        //   • A line WITH a quantity is either:
+        //       – a MEMBER of the currently open group, or
+        //       – a SINGLE top-level ingredient when no group is open yet
+        //         (i.e. it appears before the first header).
+        print("\n🥕 INGREDIENTS (raw → grouped):")
+        var recipeIngredients: [Ingredient] = []
+        var currentGroup: Ingredient? = nil
+
+        for (index, rawIngredient) in (recipeIngredient ?? []).enumerated() {
             let parts = parseIngredientString(rawIngredient)
-            print("   [\(index)] RAW: \"\(rawIngredient)\"")
-            print("         → quantity: \"\(parts.quantity)\" | name: \"\(parts.name)\"")
-            return Ingredient(
-                quantity: parts.quantity,
-                name: parts.name
-            )
+            let hasQuantity = !parts.quantity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            print("   [\(index)] RAW: \"\(rawIngredient)\" → qty: \"\(parts.quantity)\" | name: \"\(parts.name)\"")
+
+            if !hasQuantity {
+                // Group header — opens a new group.
+                let group = Ingredient(quantity: "", name: parts.name, groupIngredients: [])
+                recipeIngredients.append(group)
+                currentGroup = group
+                print("         ↳ GROUP HEADER")
+            } else if let group = currentGroup {
+                // Member of the currently open group.
+                group.groupIngredients?.append(Ingredient(quantity: parts.quantity, name: parts.name))
+                print("         ↳ MEMBER of \"\(group.name)\"")
+            } else {
+                // Single top-level ingredient (before any header).
+                recipeIngredients.append(Ingredient(quantity: parts.quantity, name: parts.name))
+                print("         ↳ SINGLE")
+            }
         }
         
         // Map instructions

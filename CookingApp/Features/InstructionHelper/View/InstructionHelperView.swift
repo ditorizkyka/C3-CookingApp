@@ -12,7 +12,7 @@ struct InstructionHelperView: View {
     @StateObject private var speechManager = SpeechManager()
     
     var recipe: Recipe
-    let allGranularSteps: [Instruction]
+    var onGoToHome: (() -> Void)? = nil
     @State private var currentStepIndex: Int = 0
     
     @State private var showIntro: Bool = true
@@ -26,20 +26,9 @@ struct InstructionHelperView: View {
         "Balik": "Langkah Sebelumnya"
     ]
     
-    init(recipe: Recipe) {
+    init(recipe: Recipe, onGoToHome: (() -> Void)? = nil) {
         self.recipe = recipe
-        
-        let granular = recipe.instructions.flatMap { $0.breakdownInstruction }
-        if granular.isEmpty {
-            self.allGranularSteps = recipe.instructions
-        } else {
-            var seq = 1
-            self.allGranularSteps = granular.map { orig in
-                let newInst = Instruction(sequenceNumber: seq, text: orig.text, photoUrl: orig.photoUrl)
-                seq += 1
-                return newInst
-            }
-        }
+        self.onGoToHome = onGoToHome
     }
     
     private func dismissIntro() {
@@ -152,7 +141,7 @@ struct InstructionHelperView: View {
             }
             .navigationBarBackButtonHidden(true)
             .navigationDestination(isPresented: $navigateToComplete) {
-                InstructionHelperCompleteView(recipe: recipe)
+                InstructionHelperCompleteView(recipe: recipe, onGoToHome: onGoToHome)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

@@ -55,11 +55,7 @@ struct LoadingRecipeView: View {
         .onAppear {
             viewModel.startScraping(url: urlToScrape, onError: onError)
         }
-        .navigationDestination(isPresented: $viewModel.navigateToDetail) {
-            if let recipe = viewModel.scrapedRecipe {
-                DetailRecipeView(recipe: recipe, isFromImport: true)
-            }
-        }
+
         .translationTask(viewModel.configIdToEn) { session in
             await viewModel.translateToEnglish(session: session)
         }
