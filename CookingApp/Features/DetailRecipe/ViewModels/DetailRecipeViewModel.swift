@@ -20,8 +20,19 @@ class DetailRecipeViewModel: ObservableObject {
     /// Value snapshot captured when editing begins, used to revert on "Buang".
     private var snapshot: RecipeSnapshot?
 
-    init(recipe: Recipe) {
+    init(recipe: Recipe, isFromImport: Bool = false) {
         self.recipe = recipe
+        self.isEdited = isFromImport
+        
+        if isFromImport {
+            self.snapshot = RecipeSnapshot(
+                title: recipe.title,
+                portion: recipe.portion,
+                durationInMinutes: recipe.durationInMinutes,
+                ingredients: recipe.ingredients.map { IngredientSnapshot($0) },
+                instructions: recipe.instructions.map { InstructionSnapshot($0) }
+            )
+        }
     }
 
     // MARK: - Edit Lifecycle
