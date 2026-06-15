@@ -25,22 +25,8 @@ struct CookingAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ReproRoot()
+            HomeView()
         }
-        .modelContainer(PreviewContainer.shared)
-    }
-}
-
-// TEMP REPRO
-struct ReproRoot: View {
-    @Query private var recipes: [Recipe]
-    var body: some View {
-        NavigationStack {
-            if let r = recipes.first(where: { !$0.ingredients.isEmpty }) {
-                HomeView()
-            } else {
-                Text("no data")
-            }
-        }
+        .modelContainer(for: Recipe.self)
     }
 }
