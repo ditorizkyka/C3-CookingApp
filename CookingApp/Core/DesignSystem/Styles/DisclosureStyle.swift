@@ -36,7 +36,7 @@ struct DisclosureStyle: DisclosureGroupStyle {
                         .font(.title2)
                         .foregroundStyle(hasSubInstructions ? (Color.brandPrimary ?? .green) : Color.gray.opacity(0.5))
                 }
-                .disabled(!isCurrent || !hasSubInstructions)
+                .disabled(!hasSubInstructions)
                 .padding(.top, 16)
             }
             .padding(16)

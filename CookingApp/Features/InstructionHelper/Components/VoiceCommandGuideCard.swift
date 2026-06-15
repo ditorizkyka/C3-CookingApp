@@ -3,7 +3,7 @@ import SwiftUI
 struct VoiceCommandGuideCard: View {
     var guides: [String: String]
     
-    private let guideOrder = ["Lanjut", "Ulangi", "Balik", "Kembali"]
+    private let guideOrder = ["Kembali", "Ulangi", "Lanjut"]
     
     var body: some View {
         VStack(alignment: .center, spacing: 16) {

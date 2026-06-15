@@ -20,25 +20,32 @@ class InstructionHelperViewModel: ObservableObject {
     var onGoToHome: (() -> Void)?
     
     let guides = [
-        "Lanjut": "Langkah Berikutnya",
+        "Kembali": "Langkah Sebelumnya",
         "Ulangi": "Langkah Saat Ini",
-        "Kembali": "Langkah Sebelumnya"
+        "Lanjut": "Langkah Berikutnya",
     ]
     
     init(recipe: Recipe, onGoToHome: (() -> Void)? = nil) {
         self.recipe = recipe
         self.onGoToHome = onGoToHome
         
-        let granular = recipe.instructions.flatMap { $0.breakdownInstruction }
-        if granular.isEmpty {
-            self.allGranularSteps = recipe.instructions
-        } else {
-            var seq = 1
-            self.allGranularSteps = granular.map { orig in
-                let newInst = Instruction(sequenceNumber: seq, text: orig.text, photoUrl: orig.photoUrl)
-                seq += 1
-                return newInst
+        var allSteps: [Instruction] = []
+        let sortedMain = recipe.instructions.sorted(by: { $0.sequenceNumber < $1.sequenceNumber })
+        
+        for mainStep in sortedMain {
+            let sortedSub = mainStep.breakdownInstruction.sorted(by: { $0.sequenceNumber < $1.sequenceNumber })
+            if sortedSub.isEmpty {
+                allSteps.append(mainStep)
+            } else {
+                allSteps.append(contentsOf: sortedSub)
             }
+        }
+        
+        var seq = 1
+        self.allGranularSteps = allSteps.map { orig in
+            let newInst = Instruction(sequenceNumber: seq, text: orig.text, photoUrl: orig.photoUrl)
+            seq += 1
+            return newInst
         }
     }
     
@@ -87,6 +94,17 @@ class InstructionHelperViewModel: ObservableObject {
     func completeFlow(speechManager: SpeechManager) {
         speechManager.stopSpeaking()
         navigateToComplete = true
+    }
+    
+
+    func jumpToStep(withText targetText: String, speechManager: SpeechManager) {
+        if let idx = allGranularSteps.firstIndex(where: { $0.text == targetText }) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                currentStepIndex = idx
+            }
+            speechManager.stopSpeaking()
+            speechManager.speak(text: allGranularSteps[idx].text)
+        }
     }
     
     func handleRecognizedText(_ newValue: String, speechManager: SpeechManager) {

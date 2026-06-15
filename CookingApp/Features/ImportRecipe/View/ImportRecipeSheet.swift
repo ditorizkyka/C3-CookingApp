@@ -24,7 +24,10 @@ struct ImportRecipeSheet: View {
     var body: some View {
         ZStack {
             Color.surfaceElevated
-                        .ignoresSafeArea()
+                .ignoresSafeArea()
+                .onTapGesture {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
             VStack(spacing: 32) {
                 ZStack {
                     // Judul di tengah
@@ -51,7 +54,7 @@ struct ImportRecipeSheet: View {
                 VStack(spacing:16) {
                     Text("Masukkan link resep (cth: Cookpad) untuk memproses bahan dan panduan masak secara otomatis")
                         .font(.body)
-                    TextField("https://cookpad.com/id/resep/...", text: $viewModel.link)
+                    TextField("Masukkan link resep di sini", text: $viewModel.link)
                         .padding(.horizontal,15)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
@@ -62,6 +65,7 @@ struct ImportRecipeSheet: View {
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
+                        .tint(Color.brandPrimary)
                         .trackFrame(in: .named("SheetSpace"), $textFieldFrame)
                         .onChange(of: viewModel.link) { _, _ in
                             // Clear error when user edits the link

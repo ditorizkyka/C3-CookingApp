@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct InstructionHelperView: View {
     @Environment(\.dismiss) var dismiss
@@ -132,7 +133,9 @@ struct InstructionHelperView: View {
         }
         .sheet(isPresented: $viewModel.showStepSheet) {
             if viewModel.currentStepIndex >= 0 && viewModel.currentStepIndex < viewModel.allGranularSteps.count {
-                StepSheet(instructions: viewModel.recipe.instructions, activeGranularText: viewModel.allGranularSteps[viewModel.currentStepIndex].text)
+                StepSheet(instructions: viewModel.recipe.instructions, activeGranularText: viewModel.allGranularSteps[viewModel.currentStepIndex].text) { selectedText in
+                    viewModel.jumpToStep(withText: selectedText, speechManager: speechManager)
+                }
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
                     .presentationBackground(Color.surfaceElevated ?? .white)
@@ -140,6 +143,11 @@ struct InstructionHelperView: View {
         }
         .onDisappear {
             viewModel.cleanUp(speechManager: speechManager)
+        }
+        .onChange(of: speechManager.isListening) { _, isListening in
+            if isListening {
+                speechManager.playBeepSound()
+            }
         }
         .onChange(of: speechManager.recognizedText) { _, newValue in
             viewModel.handleRecognizedText(newValue, speechManager: speechManager)

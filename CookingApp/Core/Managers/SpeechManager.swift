@@ -35,6 +35,8 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
             }
         }
     }
+    // Audio Player for loud beep
+    private var audioPlayer: AVAudioPlayer?
     
     override init() {
         super.init()
@@ -228,6 +230,19 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         
         DispatchQueue.main.async {
             self.isListening = false
+        }
+    }
+    
+    // Play loud beep sound
+    func playBeepSound() {
+        let soundURL = URL(fileURLWithPath: "/System/Library/Audio/UISounds/begin_record.caf")
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+            audioPlayer?.volume = 1.0
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+        } catch {
+            print("Gagal memutar beep: \(error)")
         }
     }
 }
