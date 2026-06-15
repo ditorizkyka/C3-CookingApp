@@ -10,7 +10,9 @@ import SwiftUI
 struct RecipeCardSmall: View {
     var recipeTitle: String
     var recipeCategoryIcon: String
-    var recipeImage: String
+    var imageName: String?
+    var imageUrl: URL?
+    var imageData: Data?
     var recipeColor: Color
     var recipePortion: Int
     var recipeDuration: Int
@@ -56,9 +58,21 @@ struct RecipeCardSmall: View {
         .frame(height: 180)
         .background(
             ZStack() {
-                Image(recipeImage)
-                    .resizable()
-                    .scaledToFill()
+                Group {
+                    if let data = imageData, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else if let url = imageUrl {
+                        CachedAsyncImage(url: url)
+                    } else if let name = imageName, !name.isEmpty {
+                        Image(name)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        ImagePlaceholder()
+                    }
+                }
                 
                 LinearGradient(
                     colors: [recipeColor, recipeColor.opacity(0.2)],
@@ -77,5 +91,5 @@ struct RecipeCardSmall: View {
 }
 
 #Preview {
-    RecipeCardSmall(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.red, recipePortion: 4, recipeDuration: 30)
+    RecipeCardSmall(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", imageName: "img_test", recipeColor: Color.red, recipePortion: 4, recipeDuration: 30)
 }

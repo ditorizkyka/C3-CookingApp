@@ -17,13 +17,8 @@ struct HomeView: View {
     @State private var isSearchActive: Bool = false
     @State private var selectedIndex: Int? = nil
     
-    /// Combined list: SwiftData saved recipes + dummy recipes (fallback when DB is empty)
     var allRecipes: [Recipe] {
-        if savedRecipes.isEmpty {
-            return Recipe.dummyRecipes
-        } else {
-            return savedRecipes
-        }
+        return Array(savedRecipes.reversed())
     }
     
     var filteredRecipes: [Recipe] {
@@ -38,6 +33,7 @@ struct HomeView: View {
     @State private var navigateToManual = false
     @State private var navigateToDetail = false
     @State private var navigateToLoading = false
+    @State private var navigateToLibrary = false
     
     @State private var isShowingImportSheet = false
     
@@ -110,8 +106,8 @@ struct HomeView: View {
                             
                             Spacer()
                             
-                            NavigationLink {
-                                RecipeLibrary()
+                            Button {
+                                navigateToLibrary = true
                             } label: {
                                 Text("Lihat Semua")
                                     .font(Font.subheadline)
@@ -123,7 +119,7 @@ struct HomeView: View {
                         if !allRecipes.isEmpty {
                             ScrollView {
                                 VStack(spacing: -120) {
-                                    ForEach(allRecipes.indices, id: \.self) { index in
+                                    ForEach(allRecipes.prefix(6).indices, id: \.self) { index in
                                         let isSelected = selectedIndex == index
                                         let recipe = allRecipes[index]
                                         let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
@@ -132,7 +128,9 @@ struct HomeView: View {
                                         RecipeCard(
                                             recipeTitle: recipe.title,
                                             recipeCategoryIcon: "🍲",
-                                            recipeImage: "img_test",
+                                            imageName: nil,
+                                            imageUrl: recipe.coverImageUrl,
+                                            imageData: recipe.coverImageData,
                                             recipeColor: color,
                                             recipePortion: recipe.portion,
                                             recipeDuration: recipe.durationInMinutes
@@ -205,6 +203,9 @@ struct HomeView: View {
                         }
                     })
                 }
+                .navigationDestination(isPresented: $navigateToLibrary) {
+                    RecipeLibrary()
+                }
                 
                 // MARK: - Clipboard Toast pinned to bottom
                 VStack {
@@ -234,6 +235,8 @@ struct HomeView: View {
         .environment(\.popToRoot) {
             navigateToDetail = false
             navigateToLoading = false
+            navigateToLibrary = false
+            navigateToManual = false
         }
         .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
         // MARK: - Clipboard → Website Preview Sheet
@@ -263,6 +266,12 @@ struct HomeView: View {
             if newPhase == .active {
                 clipboardManager.checkNow()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("PopToRoot"))) { _ in
+            navigateToDetail = false
+            navigateToLoading = false
+            navigateToLibrary = false
+            navigateToManual = false
         }
     }
     

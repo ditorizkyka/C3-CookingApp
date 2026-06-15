@@ -30,7 +30,9 @@ struct RecipeGridSearchResultView: View {
                         RecipeCardSmall(
                             recipeTitle: recipe.title,
                             recipeCategoryIcon: "🍲",
-                            recipeImage: "img_test",
+                            imageName: nil,
+                            imageUrl: recipe.coverImageUrl,
+                            imageData: recipe.coverImageData,
                             recipeColor: color,
                             recipePortion: recipe.portion,
                             recipeDuration: recipe.durationInMinutes

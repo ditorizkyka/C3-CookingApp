@@ -28,6 +28,13 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
     @Published var recognizedText: String = ""
     @Published var errorMessage: String? = nil
     @Published var audioLevel: Float = 0.0
+    @Published var isMuted: Bool = false {
+        didSet {
+            if isMuted {
+                stopSpeaking()
+            }
+        }
+    }
     
     override init() {
         super.init()
@@ -66,6 +73,8 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
     
     // Text-to-Speech
     func speak(text: String) {
+        guard !isMuted else { return }
+        
         // Stop listening right away to prevent overlapping audio issues
         stopListening()
         

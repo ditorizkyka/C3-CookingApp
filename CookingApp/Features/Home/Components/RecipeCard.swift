@@ -10,7 +10,9 @@ import SwiftUI
 struct RecipeCard: View {
     var recipeTitle: String
     var recipeCategoryIcon: String
-    var recipeImage: String
+    var imageName: String?
+    var imageUrl: URL?
+    var imageData: Data?
     var recipeColor: Color
     var recipePortion: Int
     var recipeDuration: Int
@@ -60,9 +62,24 @@ struct RecipeCard: View {
         .padding(.vertical, 20)
         .background(
             ZStack() {
-                Image(recipeImage)
-                    .resizable()
-                    .scaledToFill()
+                Group {
+                    if let data = imageData, let uiImage = UIImage(data: data) {
+                        // Show locally saved image (user picked from photo library)
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else if let url = imageUrl {
+                        CachedAsyncImage(url: url)
+                    } else if let name = imageName, !name.isEmpty {
+                        Image(name)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        ImagePlaceholder()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
                 
                 LinearGradient(
                     colors: [recipeColor, recipeColor.opacity(0.2)],
@@ -81,5 +98,5 @@ struct RecipeCard: View {
 }
 
 #Preview {
-    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", recipeImage: "img_test", recipeColor: Color.red, recipePortion: 4, recipeDuration: 30)
+    RecipeCard(recipeTitle: "Ayam Tepung Kriuk Sambal", recipeCategoryIcon: "🎂", imageName: "img_test", recipeColor: Color.red, recipePortion: 4, recipeDuration: 30)
 }
