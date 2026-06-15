@@ -39,10 +39,19 @@ struct BreakdownLoadingView: View {
                         .padding(.horizontal, 32)
                     
                     ButtonApp(title: "Coba Lagi", action: {
-                        viewModel.errorMessage = nil
-                        viewModel.startBreakdown()
+                        viewModel.resetAndRetry()
                     })
                     .padding(.horizontal, 40)
+                    
+                    Button(action: {
+                        onBreakdownComplete?(viewModel.recipe)
+                    }) {
+                        Text("Lanjutkan Tanpa Rincian")
+                            .font(.body)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color.brandPrimary!)
+                    }
+                    .padding(.top, 8)
                 }
             } else {
                 // Loading state

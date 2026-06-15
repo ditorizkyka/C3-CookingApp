@@ -39,6 +39,18 @@ class BreakdownLoadingViewModel: ObservableObject {
         )
     }
     
+    func resetAndRetry() {
+        self.errorMessage = nil
+        self.hasStarted = false
+        self.configIdToEn = nil
+        self.configEnToId = nil
+        
+        // Slight delay to allow View to register nil config, then re-trigger
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.startBreakdown()
+        }
+    }
+    
     func translateToEnglish(session: TranslationSession) async {
         print("▶️ [Breakdown] Mulai proses terjemahan (ID -> EN) untuk \(recipe.instructions.count) instruksi...")
         do {

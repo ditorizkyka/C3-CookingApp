@@ -31,7 +31,7 @@ struct DetailRecipeView: View {
     
     /// Initialize with a Recipe model (used for import flow and when passing a recipe directly)
     init(recipe: Recipe, isFromImport: Bool = false, onDismiss: (() -> Void)? = nil) {
-        self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe))
+        self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe, isFromImport: isFromImport))
         self.isFromImport = isFromImport
         self.onDismiss = onDismiss
     }
@@ -125,11 +125,6 @@ struct DetailRecipeView: View {
             
         }
         .listStyle(.insetGrouped)
-        .onAppear { 
-            if isFromImport {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { viewModel.beginEditing() } 
-            }
-        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isFromImport || viewModel.isEdited)
         .toolbar {
