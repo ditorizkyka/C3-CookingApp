@@ -128,7 +128,7 @@ struct HomeView: View {
         .environment(\.popToRoot) {
             viewModel.resetNavigation()
         }
-        .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
+        .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.large)
         // MARK: - Clipboard → Website Preview Sheet
         .sheet(isPresented: $viewModel.showWebPreviewFromClipboard) {
             WebsitePreviewSheet(

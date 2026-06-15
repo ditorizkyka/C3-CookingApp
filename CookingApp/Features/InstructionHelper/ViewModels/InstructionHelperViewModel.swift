@@ -20,9 +20,9 @@ class InstructionHelperViewModel: ObservableObject {
     var onGoToHome: (() -> Void)?
     
     let guides = [
-        "Lanjut": "Langkah Berikutnya",
+        "Kembali": "Langkah Sebelumnya",
         "Ulangi": "Langkah Saat Ini",
-        "Kembali": "Langkah Sebelumnya"
+        "Lanjut": "Langkah Berikutnya",
     ]
     
     init(recipe: Recipe, onGoToHome: (() -> Void)? = nil) {

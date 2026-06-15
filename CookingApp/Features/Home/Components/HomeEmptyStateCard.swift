@@ -30,9 +30,10 @@ struct HomeEmptyStateCard: View {
                     .foregroundStyle(Color.labelLight!)
             }
             .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, 64)
-        .padding(.horizontal, 40)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 32)
         .frame(maxWidth: .infinity)
         .overlay(
             RoundedRectangle(cornerRadius: Radius.large)
