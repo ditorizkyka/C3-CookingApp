@@ -89,8 +89,14 @@ class Instruction: Identifiable {
     init(id: UUID = UUID(), sequenceNumber: Int, text: String, photoUrl: URL? = nil, breakdownInstruction: [Instruction] = []) {
         self.id = id
         self.sequenceNumber = sequenceNumber
-        self.text = text
+        self.text = text.removingEmojis().trimmingCharacters(in: .whitespacesAndNewlines)
         self.photoUrl = photoUrl
         self.breakdownInstruction = breakdownInstruction
+    }
+}
+
+extension String {
+    func removingEmojis() -> String {
+        return self.unicodeScalars.filter { !$0.properties.isEmojiPresentation }.map(String.init).joined()
     }
 }

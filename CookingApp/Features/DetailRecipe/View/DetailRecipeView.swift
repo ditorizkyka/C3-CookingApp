@@ -64,7 +64,12 @@ struct DetailRecipeView: View {
                         showInstructionHelper = true
                     })
                     .padding(.bottom, 8)
-                    .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
+                    .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top) { action in
+                        if onboardingStep == 3 {
+                            onboardingStep = 4
+                        }
+                        startCookTip.invalidate(reason: .actionPerformed)
+                    }
                 }
             }
             .listRowBackground(Color.clear)
@@ -122,9 +127,9 @@ struct DetailRecipeView: View {
                 .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .listRowSeparator(.hidden)
             
-            
         }
         .listStyle(.insetGrouped)
+        .scrollDismissesKeyboard(.interactively)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isFromImport || viewModel.isEdited)
         .toolbar {

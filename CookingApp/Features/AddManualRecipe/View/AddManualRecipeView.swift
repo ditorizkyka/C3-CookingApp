@@ -132,6 +132,7 @@ struct AddManualRecipeView: View {
             
         }
         .listStyle(.insetGrouped)
+        .scrollDismissesKeyboard(.interactively)
         .background(Color.surfaceDefault)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

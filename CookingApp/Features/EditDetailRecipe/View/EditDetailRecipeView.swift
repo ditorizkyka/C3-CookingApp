@@ -118,6 +118,8 @@ struct EditDetailRecipeView: View {
                     .listRowSeparator(.hidden)
                 
             }
+            .listStyle(.insetGrouped)
+            .scrollDismissesKeyboard(.interactively)
             .toolbarRole(.editor)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
