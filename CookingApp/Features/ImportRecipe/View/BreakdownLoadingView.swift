@@ -1,13 +1,22 @@
-import SwiftUI
+//
+//  BreakdownLoadingView.swift
+//  CookingApp
+//
 
-struct LoadingRecipeView: View {
-    let urlToScrape: String
-    var onScrapingComplete: ((Recipe) -> Void)? = nil
+import SwiftUI
+import Translation
+
+struct BreakdownLoadingView: View {
+    var onBreakdownComplete: ((Recipe) -> Void)? = nil
     var onError: ((String) -> Void)? = nil
     
-    @StateObject private var viewModel = LoadingRecipeViewModel()
-    @State private var navigateToBreakdown = false
-    @State private var scrapedRecipe: Recipe?
+    @StateObject private var viewModel: BreakdownLoadingViewModel
+    
+    init(recipe: Recipe, onBreakdownComplete: ((Recipe) -> Void)? = nil, onError: ((String) -> Void)? = nil) {
+        self.onBreakdownComplete = onBreakdownComplete
+        self.onError = onError
+        _viewModel = StateObject(wrappedValue: BreakdownLoadingViewModel(recipe: recipe))
+    }
     
     var body: some View {
         VStack(spacing: 24) {
@@ -18,7 +27,7 @@ struct LoadingRecipeView: View {
                         .font(.system(size: 48))
                         .foregroundColor(Color.brandSecondary!)
                     
-                    Text("Gagal Mengekstrak Resep")
+                    Text("Gagal Memproses Langkah")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(Color.labelDark!)
@@ -31,14 +40,7 @@ struct LoadingRecipeView: View {
                     
                     ButtonApp(title: "Coba Lagi", action: {
                         viewModel.errorMessage = nil
-                        viewModel.startScraping(
-                            url: urlToScrape,
-                            onComplete: { recipe in
-                                self.scrapedRecipe = recipe
-                                self.navigateToBreakdown = true
-                            },
-                            onError: onError
-                        )
+                        viewModel.startBreakdown()
                     })
                     .padding(.horizontal, 40)
                 }
@@ -47,12 +49,12 @@ struct LoadingRecipeView: View {
                 ProgressView()
                     .scaleEffect(2)
                     .tint(Color.brandPrimary!)
-                Text("Mengekstrak Resep...")
+                Text("Memproses Langkah Memasak...")
                     .font(.title3)
                     .fontWeight(.semibold)
                     .foregroundColor(Color.labelDark!)
                 
-                Text("Memproses bahan dan instruksi dari website")
+                Text("Menerjemahkan dan menyusun panduan")
                     .font(.subheadline)
                     .foregroundColor(Color.labelLight!)
             }
@@ -61,29 +63,13 @@ struct LoadingRecipeView: View {
         .background(Color.surfaceDefault.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            viewModel.startScraping(
-                url: urlToScrape,
-                onComplete: { recipe in
-                    self.scrapedRecipe = recipe
-                    self.navigateToBreakdown = true
-                },
-                onError: onError
-            )
+            viewModel.startBreakdown()
         }
-        .navigationDestination(isPresented: $navigateToBreakdown) {
-            if let recipe = scrapedRecipe {
-                BreakdownLoadingView(
-                    recipe: recipe,
-                    onBreakdownComplete: onScrapingComplete,
-                    onError: onError
-                )
-            }
+        .translationTask(viewModel.configIdToEn) { session in
+            await viewModel.translateToEnglish(session: session)
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        LoadingRecipeView(urlToScrape: "https://cookpad.com/id/resep/example")
+        .translationTask(viewModel.configEnToId) { session in
+            await viewModel.translateToIndonesian(session: session, onComplete: onBreakdownComplete)
+        }
     }
 }

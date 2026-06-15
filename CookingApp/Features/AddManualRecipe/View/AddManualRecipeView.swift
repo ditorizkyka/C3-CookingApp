@@ -32,6 +32,12 @@ struct AddManualRecipeView: View {
     @State private var showValidationAlert = false
     @State private var validationMessage = ""
     
+    // Breakdown process
+    @State private var navigateToBreakdown = false
+    @State private var createdRecipe: Recipe?
+    
+    var onManualComplete: ((Recipe) -> Void)? = nil
+    
     var body: some View {
         List {
             // MARK: - Header (Cover Image + Title)
@@ -172,6 +178,17 @@ struct AddManualRecipeView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(validationMessage)
+        }
+        .navigationDestination(isPresented: $navigateToBreakdown) {
+            if let recipe = createdRecipe {
+                BreakdownLoadingView(
+                    recipe: recipe,
+                    onBreakdownComplete: onManualComplete,
+                    onError: { _ in
+                        dismiss()
+                    }
+                )
+            }
         }
     }
 
@@ -318,12 +335,11 @@ struct AddManualRecipeView: View {
             instructions: instructions
         )
         
-        // Save to SwiftData
-        modelContext.insert(recipe)
+        print("✅ Manual Recipe Draft created: \"\(recipe.title)\" with \(ingredients.count) ingredients, \(instructions.count) instructions")
         
-        print("✅ Recipe saved: \"\(recipe.title)\" with \(ingredients.count) ingredients, \(instructions.count) instructions")
-        
-        dismiss()
+        // Navigate to Breakdown process
+        createdRecipe = recipe
+        navigateToBreakdown = true
     }
 }
 

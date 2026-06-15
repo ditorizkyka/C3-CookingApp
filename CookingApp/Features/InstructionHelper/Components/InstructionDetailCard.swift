@@ -53,6 +53,13 @@ struct InstructionDetailCard: View {
             Text(mainInstruction)
         }
         .disclosureGroupStyle(DisclosureStyle(stepNumber: stepNumber, isCurrent: isCurrent, hasSubInstructions: !subInstructions.isEmpty))
+        .onChange(of: isCurrent) { _, newValue in
+            if newValue && !subInstructions.isEmpty {
+                withAnimation {
+                    isExpanded = true
+                }
+            }
+        }
     }
 }
 

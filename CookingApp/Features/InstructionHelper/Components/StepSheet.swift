@@ -15,32 +15,56 @@ struct StepSheet: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .center, spacing: 16) {
-                    ForEach(instructions, id: \.id) { instruction in
-                        let subTexts = instruction.breakdownInstruction.map { $0.text }
-                        let isCurrent = subTexts.contains(activeGranularText) || instruction.text == activeGranularText
-                        
-                        InstructionDetailCard(
-                            stepNumber: instruction.sequenceNumber,
-                            mainInstruction: instruction.text,
-                            subInstructions: subTexts,
-                            isCurrent: isCurrent,
-                            activeSubInstruction: activeGranularText
-                        )
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .center, spacing: 16) {
+                        ForEach(instructions.sorted(by: { $0.sequenceNumber < $1.sequenceNumber }), id: \.id) { instruction in
+                            let sortedSubInstructions = instruction.breakdownInstruction.sorted(by: { $0.sequenceNumber < $1.sequenceNumber })
+                            let subTexts = sortedSubInstructions.map { $0.text }
+                            let isCurrent = subTexts.contains(activeGranularText) || instruction.text == activeGranularText
+                            
+                            InstructionDetailCard(
+                                stepNumber: instruction.sequenceNumber,
+                                mainInstruction: instruction.text,
+                                subInstructions: subTexts,
+                                isCurrent: isCurrent,
+                                activeSubInstruction: activeGranularText
+                            )
+                            .id(instruction.id)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 16)
+                }
+                .navigationTitle("Preview")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                        }
                     }
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
-            }
-            .navigationTitle("Preview")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
+                .onAppear {
+                    if let currentId = instructions.first(where: {
+                        $0.breakdownInstruction.map { $0.text }.contains(activeGranularText) || $0.text == activeGranularText
+                    })?.id {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            withAnimation {
+                                proxy.scrollTo(currentId, anchor: .top)
+                            }
+                        }
+                    }
+                }
+                .onChange(of: activeGranularText) { _, newText in
+                    if let currentId = instructions.first(where: {
+                        $0.breakdownInstruction.map { $0.text }.contains(newText) || $0.text == newText
+                    })?.id {
+                        withAnimation {
+                            proxy.scrollTo(currentId, anchor: .top)
+                        }
                     }
                 }
             }

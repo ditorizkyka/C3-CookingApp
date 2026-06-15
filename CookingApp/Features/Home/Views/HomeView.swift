@@ -13,198 +13,93 @@ import TipKit
 struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query private var savedRecipes: [Recipe]
-    @State private var searchRecipe: String = ""
-    @State private var isSearchActive: Bool = false
-    @State private var selectedIndex: Int? = nil
+    
+    @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var clipboardManager = ClipboardManager()
+    
+    @AppStorage("onboardingStep") private var onboardingStep = 0
+    @State private var buttonFrame: CGRect = .zero
     
     var allRecipes: [Recipe] {
         return Array(savedRecipes.reversed())
     }
     
-    var filteredRecipes: [Recipe] {
-        if searchRecipe.isEmpty {
-            return allRecipes
-        } else {
-            return allRecipes.filter { $0.title.localizedCaseInsensitiveContains(searchRecipe) }
-        }
-    }
-    
-    
-    @State private var navigateToManual = false
-    @State private var navigateToDetail = false
-    @State private var navigateToLoading = false
-    @State private var navigateToLibrary = false
-    
-    @State private var isShowingImportSheet = false
-    
-    // Import flow state
-    @State private var urlToScrape: String = ""
-    @State private var importedRecipe: Recipe?
-    
-    @AppStorage("onboardingStep") private var onboardingStep = 0
-    
-    
-    //    MARK : CLIPBOARD VARIABLE
-    @StateObject private var clipboardManager = ClipboardManager()
-    @State private var importedLink: String = ""
-    
-    // Controls whether the WebsitePreviewSheet is shown for a clipboard-detected URL
-    @State private var showWebPreviewFromClipboard = false
-    
-    
-    @State private var buttonFrame: CGRect = .zero
-    let importRecipeTip = ToolTip(tipTitle: "Ambil Resep dari Web", tipSubtitle: "Tempel link resep pilihanmu di sini. Kami akan menyusun bahan dan langkah masaknya secara otomatis.", iconName: "link.badge.plus", buttonTitle: "")
-    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.surfaceBrandElevated.ignoresSafeArea()
-                VStack(alignment: .leading, spacing: 24) {
-                SearchStateObserver(isSearchActive: $isSearchActive)
                 
-                if isSearchActive {
-                    // Tampilan saat search aktif (mirip RecipeLibrary)
-                    RecipeGridSearchResultView(
-                        searchQuery: searchRecipe,
-                        filteredRecipes: filteredRecipes,
-                        onTapRecipe: { recipe in
-                            if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
-                                selectedIndex = originalIndex
-                                navigateToDetail = true
-                            }
-                        }
-                    )
-                } else {
-                    // Tampilan default HomeView
-                    // Add Recipe Button
-                    HStack() {
-                        AddRecipeButton(isManual: false, titleButton: "Import Resep", descriptionButton: "Tambahkan resep dari link website",
-                                        action: {
-                            if onboardingStep == 0 {
-                                onboardingStep = 1
-                            }
-                            isShowingImportSheet = true
-                        })
-                        .trackGlobalFrame($buttonFrame)
-                        .conditionalPopoverTip(onboardingStep == 0, tip: importRecipeTip, arrowEdge: .top)
-                        AddRecipeButton(isManual: true, titleButton: "Tulis Resep", descriptionButton: "Buat dan simpan resepmu",
-                                        action: {
-                            navigateToManual = true
-                            
-                        })
-                        
-                    }
-                    .padding(.horizontal)
+                VStack(alignment: .leading, spacing: 24) {
+                    SearchStateObserver(isSearchActive: $viewModel.isSearchActive)
                     
-                    // Recipe Section
-                    VStack(spacing: 16) {
-                        // Title
-                        HStack {
-                            Text("Resep")
-                                .font(Font.headline)
-                                .foregroundStyle(Color.labelLight!)
-                            
-                            Spacer()
-                            
-                            Button {
-                                navigateToLibrary = true
-                            } label: {
-                                Text("Lihat Semua")
-                                    .font(Font.subheadline)
-                                    .foregroundStyle(Color.brandAccent!)
-                            }
-                        }
-                        .padding(.horizontal,14)
-                        
-                        if !allRecipes.isEmpty {
-                            ScrollView {
-                                VStack(spacing: -120) {
-                                    ForEach(allRecipes.prefix(6).indices, id: \.self) { index in
-                                        let isSelected = selectedIndex == index
-                                        let recipe = allRecipes[index]
-                                        let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
-                                        let color = colors[index % colors.count]
-                                        
-                                        RecipeCard(
-                                            recipeTitle: recipe.title,
-                                            recipeCategoryIcon: "🍲",
-                                            imageName: nil,
-                                            imageUrl: recipe.coverImageUrl,
-                                            imageData: recipe.coverImageData,
-                                            recipeColor: color,
-                                            recipePortion: recipe.portion,
-                                            recipeDuration: recipe.durationInMinutes
-                                        )
-                                        .zIndex(Double(index))
-                                        .brightness(!isSelected ? -Double(allRecipes.count - index) * 0.02 : 0)
-                                        .padding(.top, selectedIndex != nil && index == selectedIndex! + 1 ? 160 : 0)
-                                        .onTapGesture {
-                                            if selectedIndex == index {
-                                                navigateToDetail = true
-                                            } else {
-                                                withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
-                                                    selectedIndex = index
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    
+                    if viewModel.isSearchActive {
+                        // Tampilan saat search aktif (mirip RecipeLibrary)
+                        RecipeGridSearchResultView(
+                            searchQuery: viewModel.searchRecipe,
+                            filteredRecipes: viewModel.filteredRecipes(from: allRecipes),
+                            onTapRecipe: { recipe in
+                                if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
+                                    viewModel.selectedIndex = originalIndex
+                                    viewModel.navigateToDetail = true
                                 }
                             }
-                            .clipShape(RoundedRectangle(cornerRadius: Radius.large))
-                            
-                        } else {
-                            HomeEmptyStateCard()
+                        )
+                    } else {
+                        // Tampilan default HomeView
+                        
+                        // Add Recipe Buttons Extracted
+                        HomeActionButtons(
+                            viewModel: viewModel,
+                            onboardingStep: $onboardingStep,
+                            buttonFrame: $buttonFrame
+                        )
+                        
+                        // Recipe List Section Extracted
+                        HomeRecipeListSection(
+                            viewModel: viewModel,
+                            allRecipes: allRecipes
+                        )
+                        .sheet(isPresented: $viewModel.isShowingImportSheet) {
+                            ImportRecipeSheet(onImport: { url in
+                                viewModel.handleImport(url: url)
+                            })
+                            .presentationDetents([.fraction(0.5), .large])
+                            .presentationDragIndicator(.visible)
                         }
-                        
-                        Spacer()
-                        
+                        .padding(.horizontal)
+                        .padding(.vertical, 24)
+                        .frame(maxHeight: .infinity)
                     }
-                    .sheet(isPresented: $isShowingImportSheet) {
-                        ImportRecipeSheet(onImport: { url in
-                            urlToScrape = url
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                navigateToLoading = true
-                            }
-                        })
-                        .presentationDetents([.fraction(0.5), .large])
-                        .presentationDragIndicator(.visible)
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 24)
-                    .frame(maxHeight: .infinity)
-                }
                 }
                 .searchable(
-                    text: $searchRecipe,
+                    text: $viewModel.searchRecipe,
                     placement: .navigationBarDrawer(displayMode: .always),
                     prompt: "Cari resep..."
                 )
                 .searchDictationBehavior(.inline(activation: .onSelect))
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationDestination(isPresented: $navigateToManual) {
-                    AddManualRecipeView()
-                }
-                .navigationDestination(isPresented: $navigateToDetail) {
-                    if let recipe = importedRecipe {
-                        DetailRecipeView(recipe: recipe, isFromImport: true, onDismiss: { navigateToDetail = false })
-                    } else if let index = selectedIndex, index < allRecipes.count {
-                        DetailRecipeView(recipe: allRecipes[index], onDismiss: { navigateToDetail = false })
-                    }
-                }
-                .navigationDestination(isPresented: $navigateToLoading) {
-                    LoadingRecipeView(urlToScrape: urlToScrape, onScrapingComplete: { recipe in
-                        importedRecipe = recipe
-                        navigateToLoading = false
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            navigateToDetail = true
-                        }
+                .navigationDestination(isPresented: $viewModel.navigateToManual) {
+                    AddManualRecipeView(onManualComplete: { recipe in
+                        viewModel.handleManualRecipeComplete(recipe: recipe)
                     })
                 }
-                .navigationDestination(isPresented: $navigateToLibrary) {
-                    RecipeLibrary()
+                .navigationDestination(isPresented: $viewModel.navigateToDetail) {
+                    if let recipe = viewModel.importedRecipe {
+                        DetailRecipeView(recipe: recipe, isFromImport: true, onDismiss: {
+                            viewModel.dismissDetail()
+                        })
+                    } else if let index = viewModel.selectedIndex, index < allRecipes.count {
+                        DetailRecipeView(recipe: allRecipes[index], onDismiss: { viewModel.dismissDetail() })
+                    }
+                }
+                .navigationDestination(isPresented: $viewModel.navigateToLoading) {
+                    LoadingRecipeView(urlToScrape: viewModel.urlToScrape, onScrapingComplete: { recipe in
+                        viewModel.handleScrapingComplete(recipe: recipe)
+                    })
+                }
+                .navigationDestination(isPresented: $viewModel.navigateToLibrary) {
+                    RecipeLibraryView()
                 }
                 
                 // MARK: - Clipboard Toast pinned to bottom
@@ -214,9 +109,9 @@ struct HomeView: View {
                         ClipboardToastView(
                             url: detectedURL,
                             onImport: {
-                                self.importedLink = detectedURL
+                                viewModel.importedLink = detectedURL
                                 clipboardManager.dismissToast()
-                                showWebPreviewFromClipboard = true
+                                viewModel.showWebPreviewFromClipboard = true
                             },
                             onDismiss: {
                                 clipboardManager.dismissToast()
@@ -229,29 +124,20 @@ struct HomeView: View {
                 .zIndex(1)
                 .animation(.spring(response: 0.4, dampingFraction: 0.8), value: clipboardManager.showClipboardToast)
             }
-            
-            
         }
         .environment(\.popToRoot) {
-            navigateToDetail = false
-            navigateToLoading = false
-            navigateToLibrary = false
-            navigateToManual = false
+            viewModel.resetNavigation()
         }
         .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
         // MARK: - Clipboard → Website Preview Sheet
-        .sheet(isPresented: $showWebPreviewFromClipboard) {
+        .sheet(isPresented: $viewModel.showWebPreviewFromClipboard) {
             WebsitePreviewSheet(
-                urlString: importedLink,
+                urlString: viewModel.importedLink,
                 onImport: {
-                    showWebPreviewFromClipboard = false
-                    urlToScrape = importedLink
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        navigateToLoading = true
-                    }
+                    viewModel.handleClipboardImport(url: viewModel.importedLink)
                 },
                 onDismiss: {
-                    showWebPreviewFromClipboard = false
+                    viewModel.showWebPreviewFromClipboard = false
                 }
             )
         }
@@ -268,14 +154,9 @@ struct HomeView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("PopToRoot"))) { _ in
-            navigateToDetail = false
-            navigateToLoading = false
-            navigateToLibrary = false
-            navigateToManual = false
+            viewModel.resetNavigation()
         }
     }
-    
-
 }
 
 #Preview {
