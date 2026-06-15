@@ -273,7 +273,7 @@ struct DetailRecipeView: View {
         ) {
             if !viewModel.recipe.ingredients.isEmpty {
                 ForEach(viewModel.recipe.ingredients) { ingredient in
-                    if let index = viewModel.recipe.ingredients.firstIndex(where: { $0.id == ingredient.id }) {
+                    if viewModel.recipe.ingredients.contains(where: { $0.id == ingredient.id }) {
                         Group {
                             if ingredient.isGroup {
                                 groupIngredientRows(ingredient)

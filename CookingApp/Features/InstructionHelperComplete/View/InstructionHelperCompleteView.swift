@@ -33,7 +33,34 @@ struct InstructionHelperCompleteView: View {
                     .font(Font.title)
                 
                 // Image
-                Image("img_test")
+                Group {
+                    if let data = recipe.coverImageData, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else if let url = recipe.coverImageUrl {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            case .failure(_):
+                                ImagePlaceholder()
+                            case .empty:
+                                ProgressView()
+                                    .frame(height: 200)
+                            @unknown default:
+                                EmptyView()
+                            }
+                        }
+                    } else {
+                        ImagePlaceholder()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: 200)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.large))
+                .padding(.horizontal)
                 
                 // Serving
                 HStack(spacing: 8) {
@@ -55,11 +82,7 @@ struct InstructionHelperCompleteView: View {
             
             // Button
             Button {
-                if let onGoToHome = onGoToHome {
-                    onGoToHome()
-                } else {
-                    popToRoot()
-                }
+                NotificationCenter.default.post(name: Notification.Name("PopToRoot"), object: nil)
             } label: {
                 Text("Selesai")
                     .font(Font.headline)
