@@ -16,47 +16,42 @@ struct RecipeDetailHeader: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Group {
-                if let data = imageData, let uiImage = UIImage(data: data) {
-                    // Show locally saved image (user picked from photo library)
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                } else if let url = imageUrl {
-                    // Show image from scraped URL
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        case .failure(_):
-                            ImagePlaceholder()
-                        case .empty:
-                            ProgressView()
-                                .frame(height: 250)
-                        @unknown default:
-                            EmptyView()
-                        }
+            if let data = imageData, let uiImage = UIImage(data: data) {
+                // Show locally saved image (user picked from photo library)
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 208)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.small))
+            } else if let url = imageUrl {
+                // Show image from scraped URL
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .failure(_):
+                        ImagePlaceholder()
+                    case .empty:
+                        ProgressView()
+                    @unknown default:
+                        EmptyView()
                     }
-                } else if let name = imageName, !name.isEmpty {
-                    Image(name)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    ImagePlaceholder()
                 }
+                .frame(height: 208)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.small))
+            } else if let name = imageName, !name.isEmpty {
+                Image(name)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 208)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.small))
+            } else {
+                ImagePlaceholder()
+                    .frame(height: 208)
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.small))
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 221)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.small))
-            
-            Text(titleRecipe)
-                .padding(.horizontal, 0)
-                .padding(.vertical, 36)
-                .frame(height: 48)
-                .font(.title)
-                .cornerRadius(Radius.infinity)
         }
     }
 }
@@ -72,7 +67,7 @@ struct ImagePlaceholder: View {
         }
         .foregroundColor(Color.labelLightest!)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.tertiarySystemFill))
+        .background(Color.labelLight)
     }
 }
 
@@ -172,14 +167,13 @@ struct RecipeEditHeader: View {
                 }
             }
             
-            TextField("Nama Resep", text: $viewModel.recipe.title)
+            TextField("Nama Resep", text: $viewModel.recipe.title, axis: .vertical)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 36)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, minHeight: 48)
                 .font(.title)
                 .background(Color.surfaceElevated)
-                .cornerRadius(Radius.infinity)
+                .cornerRadius(Radius.small)
                 .padding(.vertical, 20)
         }
         .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhotoItem, matching: .images)
@@ -229,6 +223,11 @@ struct RecipeEditHeader: View {
 #Preview {
     @Previewable @State var title = "Mie Kuah Spesial"
     ScrollView {
-        // Preview is simplified
+        RecipeDetailHeader(
+             titleRecipe: "HaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHalo"
+        )
+        ButtonApp(title: "Halo",action:  {
+            print("halo")
+        })
     }
 }

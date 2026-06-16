@@ -40,8 +40,6 @@ struct EditInstructionRow: View {
                 }
 
                 Spacer()
-
-                dragHandle
             }
 
             if allowBreakdown {
@@ -92,18 +90,7 @@ struct EditInstructionRow: View {
         .padding(.horizontal, 10)
     }
 
-    @ViewBuilder
-    private var dragHandle: some View {
-        let handle = Image(systemName: AppIcon.line3Horizontal)
-            .font(.body)
-            .foregroundStyle(Color.labelLight!)
-
-        if let onDrag {
-            handle.onDrag(onDrag)
-        } else {
-            handle
-        }
-    }
+    
 }
 
 // MARK: - Breakdown Instruction Row
@@ -127,10 +114,6 @@ struct EditBreakdownInstructionRow: View {
                 .foregroundStyle(Color.labelLight!)
             
             Spacer()
-            
-            Image(systemName: AppIcon.line3Horizontal)
-                .font(.body)
-                .foregroundStyle(Color.labelLight!)
         }
         .padding(.vertical, 6)
     }

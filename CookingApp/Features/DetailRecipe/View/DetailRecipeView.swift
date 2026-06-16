@@ -39,17 +39,25 @@ struct DetailRecipeView: View {
     var body: some View {
         List {
             // MARK: - Header (Image, Title, Button)
-            VStack(alignment: .leading) {
-                
-                if viewModel.isEdited {
-                    RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
-                } else {
-                    RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+            Section {
+                VStack(alignment: .leading) {
+                    
+                    if viewModel.isEdited {
+                        RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+                    } else {
+                        RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+                        Text(viewModel.recipe.title)
+                            
+                            .padding(.top, 10)
+                            .padding(.bottom, 10)
+                            .font(.title)
+                            .multilineTextAlignment(.leading)
+                            .frame(minHeight: 48)
+                    }
+
+                    
                     
                 }
-
-                
-                
             }
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -154,8 +162,14 @@ struct DetailRecipeView: View {
                 if viewModel.isEdited {
                     Button {
                         if viewModel.commitEditing() {
+                            
+                            
                             if !isFromImport {
                                 try? modelContext.save()
+                            } else {
+                                modelContext.insert(viewModel.recipe)
+                                try? modelContext.save()
+                                print("✅ User chose to save the imported recipe")
                             }
                         }
                     } label: {
@@ -165,13 +179,18 @@ struct DetailRecipeView: View {
                             .foregroundStyle(Color.brandPrimary!)
                     }
                 } else {
-                    Button {
-                        showRecipeActions = true
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                    Menu("More", systemImage: "ellipsis") {
+                                            Button("Ubah Resep", systemImage: "pencil") {
+                                                // TODO: - Edit action
+                                                viewModel.beginEditing()
+                                            }
+                        Button("Hapus Resep", systemImage: "trash", role: .destructive) {
+                            // TODO: - Action hapus
+                            showDeleteRecipeConfirmation = true
+                        }
+
                     }
+
                 }
             }
         }
@@ -187,11 +206,7 @@ struct DetailRecipeView: View {
                 print("✅ User chose to save the imported recipe")
                 handleDismiss()
             }
-            Button("Hapus Perubahan", role: .destructive) {
-                print("↩️ User discarded the imported recipe")
-                handleDismiss()
-            }
-            Button("Batal", role: .cancel) {}
+            Button("Nanti", role: .cancel) {}
         } message: {
             Text("Apakah kamu ingin menyimpan resep yang sudah diimpor ke koleksimu?")
         }
@@ -226,16 +241,6 @@ struct DetailRecipeView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(viewModel.validationMessage)
-        }
-        // ⋯ menu: edit or delete this recipe.
-        .confirmationDialog("Resep", isPresented: $showRecipeActions, titleVisibility: .hidden) {
-            Button("Ubah Resep") {
-                viewModel.beginEditing()
-            }
-            Button("Hapus Resep", role: .destructive) {
-                showDeleteRecipeConfirmation = true
-            }
-            Button("Batal", role: .cancel) { }
         }
         // Confirm before permanently deleting the recipe.
         .alert("Hapus Resep?", isPresented: $showDeleteRecipeConfirmation) {
@@ -274,6 +279,7 @@ struct DetailRecipeView: View {
                                 groupIngredientRows(ingredient)
                             } else {
                                 singleIngredientRow(ingredient)
+                                
                             }
                         }
                     }
@@ -351,16 +357,8 @@ struct DetailRecipeView: View {
                 onDelete: {
                     viewModel.deleteIngredient(ingredient)
                 },
-                onDrag: {
-                    draggingIngredientID = ingredient.id
-                    return NSItemProvider(object: ingredient.id.uuidString as NSString)
-                }
             )
-            .onDrop(of: [.text], delegate: ReorderDropDelegate(
-                item: ingredient,
-                items: ingredientsBinding,
-                draggingID: $draggingIngredientID
-            ))
+            
         } else {
             IngredientRowView(quantity: ingredient.quantity, name: ingredient.name, isSubItem: false)
         }
@@ -383,18 +381,8 @@ struct DetailRecipeView: View {
                                 onDelete: {
                                     viewModel.deleteInstruction(instructionItem)
                                 },
-                                onDrag: {
-                                    draggingInstructionID = instructionItem.id
-                                    return NSItemProvider(object: instructionItem.id.uuidString as NSString)
-                                }
                             )
                             .listRowSeparator(.hidden)
-                            .onDrop(of: [.text], delegate: ReorderDropDelegate(
-                                item: instructionItem,
-                                items: instructionsBinding,
-                                draggingID: $draggingInstructionID,
-                                onComplete: { viewModel.renumberInstructions() }
-                            ))
                         } else {
                             InstructionRowView(
                                 instruction: instructionItem,
@@ -463,12 +451,13 @@ struct DetailRecipeView: View {
             if !ingredient.quantity.isEmpty {
                 Text(ingredient.quantity)
                     .font(.body)
+                    .foregroundColor(Color.labelDark!)
             }
             
             Text(ingredient.name)
                 .font(.body)
         }
-        .padding(.vertical, 4)
+//        .padding(.vertical, 4)
     }
     
     @ViewBuilder
@@ -483,6 +472,7 @@ struct DetailRecipeView: View {
                     if !ingredient.quantity.isEmpty {
                         Text(ingredient.quantity)
                             .font(.body)
+                            .foregroundColor(Color.labelDark!)
                     }
                     
                     Text(ingredient.name)
@@ -491,7 +481,7 @@ struct DetailRecipeView: View {
                 
                 Spacer()
             }
-            .padding(.vertical, 4)
+//            .padding(.vertical, 4)
         }
     }
 }
@@ -515,13 +505,9 @@ struct IngredientRowView: View {
             // Quantity pill badge
             if !quantity.isEmpty {
                 Text(quantity)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.brandPrimary!)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.surfaceBrand)
-                    .clipShape(Capsule())
+                    .font(.body)
+                    .foregroundColor(Color.labelDark!)
+                
             }
             
             // Ingredient name
@@ -531,7 +517,7 @@ struct IngredientRowView: View {
             
             Spacer()
         }
-        .padding(.vertical, 5)
+//        .padding(.vertical, 5)
         .padding(.leading, isSubItem ? 8 : 0)
     }
 }
@@ -580,10 +566,10 @@ struct InstructionRowView: View {
                         isExpanded.toggle()
                     }
                 }) {
-                    Image(systemName: "chevron.right.circle")
+                    Image(systemName: "chevron.down.circle")
                         .font(.title2)
                         .foregroundColor(isExpanded ? Color.brandPrimary! : Color.labelLight)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
                         .padding(.trailing, 16)
                 }
                 .buttonStyle(.plain)
@@ -636,15 +622,15 @@ struct SeparatorView: View {
 
 // MARK: - Preview
 #Preview {
-//    let container = PreviewContainer.shared
-//    let ctx = container.mainContext
-//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
-//    return NavigationStack {
-//        if let first = recipes.first {
-//            DetailRecipeView(recipe: first)
-//        } else {
-//            Text("No sample data")
-//        }
-//    }
-//    .modelContainer(container)
+    let container = PreviewContainer.shared
+    let ctx = container.mainContext
+    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+    return NavigationStack {
+        if let first = recipes.first {
+            DetailRecipeView(recipe: first)
+        } else {
+            Text("No sample data")
+        }
+    }
+    .modelContainer(container)
 }
