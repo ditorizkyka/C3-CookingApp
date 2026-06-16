@@ -376,25 +376,24 @@ struct DetailRecipeView: View {
             .fontWeight(.semibold)
             .foregroundColor(Color.labelLight!)
         ) {
-            if !viewModel.recipe.instructions.isEmpty {
-                ForEach(viewModel.recipe.instructions) { instructionItem in
-                    if let index = viewModel.recipe.instructions.firstIndex(where: { $0.id == instructionItem.id }) {
-                        if viewModel.isEdited {
-                            EditInstructionRow(
-                                instruction: instructionItem,
-                                displayNumber: index + 1,
-                                onDelete: {
-                                    viewModel.deleteInstruction(instructionItem)
-                                },
-                            )
-                            .listRowSeparator(.hidden)
-                        } else {
-                            InstructionRowView(
-                                instruction: instructionItem,
-                                displayNumber: index + 1
-                            )
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        }
+            let sortedInstructions = viewModel.recipe.instructions.sorted { $0.sequenceNumber < $1.sequenceNumber }
+            if !sortedInstructions.isEmpty {
+                ForEach(Array(sortedInstructions.enumerated()), id: \.element.id) { index, instructionItem in
+                    if viewModel.isEdited {
+                        EditInstructionRow(
+                            instruction: instructionItem,
+                            displayNumber: index + 1,
+                            onDelete: {
+                                viewModel.deleteInstruction(instructionItem)
+                            },
+                        )
+                        .listRowSeparator(.hidden)
+                    } else {
+                        InstructionRowView(
+                            instruction: instructionItem,
+                            displayNumber: index + 1
+                        )
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                 }
             }
@@ -589,7 +588,8 @@ struct InstructionRowView: View {
             
             
             VStack(alignment: .leading, spacing: 14) {
-                ForEach(instruction.breakdownInstruction) { subStep in
+                let sortedBreakdowns = instruction.breakdownInstruction.sorted { $0.sequenceNumber < $1.sequenceNumber }
+                ForEach(sortedBreakdowns) { subStep in
                     SubStepRow(subStep: subStep)
                 }
             }

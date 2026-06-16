@@ -31,11 +31,11 @@ struct RecipeNLPService {
             
             let prompt = """
             You are a cooking assistant. The following is a 'Current step to refine' that has been pre-split by a grammar parser.
-            Your job is to refine it:
+            Your job is to refine it strictly based on the provided text:
+            - CRITICAL: DO NOT invent, hallucinate, or add any new cooking steps, temperatures, times, or ingredients. ONLY reformat the text provided in the 'Current step to refine'. Do NOT write a recipe from scratch.
             - Resolve any implicit pronouns or missing objects based on the 'Context from previous steps'. (e.g., if the current step says "wash thoroughly", and the context mentions "chicken", you output "wash the chicken thoroughly"). Each step you return must make sense fully on its own.
-            - Merge any steps that are too fragmented and belong together (e.g. "Remove" and "Drain" happening at the same moment).
-            - If a condition or waiting state appears (e.g. "after X is cold", "until X changes color"), convert it into an explicit waiting step: "Wait until [condition]".
-            - Do NOT split ingredient lists.
+            - Merge any steps that are too fragmented and belong together.
+            - If a condition or waiting state appears, convert it into an explicit waiting step: "Wait until [condition]".
             - CRITICAL: Return ONLY the refined steps for the 'Current step to refine'. DO NOT include, repeat, or summarize any steps from the 'Context from previous steps'.
             
             Context from previous steps:
