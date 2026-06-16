@@ -50,24 +50,10 @@ struct EditIngredientsRow: View {
             }
             
             Spacer()
-
-            dragHandle
         }
         .padding(.horizontal, 10)
     }
 
-    @ViewBuilder
-    private var dragHandle: some View {
-        let handle = Image(systemName: AppIcon.line3Horizontal)
-            .font(.body)
-            .foregroundStyle(Color.labelLight!)
-
-        if let onDrag {
-            handle.onDrag(onDrag)
-        } else {
-            handle
-        }
-    }
 }
 
 struct EditIngredientsGroupRow: View {
@@ -87,10 +73,6 @@ struct EditIngredientsGroupRow: View {
                     .font(.headline)
                 
                 Spacer()
-                
-                Image(systemName: AppIcon.line3Horizontal)
-                    .font(.body)
-                    .foregroundStyle(Color.labelLight!)
             }
         }
     }
