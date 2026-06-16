@@ -365,7 +365,7 @@ struct GroupedIngredientSectionView: View {
     var onDeleteGroup: () -> Void
 
     var body: some View {
-        if let groupIngredients = ingredient.groupIngredients {
+        if let _ = ingredient.groupIngredients {
             // --- Group Header ---
             HStack {
                 DeleteConfirmButton {
@@ -377,15 +377,12 @@ struct GroupedIngredientSectionView: View {
                 .foregroundColor(Color.labelDark!)
 
                 Spacer()
-
-                Image(systemName: AppIcon.line3Horizontal)
-                    .foregroundStyle(Color.labelLight!)
             }
             .padding(.horizontal, 10)
             .listRowSeparator(.hidden)
 
             // --- Sub-ingredients ---
-            ForEach(groupIngredients) { sub in
+            ForEach(ingredient.groupIngredients ?? []) { sub in
                 EditIngredientsRow(
                     isBreakdown: true,
                     ingredientsItemsName: Binding(
@@ -403,6 +400,24 @@ struct GroupedIngredientSectionView: View {
                     }
                 )
             }
+            
+            // --- Tambah Anggota Grup ---
+            Button {
+                withAnimation {
+                    ingredient.groupIngredients?.append(Ingredient(quantity: "", name: ""))
+                }
+            } label: {
+                HStack {
+                    Image(systemName: AppIcon.plusFill)
+                        .foregroundStyle(Color.brandPrimary!)
+                    Text("Tambah Anggota")
+                        .font(.body)
+                        .foregroundStyle(Color.brandPrimary!)
+                    Spacer()
+                }
+                .padding(.horizontal, 10)
+            }
+            .listRowBackground(Color.surfaceBrand)
         }
     }
 }

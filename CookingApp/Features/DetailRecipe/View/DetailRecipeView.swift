@@ -141,6 +141,16 @@ struct DetailRecipeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isFromImport || viewModel.isEdited)
         .toolbar {
+            // Keyboard dismiss button
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Selesai") {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.brandPrimary!)
+            }
+            
             // Back button — intercepted while editing (confirm save/discard) or
             // during the import flow (confirm keep/discard).
             if isFromImport || viewModel.isEdited {
@@ -167,8 +177,6 @@ struct DetailRecipeView: View {
                 if viewModel.isEdited {
                     Button {
                         if viewModel.commitEditing() {
-                            
-                            
                             if !isFromImport {
                                 try? modelContext.save()
                             } else {
@@ -185,17 +193,13 @@ struct DetailRecipeView: View {
                     }
                 } else {
                     Menu("More", systemImage: "ellipsis") {
-                                            Button("Ubah Resep", systemImage: "pencil") {
-                                                // TODO: - Edit action
-                                                viewModel.beginEditing()
-                                            }
+                        Button("Ubah Resep", systemImage: "pencil") {
+                            viewModel.beginEditing()
+                        }
                         Button("Hapus Resep", systemImage: "trash", role: .destructive) {
-                            // TODO: - Action hapus
                             showDeleteRecipeConfirmation = true
                         }
-
                     }
-
                 }
             }
         }
@@ -292,8 +296,15 @@ struct DetailRecipeView: View {
             }
 
             if viewModel.isEdited {
+                // Bug 2 Fix: Tambah Bahan
                 ButtonAddIngredientsRow(isGroup: false) {
                     withAnimation { viewModel.addIngredient() }
+                }
+                .listRowBackground(Color.surfaceBrand)
+                
+                // Bug 2 Fix: Tambah Grup
+                ButtonAddIngredientsRow(isGroup: true) {
+                    withAnimation { viewModel.addIngredientGroup() }
                 }
                 .listRowBackground(Color.surfaceBrand)
             }
@@ -312,12 +323,7 @@ struct DetailRecipeView: View {
                     .font(.headline)
                     .foregroundColor(Color.labelDark!)
                 Spacer()
-                Image(systemName: AppIcon.line3Horizontal)
-                    .foregroundStyle(Color.labelLight!)
-                    .onDrag {
-                        draggingIngredientID = ingredient.id
-                        return NSItemProvider(object: ingredient.id.uuidString as NSString)
-                    }
+                
             }
             .padding(.horizontal, 10)
             .listRowSeparator(.hidden)
@@ -349,6 +355,29 @@ struct DetailRecipeView: View {
             } else {
                 IngredientRowView(quantity: sub.quantity, name: sub.name, isSubItem: true)
             }
+        }
+        
+        // Bug 3 Fix: Tambah Anggota Grup
+        if viewModel.isEdited {
+            Button {
+                withAnimation {
+                    if ingredient.groupIngredients == nil {
+                        ingredient.groupIngredients = []
+                    }
+                    ingredient.groupIngredients?.append(Ingredient(quantity: "", name: ""))
+                }
+            } label: {
+                HStack {
+                    Image(systemName: AppIcon.plusFill)
+                        .foregroundStyle(Color.brandPrimary!)
+                    Text("Tambah Anggota")
+                        .font(.body)
+                        .foregroundStyle(Color.brandPrimary!)
+                    Spacer()
+                }
+                .padding(.horizontal, 10)
+            }
+            
         }
     }
 
@@ -627,15 +656,36 @@ struct SeparatorView: View {
 
 // MARK: - Preview
 #Preview {
-    let container = PreviewContainer.shared
-    let ctx = container.mainContext
-    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
+    let dummyRecipe = Recipe(
+        title: "Nasi Goreng Spesial",
+        portion: 2,
+        durationInMinutes: 30,
+        ingredients: [
+            Ingredient(quantity: "2 piring", name: "Nasi Putih"),
+            Ingredient(quantity: "3 siung", name: "Bawang Merah"),
+            Ingredient(quantity: "2 siung", name: "Bawang Putih"),
+            Ingredient(quantity: "1 butir", name: "Telur", groupIngredients: [
+                Ingredient(quantity: "secukupnya", name: "Garam"),
+                Ingredient(quantity: "secukupnya", name: "Merica")
+            ])
+        ],
+        instructions: [
+            Instruction(sequenceNumber: 1, text: "Haluskan bawang merah dan bawang putih."),
+            Instruction(sequenceNumber: 2, text: "Panaskan minyak, orak-arik telur."),
+            Instruction(sequenceNumber: 3, text: "Masukkan bumbu halus, tumis hingga harum.", breakdownInstruction: [
+                Instruction(sequenceNumber: 1, text: "Gunakan api sedang."),
+                Instruction(sequenceNumber: 2, text: "Aduk terus agar tidak gosong.")
+            ]),
+            Instruction(sequenceNumber: 4, text: "Masukkan nasi, kecap, garam, dan merica. Aduk rata.")
+        ]
+    )
+
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Recipe.self, configurations: config)
+    container.mainContext.insert(dummyRecipe)
+
     return NavigationStack {
-        if let first = recipes.first {
-            DetailRecipeView(recipe: first)
-        } else {
-            Text("No sample data")
-        }
+        DetailRecipeView(recipe: dummyRecipe)
     }
     .modelContainer(container)
 }

@@ -82,10 +82,20 @@ struct EditIngredientsGroupRow: View {
 #Preview {
     @Previewable @State var name = "Bawang Merah"
     @Previewable @State var qty = "10 siung"
-    @Previewable @State var ingredients: [Ingredient] = []
+    @Previewable @State var subName = "Garam"
+    @Previewable @State var subQty = "Secukupnya"
+    @Previewable @State var ingredients: [Ingredient] = [
+        Ingredient(quantity: "", name: "Bumbu Halus")
+    ]
     
-    VStack(spacing: 20) {
-        EditIngredientsRow(isBreakdown: true, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
-        EditIngredientsRow(isBreakdown: false, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
+    List {
+        Section("Bahan Satuan") {
+            EditIngredientsRow(isBreakdown: false, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
+        }
+        
+        Section("Bahan Grup") {
+            EditIngredientsGroupRow(ingredients: $ingredients)
+            EditIngredientsRow(isBreakdown: true, ingredientsItemsName: $subName, ingredientsItemsQty: $subQty)
+        }
     }
 }
