@@ -46,7 +46,8 @@ struct EditInstructionRow: View {
                 // MARK: - Breakdown Instructions
                 if !instruction.breakdownInstruction.isEmpty {
                     VStack(alignment: .leading, spacing: 0) {
-                        ForEach(instruction.breakdownInstruction) { subStep in
+                        let sortedBreakdowns = instruction.breakdownInstruction.sorted { $0.sequenceNumber < $1.sequenceNumber }
+                        ForEach(sortedBreakdowns) { subStep in
                             EditBreakdownInstructionRow(
                                 subInstruction: subStep,
                                 onDelete: {
