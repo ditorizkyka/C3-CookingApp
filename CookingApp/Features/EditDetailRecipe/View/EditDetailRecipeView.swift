@@ -58,9 +58,7 @@ struct EditDetailRecipeView: View {
                                 
                                 Spacer()
                                 
-                                Image(systemName: AppIcon.line3Horizontal)
-                                    .font(.body)
-                                    .foregroundStyle(Color.labelLight!)
+                                
                             }
                             .padding(.horizontal, 10)
                             .listRowSeparator(.hidden)

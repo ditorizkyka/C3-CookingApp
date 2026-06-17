@@ -34,8 +34,8 @@ struct RecipeLibrarySortMenu: View {
                 }
             }
         } label: {
-            Image(systemName: "line.3.horizontal.decrease.circle")
-                .foregroundStyle(.primary)
+//            Image(systemName: "line.3.horizontal.decrease.circle")
+//                .foregroundStyle(.primary)
         }
     }
 }

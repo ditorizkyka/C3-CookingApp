@@ -59,7 +59,7 @@ struct EditInstructionRow: View {
                         }
                     }
 //                    .padding(.leading, 28)
-                    .padding(.top, 8)
+                    .padding(.vertical  , 8)
                 }
 
                 // MARK: - Tambah Langkah Breakdown
@@ -100,7 +100,7 @@ struct EditBreakdownInstructionRow: View {
     var onDelete: (() -> Void)? = nil
 
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .top) {
             DeleteConfirmButton {
                 onDelete?()
             }
@@ -108,13 +108,18 @@ struct EditBreakdownInstructionRow: View {
             Circle()
                 .fill(Color.labelDark!)
                 .frame(width: 3, height: 3)
-                .padding(.horizontal,10)
+                .padding(.horizontal, 10)
+                .padding(.top, 6)
             
             TextField("Tulis sub-langkah...", text: $subInstruction.text, axis: .vertical)
                 .font(.subheadline)
                 .foregroundStyle(Color.labelLight!)
-            
-            Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .scrollDismissesKeyboard(.immediately)
+                .submitLabel(.done)
+                .onSubmit {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
         }
         .padding(.vertical, 6)
     }
@@ -198,19 +203,16 @@ struct PhotoPickerHStack: View {
 }
 
 #Preview {
-//    let container = PreviewContainer.shared
-//    let ctx = container.mainContext
-//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
-//    let instruction = recipes.first?.instructions.first(where: { !$0.breakdownInstruction.isEmpty })
-//        ?? recipes.first?.instructions.first
-//    
-//    return Group {
-//        if let instr = instruction {
-//            @State var editableInstruction = instr
-//            EditInstructionRow(instruction: $editableInstruction)
-//        } else {
-//            Text("No instructions in sample data")
-//        }
-//    }
-//    .modelContainer(container)
+    @Previewable @State var dummyInstruction = Instruction(
+        sequenceNumber: 1,
+        text: "Potong ayam menjadi bagian-bagian kecil lalu cuci bersih.",
+        breakdownInstruction: [
+            Instruction(sequenceNumber: 1, text: "Gunakan pisau tajam agar potongan rapis.ssssssssssssssss"),
+            Instruction(sequenceNumber: 2, text: "Tiriskan ayam setelah dicuci.")
+        ]
+    )
+    
+    List {
+        EditInstructionRow(instruction: dummyInstruction, displayNumber: 1)
+    }
 }
