@@ -159,14 +159,14 @@ struct DetailRecipeView: View {
                         if viewModel.isEdited {
                             showEditBackConfirmation = true
                         } else {
-                            showImportConfirmation = true
+                            print("✅ User chose to save the imported recipe")
+                            handleDismiss()
+//                            showImportConfirmation = true
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
                                 .font(.body.weight(.semibold))
-                            Text("Kembali")
-                                .font(.body)
                         }
                         .foregroundStyle(Color.brandPrimary!)
                     }
@@ -186,7 +186,7 @@ struct DetailRecipeView: View {
                             }
                         }
                     } label: {
-                        Text("Selesai")
+                        Image(systemName: "checkmark")
                             .font(.body)
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.brandPrimary!)
