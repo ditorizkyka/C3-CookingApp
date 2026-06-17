@@ -67,7 +67,7 @@ struct HomeView: View {
                             .presentationDragIndicator(.visible)
                         }
                         .padding(.horizontal)
-                        .padding(.vertical, 24)
+                        .padding(.bottom, 24)
                         .frame(maxHeight: .infinity)
                     }
                 }
