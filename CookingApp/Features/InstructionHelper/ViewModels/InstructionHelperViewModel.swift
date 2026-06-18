@@ -114,15 +114,15 @@ class InstructionHelperViewModel: ObservableObject {
             speechManager.recognizedText = ""
             dismissIntro(speechManager: speechManager)
             
-        } else if text.contains("lanjut") {
+        } else if text.contains("lanjut") || text.contains("next") {
             speechManager.recognizedText = ""
             nextStep(speechManager: speechManager)
             
-        } else if text.contains("kembali") {
+        } else if text.contains("kembali") || text.contains("back") {
             speechManager.recognizedText = ""
             previousStep(speechManager: speechManager)
             
-        } else if text.contains("ulangi") {
+        } else if text.contains("ulangi") || text.contains("repeat") {
             speechManager.recognizedText = ""
             repeatStep(speechManager: speechManager)
         }
