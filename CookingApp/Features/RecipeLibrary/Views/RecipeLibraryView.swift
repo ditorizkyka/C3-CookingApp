@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct RecipeLibraryView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query private var allRecipes: [Recipe]
     @StateObject private var viewModel = RecipeLibraryViewModel()
     
@@ -20,6 +21,9 @@ struct RecipeLibraryView: View {
             filteredRecipes: filtered,
             onTapRecipe: { recipe in
                 viewModel.selectRecipe(recipe: recipe, in: filtered)
+            },
+            onDeleteRecipe: { recipe in
+                viewModel.confirmDelete(recipe: recipe)
             }
         )
         .navigationTitle("Semua Resep")
@@ -38,6 +42,19 @@ struct RecipeLibraryView: View {
                 let selectedRecipe = filtered[index]
                 DetailRecipeView(recipe: selectedRecipe, onDismiss: { viewModel.dismissDetail() })
             }
+        }
+        .alert(
+            "Apakah kamu yakin ingin menghapus resep \(viewModel.recipeToDelete?.title ?? "")?",
+            isPresented: $viewModel.showDeleteConfirmation
+        ) {
+            Button("Batal", role: .cancel) {
+                viewModel.recipeToDelete = nil
+            }
+            Button("Hapus", role: .destructive) {
+                viewModel.deleteRecipe(context: modelContext)
+            }
+        } message: {
+            Text("Resep ini akan dihapus secara permanen dari perpustakaan Anda dan tidak dapat dikembalikan.")
         }
     }
 }

@@ -14,8 +14,6 @@
 		0782BB2A2FE0F5AD0072A402 /* Exceptions for "CookingApp" folder in "CookingApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Core/Services/CookpadHTML.html,
-				Core/Services/ingredientsHTML.html,
 				Info.plist,
 			);
 			target = 0771030C2FD2A7A600532D32 /* CookingApp */;
