@@ -23,7 +23,7 @@ struct LoadingView: View {
                 
                 Text(text)
                     .font(.body)
-                    .foregroundStyle(Color.brandPrimary!)
+                    .foregroundStyle(Color.brandPrimary)
                     .multilineTextAlignment(.center)
                 
             }
@@ -35,11 +35,11 @@ struct LoadingView: View {
         .navigationBarBackButtonHidden(true)
         .background {
             VStack {
-                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -125, width: 600, height: 600)
+                RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: -125, width: 600, height: 600)
                 
                 Spacer()
                 
-                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 125, width: 600, height: 600)
+                RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: 125, width: 600, height: 600)
             }
             .ignoresSafeArea()
         }

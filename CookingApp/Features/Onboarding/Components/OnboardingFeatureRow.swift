@@ -17,9 +17,9 @@ struct OnboardingFeatureRow: View {
             // Icon
             Image(systemName: iconName)
                 .font(Font.title)
-                .foregroundStyle(Color.brandAccent!)
+                .foregroundStyle(Color.brandAccent)
                 .padding()
-                .background(Color.labelLight!.opacity(0.05))
+                .background(Color.labelLight.opacity(0.05))
                 .clipShape(RoundedRectangle(cornerRadius: Radius.small))
             
             // Detail

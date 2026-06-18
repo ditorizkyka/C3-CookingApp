@@ -67,7 +67,7 @@ struct InstructionHelperView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .background {
             VStack {
-                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -300, width: 600, height: 600)
+                RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: -300, width: 600, height: 600)
                 
                 Spacer()
             }
@@ -129,7 +129,7 @@ struct InstructionHelperView: View {
             InfoSheet()
                 .presentationDetents([.fraction(0.6)])
                 .presentationDragIndicator(.visible)
-                .presentationBackground(Color.surfaceElevated!)
+                .presentationBackground(Color.surfaceElevated)
         }
         .sheet(isPresented: $viewModel.showStepSheet) {
             if viewModel.currentStepIndex >= 0 && viewModel.currentStepIndex < viewModel.allGranularSteps.count {
@@ -138,7 +138,7 @@ struct InstructionHelperView: View {
                 }
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
-                    .presentationBackground(Color.surfaceElevated ?? .white)
+                    .presentationBackground(Color.surfaceElevated)
             }
         }
         .onDisappear {

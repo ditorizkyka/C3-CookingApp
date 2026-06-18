@@ -43,7 +43,7 @@ struct NavigationControlsView: View {
                     Text("Ulangi")
                         .fontWeight(.semibold)
                 }
-                .foregroundStyle(Color.brandPrimary ?? .green)
+                .foregroundStyle(Color.brandPrimary)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
             }

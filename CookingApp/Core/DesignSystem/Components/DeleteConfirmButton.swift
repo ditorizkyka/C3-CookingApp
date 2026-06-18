@@ -21,7 +21,7 @@ struct DeleteConfirmButton: View {
             confirming = true
         } label: {
             Image(systemName: AppIcon.minusFill)
-                .foregroundStyle(Color.actionDelete!)
+                .foregroundStyle(Color.actionDelete)
         }
         .buttonStyle(.plain)
         .popover(isPresented: $confirming) {
@@ -30,7 +30,7 @@ struct DeleteConfirmButton: View {
                     .font(.headline)
                 Text("Tindakan ini tidak dapat dibatalkan.")
                     .font(.footnote)
-                    .foregroundStyle(Color.labelLight!)
+                    .foregroundStyle(Color.labelLight)
                     .multilineTextAlignment(.center)
 
                 HStack(spacing: 12) {
@@ -50,7 +50,7 @@ struct DeleteConfirmButton: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color.actionDelete!)
+                    .tint(Color.actionDelete)
                 }
             }
             .padding(16)

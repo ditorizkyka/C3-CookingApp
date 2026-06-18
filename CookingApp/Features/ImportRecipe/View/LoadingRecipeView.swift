@@ -16,16 +16,16 @@ struct LoadingRecipeView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 48))
-                        .foregroundColor(Color.brandSecondary!)
+                        .foregroundColor(Color.brandSecondary)
                     
                     Text("Gagal Mengekstrak Resep")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color.labelDark!)
+                        .foregroundColor(Color.labelDark)
                     
                     Text(errorMessage)
                         .font(.body)
-                        .foregroundColor(Color.labelLight!)
+                        .foregroundColor(Color.labelLight)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                     
@@ -46,15 +46,15 @@ struct LoadingRecipeView: View {
                 // Loading state
                 ProgressView()
                     .scaleEffect(2)
-                    .tint(Color.brandPrimary!)
+                    .tint(Color.brandPrimary)
                 Text("Mengekstrak Resep...")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelDark!)
+                    .foregroundColor(Color.labelDark)
                 
                 Text("Memproses bahan dan instruksi dari website")
                     .font(.subheadline)
-                    .foregroundColor(Color.labelLight!)
+                    .foregroundColor(Color.labelLight)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -32,12 +32,12 @@ struct VoiceCommandGuideCard: View {
                     if index < allKeys.count - 1 {
                         Divider()
                             .frame(height: 35)
-                            .overlay(Color.labelLight?.opacity(0.3) ?? .gray.opacity(0.3))
+                            .overlay(Color.labelLight.opacity(0.3))
                     }
                 }
             }
         }
-        .foregroundStyle(Color.labelLight!)
+        .foregroundStyle(Color.labelLight)
         .padding(15)
     }
 }

@@ -27,8 +27,8 @@
 //                            }) {
 //                                Image(systemName: AppIcon.minusFill)
 //                                    .font(.title2)
-//                                    .foregroundColor(Color.actionDelete!)
-//                                    .background(Color.surfaceElevated!)
+//                                    .foregroundColor(Color.actionDelete)
+//                                    .background(Color.surfaceElevated)
 //                                    .clipShape(Circle())
 //                            }
 //                            .offset(x: 10, y: -10)
@@ -44,27 +44,27 @@
 //                            ZStack(alignment: .bottomTrailing) {
 //                                Image(systemName: "photo")
 //                                    .font(.system(size: 40))
-//                                    .foregroundColor(Color.labelLight!)
+//                                    .foregroundColor(Color.labelLight)
 //                                
 //                                Image(systemName: AppIcon.plusFill)
 //                                    .font(.system(size: 16))
-//                                    .foregroundColor(Color.labelLight!)
-//                                    .background(Color.surfaceElevated!)
+//                                    .foregroundColor(Color.labelLight)
+//                                    .background(Color.surfaceElevated)
 //                                    .clipShape(Circle())
 //                                    .offset(x: 4, y: 4)
 //                            }
 //                            
 //                            Text("Tambah Foto")
 //                                .font(.callout)
-//                                .foregroundColor(Color.labelLight!)
+//                                .foregroundColor(Color.labelLight)
 //                        }
 //                        .frame(maxWidth: .infinity)
 //                        .frame(height: 221)
-//                        .background(Color.surfaceElevated!)
+//                        .background(Color.surfaceElevated)
 //                        .clipShape(RoundedRectangle(cornerRadius: Radius.small))
 //                        .overlay(
 //                            RoundedRectangle(cornerRadius: Radius.small)
-//                                .stroke(Color.labelLight!, style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
+//                                .stroke(Color.labelLight, style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
 //                        )
 //                    }
 //                    .buttonStyle(.plain)
@@ -76,7 +76,7 @@
 //                .frame(maxWidth: .infinity)
 //                .frame(height: 48)
 //                .font(.title)
-//                .background(Color.surfaceElevated!)
+//                .background(Color.surfaceElevated)
 //                .cornerRadius(Radius.infinity)
 //        }
 //    }

@@ -23,10 +23,10 @@ struct StepInstructionView: View {
                 HStack {
                     Text("Langkah \(currentStep) dari \(totalSteps)")
                         .font(Font.title)
-                        .foregroundStyle(Color.labelLight!)
+                        .foregroundStyle(Color.labelLight)
                     
                     Image(systemName: "chevron.down.circle.fill")
-                        .foregroundStyle(Color.labelLight!)
+                        .foregroundStyle(Color.labelLight)
                 }
             }
             

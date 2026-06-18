@@ -42,9 +42,9 @@
                             }) {
                                 Image(systemName: "xmark")
                                     .font(.headline)
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(Color.labelDark)
                                     .frame(width: 45, height: 45)
-                                    .background(Color(UIColor.secondarySystemFill)) // Warna bulat abu-abu
+                                    .background(Color.surfaceDefault) // Warna bulat abu-abu
                                     .clipShape(Circle())
                             }
                             Spacer() // Mendorong tombol ke ujung kiri
@@ -52,10 +52,10 @@
                     }
                     
                     VStack(spacing:16) {
-                        Text("Masukkan link resep dari [cookpad.com](https://cookpad.com) untuk memproses bahan dan langkah memasak secara otomatis.")
+                        Text("Masukkan link resep dari website untuk memproses bahan dan langkah memasak secara otomatis.")
                             .font(.body)
                         // Opsional: Gunakan .tint() untuk mengubah warna link agar sesuai tema aplikasimu
-                            .tint(.blue)
+                            .tint(Color.brandPrimary)
                             .multilineTextAlignment(.leading)
     //                        .padding()
                         TextField("Masukkan link resep di sini", text: $viewModel.link)
@@ -63,7 +63,7 @@
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .background(
-                                Color(UIColor.tertiarySystemFill)
+                                Color.surfaceDefault
                             )
                             .cornerRadius(Radius.infinity)
                             .autocapitalization(.none)
@@ -88,7 +88,7 @@
                                 Text(errorMessage)
                                     .font(.footnote)
                             }
-                            .foregroundColor(Color.actionDelete!)
+                            .foregroundColor(Color.actionDelete)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .transition(.opacity.combined(with: .move(edge: .top)))
                         }

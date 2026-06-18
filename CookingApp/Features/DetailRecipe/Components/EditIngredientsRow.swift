@@ -24,7 +24,7 @@ struct EditIngredientsRow: View {
             if isBreakdown {
                 HStack(alignment: .center) {
                     Circle()
-                        .fill(Color.labelDark!)
+                        .fill(Color.labelDark)
                         .frame(width: 3, height: 3)
                         .padding(.horizontal, 5)
                     
@@ -66,7 +66,7 @@ struct EditIngredientsGroupRow: View {
                     print("deleted group")
                 } label: {
                     Image(systemName: AppIcon.minusFill)
-                        .foregroundStyle(Color.actionDelete!)
+                        .foregroundStyle(Color.actionDelete)
                 }
                 
                 TextField("Nama Grup", text: $ingredient.name)

@@ -25,7 +25,7 @@ struct InfoSheet: View {
                 
                 Text("Gunakan perintah suara berikut untuk mengontrol langkah memasak tanpa menyentuh layar")
                     .font(Font.footnote)
-                    .foregroundStyle(Color.labelLight!)
+                    .foregroundStyle(Color.labelLight)
                     .multilineTextAlignment(.center)
             }
             

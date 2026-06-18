@@ -15,7 +15,7 @@ struct TotalPortionRow: View {
         HStack {
             Text("Jumlah Porsi")
                 .font(.body)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
             Spacer()
             Picker("", selection: $selectedPortion) {
                 ForEach(portionOptions, id: \.self) { portion in
@@ -23,7 +23,7 @@ struct TotalPortionRow: View {
                 }
             }
             .pickerStyle(.menu)
-            .tint(Color.labelDark!)
+            .tint(Color.labelDark)
         }
         .padding(.horizontal, 10)
     }
@@ -37,7 +37,7 @@ struct TotalDurationRow: View {
         HStack {
             Text("Lama Memasak")
                 .font(.body)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
             Spacer()
             Picker("", selection: $selectedDuration) {
                 ForEach(durationOptions, id: \.self) { duration in
@@ -45,7 +45,7 @@ struct TotalDurationRow: View {
                 }
             }
             .pickerStyle(.menu)
-            .tint(Color.labelDark!)
+            .tint(Color.labelDark)
         }
         .padding(.horizontal, 10)
     }
