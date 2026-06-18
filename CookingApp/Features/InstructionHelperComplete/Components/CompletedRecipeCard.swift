@@ -61,7 +61,7 @@ struct CompletedRecipeCard: View {
                 }
             }
             .font(Font.headline)
-            .foregroundStyle(Color.brandAccent!)
+            .foregroundStyle(Color.brandAccent)
         }
     }
 }

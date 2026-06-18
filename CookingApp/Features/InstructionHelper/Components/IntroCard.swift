@@ -24,7 +24,7 @@ struct IntroCard: View {
             
             Text("atau")
                 .font(Font.body)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
             
             Button {
                 onDismiss!()
@@ -34,14 +34,14 @@ struct IntroCard: View {
             }
             .buttonStyle(.plain)
             .padding()
-            .foregroundStyle(Color.brandAccent!)
+            .foregroundStyle(Color.brandAccent)
             .frame(maxWidth: .infinity)
             .background(Color.surfaceBrand)
             .clipShape(RoundedRectangle(cornerRadius: Radius.large))
             .overlay(
                 RoundedRectangle(cornerRadius: Radius.large)
                     .stroke(style: StrokeStyle(lineWidth: 1))
-                    .foregroundColor(Color.brandPrimary!)
+                    .foregroundColor(Color.brandPrimary)
             )
             
             // Content
@@ -66,7 +66,7 @@ struct IntroCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .foregroundStyle(Color.labelLight!)
+            .foregroundStyle(Color.labelLight)
             .frame(maxWidth: .infinity)
             
         }

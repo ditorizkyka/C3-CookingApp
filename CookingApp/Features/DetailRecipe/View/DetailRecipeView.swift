@@ -103,7 +103,7 @@ struct DetailRecipeView: View {
                     HStack {
                         Text("Jumlah Porsi")
                             .font(.body)
-                            .foregroundStyle(Color.labelLight!)
+                            .foregroundStyle(Color.labelLight)
                         
                         Spacer()
                         Text("\(viewModel.recipe.portion) Orang")
@@ -111,7 +111,7 @@ struct DetailRecipeView: View {
                     HStack {
                         Text("Lama Memasak")
                             .font(.body)
-                            .foregroundStyle(Color.labelLight!)
+                            .foregroundStyle(Color.labelLight)
                         
                         Spacer()
                         Text("\(viewModel.recipe.durationInMinutes) Menit")
@@ -159,7 +159,7 @@ struct DetailRecipeView: View {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
                 .font(.body.weight(.semibold))
-                .foregroundStyle(Color.brandPrimary!)
+                .foregroundStyle(Color.brandPrimary)
             }
             
             // Back button — intercepted while editing (confirm save/discard) or
@@ -179,7 +179,7 @@ struct DetailRecipeView: View {
                             Image(systemName: "chevron.left")
                                 .font(.body.weight(.semibold))
                         }
-                        .foregroundStyle(Color.brandPrimary!)
+                        .foregroundStyle(Color.brandPrimary)
                     }
                 }
             }
@@ -200,7 +200,7 @@ struct DetailRecipeView: View {
                         Image(systemName: "checkmark")
                             .font(.body)
                             .fontWeight(.semibold)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                     }
                 } else {
                     Button {
@@ -284,7 +284,7 @@ struct DetailRecipeView: View {
         Section(header: Text("Bahan-bahan")
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(Color.labelLight!)
+            .foregroundColor(Color.labelLight)
         ) {
             if !viewModel.recipe.ingredients.isEmpty {
                 ForEach(viewModel.recipe.ingredients) { ingredient in
@@ -327,7 +327,7 @@ struct DetailRecipeView: View {
                 }
                 TextField("Nama Grup", text: stringBinding(ingredient, \.name))
                     .font(.headline)
-                    .foregroundColor(Color.labelDark!)
+                    .foregroundColor(Color.labelDark)
                 Spacer()
                 
             }
@@ -341,7 +341,7 @@ struct DetailRecipeView: View {
         } else {
             Text(ingredient.name)
                 .font(.headline)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
                 .padding(.top, 8)
                 .padding(.bottom, 2)
                 .listRowSeparator(.hidden)
@@ -375,10 +375,10 @@ struct DetailRecipeView: View {
             } label: {
                 HStack {
                     Image(systemName: AppIcon.plusFill)
-                        .foregroundStyle(Color.brandPrimary!)
+                        .foregroundStyle(Color.brandPrimary)
                     Text("Tambah Anggota")
                         .font(.body)
-                        .foregroundStyle(Color.brandPrimary!)
+                        .foregroundStyle(Color.brandPrimary)
                     Spacer()
                 }
                 .padding(.horizontal, 10)
@@ -409,7 +409,7 @@ struct DetailRecipeView: View {
         Section(header: Text("Langkah-langkah")
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(Color.labelLight!)
+            .foregroundColor(Color.labelLight)
         ) {
             let sortedInstructions = viewModel.recipe.instructions.sorted { $0.sequenceNumber < $1.sequenceNumber }
             if !sortedInstructions.isEmpty {
@@ -439,10 +439,10 @@ struct DetailRecipeView: View {
                 } label: {
                     HStack {
                         Image(systemName: AppIcon.plusFill)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                         Text("Tambah Langkah")
                             .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                         Spacer()
                     }
                     .padding(.horizontal, 10)
@@ -490,7 +490,7 @@ struct DetailRecipeView: View {
             if !ingredient.quantity.isEmpty {
                 Text(ingredient.quantity)
                     .font(.body)
-                    .foregroundColor(Color.labelDark!)
+                    .foregroundColor(Color.labelDark)
             }
             
             Text(ingredient.name)
@@ -504,14 +504,14 @@ struct DetailRecipeView: View {
         ForEach(items) { ingredient in
             HStack(alignment: .center, spacing: 12) {
                 Circle()
-                    .fill(Color.labelDark!)
+                    .fill(Color.labelDark)
                     .frame(width: 3, height: 3)
                 
                 HStack {
                     if !ingredient.quantity.isEmpty {
                         Text(ingredient.quantity)
                             .font(.body)
-                            .foregroundColor(Color.labelDark!)
+                            .foregroundColor(Color.labelDark)
                     }
                     
                     Text(ingredient.name)
@@ -537,7 +537,7 @@ struct IngredientRowView: View {
             // Bullet dot for sub-items
             if isSubItem {
                 Circle()
-                    .fill(Color.labelLight!)
+                    .fill(Color.labelLight)
                     .frame(width: 4, height: 4)
             }
             
@@ -545,14 +545,14 @@ struct IngredientRowView: View {
             if !quantity.isEmpty {
                 Text(quantity)
                     .font(.body)
-                    .foregroundColor(Color.labelDark!)
+                    .foregroundColor(Color.labelDark)
                 
             }
             
             // Ingredient name
             Text(name)
                 .font(.body)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
             
             Spacer()
         }
@@ -584,7 +584,7 @@ struct InstructionRowView: View {
             
             Text("\(displayNumber)")
                 .font(.footnote)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
                 .frame(width: 22, height: 22)
                 .background(Color.brandSecondary)
                 .clipShape(Circle())
@@ -593,7 +593,7 @@ struct InstructionRowView: View {
             
             Text(instruction.text)
                 .font(.body)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
                 .padding(.vertical, 16)
             
             Spacer()
@@ -607,7 +607,7 @@ struct InstructionRowView: View {
                 }) {
                     Image(systemName: "chevron.down.circle")
                         .font(.title2)
-                        .foregroundColor(isExpanded ? Color.brandPrimary! : Color.labelLight)
+                        .foregroundColor(isExpanded ? Color.brandPrimary : Color.labelLight)
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                         .padding(.trailing, 16)
                 }
@@ -640,12 +640,12 @@ struct InstructionRowView: View {
     private func SubStepRow(subStep: Instruction) -> some View {
         HStack(alignment: .center, spacing: 32) {
             Circle()
-                .fill(Color.labelLight!)
+                .fill(Color.labelLight)
                 .frame(width: 3, height: 3)
             
             Text(subStep.text)
                 .font(.subheadline)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
         }
     }
 }

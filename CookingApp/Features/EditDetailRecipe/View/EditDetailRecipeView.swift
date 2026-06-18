@@ -36,7 +36,7 @@ struct EditDetailRecipeView: View {
                 Section(header: Text("Bahan-bahan")
                     .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelLight!)
+                    .foregroundColor(Color.labelLight)
                 ) {
                     ForEach($editRecipeData.ingredients) { $ingredient in
                         
@@ -47,12 +47,12 @@ struct EditDetailRecipeView: View {
                                     print("deleted group")
                                 } label: {
                                     Image(systemName: AppIcon.minusFill)
-                                        .foregroundStyle(Color.actionDelete!)
+                                        .foregroundStyle(Color.actionDelete)
                                 }
                                 
                                 TextField("Nama Grup", text: $ingredient.name)
                                     .font(.headline)
-                                    .foregroundColor(Color.labelDark!)
+                                    .foregroundColor(Color.labelDark)
                                     .padding(.top, 8)
                                     .padding(.bottom, 2)
                                 
@@ -93,7 +93,7 @@ struct EditDetailRecipeView: View {
                 Section(header: Text("Langkah")
                     .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelLight!)
+                    .foregroundColor(Color.labelLight)
                 ) {
                     ForEach(Array(editRecipeData.instructions.enumerated()), id: \.element.id) { index, instruction in
                         EditInstructionRow(instruction: instruction, displayNumber: index + 1)
@@ -126,7 +126,7 @@ struct EditDetailRecipeView: View {
                     } label: {
                         Image(systemName: "checkmark")
                             .font(.headline)
-                            .foregroundStyle(Color.brandAccent!)
+                            .foregroundStyle(Color.brandAccent)
                     }
                 }
                 

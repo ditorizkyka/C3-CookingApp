@@ -23,14 +23,17 @@ class ImportRecipeViewModel: ObservableObject {
     
     // MARK: - Validation
     
-    /// Check if the entered link is a valid Cookpad URL
-    var isValidCookpadLink: Bool {
+    /// Check if the entered link is a valid recipe URL (any website)
+    var isValidRecipeLink: Bool {
         let cleaned = link.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard let url = URL(string: cleaned), let host = url.host?.lowercased() else {
+        // Add https:// if missing for validation
+        let urlString = cleaned.hasPrefix("http://") || cleaned.hasPrefix("https://") ? cleaned : "https://" + cleaned
+        guard let url = URL(string: urlString), url.host != nil else {
             return false
         }
-        return host.contains("cookpad.com")
+        return true
     }
+
     
     /// Validate the link and show the web preview if valid
     func validateAndShowPreview() {

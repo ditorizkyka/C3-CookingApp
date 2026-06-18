@@ -20,7 +20,8 @@ struct WebsitePreviewSheet: View {
                             .edgesIgnoringSafeArea(.bottom)
                     } else {
                         Text("Invalid URL")
-                            .foregroundColor(.red)
+                            .font(.body)
+                            .foregroundColor(Color.actionDelete)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                     
@@ -52,6 +53,7 @@ struct WebsitePreviewSheet: View {
                 }
             }
         }
+        .tint(Color.brandPrimary)
         .interactiveDismissDisabled(onboardingStep == 2)
     }
 }

@@ -19,11 +19,10 @@ struct RecipeNLPService {
             throw NSError(domain: "RecipeNLPService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Apple Intelligence tidak tersedia di perangkat ini."])
         }
         
-        let lmSession = LanguageModelSession()
-        
         var previousContext: [String] = []
         
         for enText in englishInstructions {
+            let lmSession = LanguageModelSession()
             let taggerChunks = prechunkWithTagger(input: enText)
             
             let combinedInput = taggerChunks.joined(separator: ". ")

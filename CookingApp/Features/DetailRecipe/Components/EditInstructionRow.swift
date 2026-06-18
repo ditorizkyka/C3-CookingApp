@@ -30,7 +30,7 @@ struct EditInstructionRow: View {
                 HStack {
                     Text("\(displayNumber)")
                         .font(.footnote)
-                        .foregroundColor(Color.labelDark!)
+                        .foregroundColor(Color.labelDark)
                         .frame(width: 20, height: 20)
                         .background(Color.brandSecondary)
                         .clipShape(Circle())
@@ -77,10 +77,10 @@ struct EditInstructionRow: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: AppIcon.plusFill)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                         Text("Tambah Langkah Breakdown")
                             .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -106,14 +106,14 @@ struct EditBreakdownInstructionRow: View {
             }
 
             Circle()
-                .fill(Color.labelDark!)
+                .fill(Color.labelDark)
                 .frame(width: 3, height: 3)
                 .padding(.horizontal, 10)
                 .padding(.top, 6)
             
             TextField("Tulis sub-langkah...", text: $subInstruction.text, axis: .vertical)
                 .font(.subheadline)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .scrollDismissesKeyboard(.immediately)
                 .submitLabel(.done)
@@ -140,7 +140,7 @@ struct PhotoPickerHStack: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)
-                        .foregroundColor(Color.labelLight!)
+                        .foregroundColor(Color.labelLight)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     
                     if selectedImage != nil {
@@ -151,9 +151,9 @@ struct PhotoPickerHStack: View {
                         }) {
                             Image(systemName: "minus")
                                 .font(.caption2.bold())
-                                .foregroundColor(Color.labelLightest!)
+                                .foregroundColor(Color.labelLightest)
                                 .padding(8)
-                                .background(Color.actionDelete!)
+                                .background(Color.actionDelete)
                                 .clipShape(Circle())
                         }
                         .offset(x: 10, y: -10)
@@ -168,26 +168,26 @@ struct PhotoPickerHStack: View {
                         ZStack(alignment: .bottomTrailing) {
                             Image(systemName: "photo")
                                 .font(.system(size: 40))
-                                .foregroundColor(Color.labelLight!)
+                                .foregroundColor(Color.labelLight)
                             
                             Image(systemName: AppIcon.plusFill)
                                 .font(.title3)
-                                .foregroundColor(Color.labelLight!)
-                                .background(Color.surfaceElevated!)
+                                .foregroundColor(Color.labelLight)
+                                .background(Color.surfaceElevated)
                                 .clipShape(Circle())
                                 .offset(x: 5, y: 5)
                         }
                         
                         Text("Tambah Foto")
                             .font(.caption)
-                            .foregroundColor(Color.labelLight!)
+                            .foregroundColor(Color.labelLight)
                     }
                     .frame(width: 100, height: 100)
-                    .background(Color.surfaceElevated!)
+                    .background(Color.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     .overlay(
                         RoundedRectangle(cornerRadius: Radius.small)
-                            .stroke(Color.labelLight!, style: StrokeStyle(lineWidth: 1, dash: [5]))
+                            .stroke(Color.labelLight, style: StrokeStyle(lineWidth: 1, dash: [5]))
                     )
                 }
                 .buttonStyle(.plain)

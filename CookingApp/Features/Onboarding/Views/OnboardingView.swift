@@ -16,9 +16,9 @@ struct OnboardingView: View {
             VStack(alignment: .leading) {
                 Image(systemName: "waveform.badge.microphone")
                     .font(Font.xXLargeTitle)
-                    .foregroundStyle(Color.brandAccent!)
+                    .foregroundStyle(Color.brandAccent)
                     .padding()
-                    .background(Color.labelLight!.opacity(0.05))
+                    .background(Color.labelLight.opacity(0.05))
                     .clipShape(RoundedRectangle(cornerRadius: Radius.small))
             }
             
@@ -56,7 +56,7 @@ struct OnboardingView: View {
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
-            RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: 400, width: 600, height: 600)
+            RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: 400, width: 600, height: 600)
             .ignoresSafeArea()
         )
     }

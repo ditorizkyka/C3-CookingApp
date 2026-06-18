@@ -25,16 +25,16 @@ struct BreakdownLoadingView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 48))
-                        .foregroundColor(Color.brandSecondary!)
+                        .foregroundColor(Color.brandSecondary)
                     
                     Text("Gagal Memproses Langkah")
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color.labelDark!)
+                        .foregroundColor(Color.labelDark)
                     
                     Text(errorMessage)
                         .font(.body)
-                        .foregroundColor(Color.labelLight!)
+                        .foregroundColor(Color.labelLight)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                     
@@ -49,7 +49,7 @@ struct BreakdownLoadingView: View {
                         Text("Lanjutkan Tanpa Rincian")
                             .font(.body)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color.brandPrimary!)
+                            .foregroundColor(Color.brandPrimary)
                     }
                     .padding(.top, 8)
                 }
@@ -57,15 +57,15 @@ struct BreakdownLoadingView: View {
                 // Loading state
                 ProgressView()
                     .scaleEffect(2)
-                    .tint(Color.brandPrimary!)
+                    .tint(Color.brandPrimary)
                 Text("Memproses Langkah Memasak...")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelDark!)
+                    .foregroundColor(Color.labelDark)
                 
                 Text("Menerjemahkan dan menyusun panduan")
                     .font(.subheadline)
-                    .foregroundColor(Color.labelLight!)
+                    .foregroundColor(Color.labelLight)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

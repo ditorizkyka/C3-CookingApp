@@ -15,7 +15,7 @@ struct HomeRecipeListSection: View {
             HStack {
                 Text("Resep")
                     .font(Font.headline)
-                    .foregroundStyle(Color.labelLight!)
+                    .foregroundStyle(Color.labelLight)
                 
                 Spacer()
                 
@@ -24,7 +24,7 @@ struct HomeRecipeListSection: View {
                 } label: {
                     Text("Lihat Semua")
                         .font(Font.subheadline)
-                        .foregroundStyle(Color.brandAccent!)
+                        .foregroundStyle(Color.brandAccent)
                 }
             }
             .padding(.horizontal, 14)
@@ -94,10 +94,10 @@ struct HomeRecipeListSection: View {
                         Text("Tutup")
                     }
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(Color.surfaceDefault!)
+                    .foregroundColor(Color.surfaceDefault)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
-                    .background(Color.labelDark!.opacity(0.8))
+                    .background(Color.labelDark.opacity(0.8))
                     .clipShape(Capsule())
                     .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
                 }

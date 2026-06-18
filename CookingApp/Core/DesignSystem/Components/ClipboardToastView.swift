@@ -22,7 +22,7 @@ struct ClipboardToastView: View {
             // MARK: - Icon
             Image(systemName: "link.badge.plus")
                 .font(.title2)
-                .foregroundStyle(Color.brandPrimary!)
+                .foregroundStyle(Color.brandPrimary)
             
             // MARK: - Text
             VStack(alignment: .leading, spacing: 2) {
@@ -45,10 +45,10 @@ struct ClipboardToastView: View {
                 Text("Import")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelLightest!)
+                    .foregroundColor(Color.labelLightest)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.brandPrimary!)
+                    .background(Color.brandPrimary)
                     .clipShape(Capsule())
             }
         }

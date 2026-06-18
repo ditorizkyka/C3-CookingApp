@@ -38,7 +38,7 @@ struct InstructionDetailCard: View {
                     
                     HStack(alignment: .top, spacing: 12) {
                         Circle()
-                            .fill(isActiveSub ? (Color.ovalGreen ?? .green) : Color.gray.opacity(0.3))
+                            .fill(isActiveSub ? (Color.ovalGreen) : Color.gray.opacity(0.3))
                             .frame(width: 4, height: 4)
                             .padding(.top, 8)
                         

@@ -17,10 +17,10 @@ struct ButtonAddInstructions: View {
         } label: {
             HStack {
                 Image(systemName: AppIcon.plusFill)
-                    .foregroundStyle(Color.brandPrimary!)
+                    .foregroundStyle(Color.brandPrimary)
                 Text("Tambah Langkah")
                     .font(.body)
-                    .foregroundStyle(Color.brandPrimary!)
+                    .foregroundStyle(Color.brandPrimary)
                 Spacer()
             }
             .padding(.horizontal,10)

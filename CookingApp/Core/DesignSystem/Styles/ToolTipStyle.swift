@@ -15,7 +15,7 @@ struct ToolTipStyle: TipViewStyle {
             if let image = configuration.image {
                 image
                     .font(Font.title)
-                    .foregroundStyle(Color.brandAccent!)
+                    .foregroundStyle(Color.brandAccent)
             }
             
             // Content
@@ -43,7 +43,7 @@ struct ToolTipStyle: TipViewStyle {
                         Button(action: action.handler) {
                             action.label()
                                 .font(Font.subheadline)
-                                .foregroundStyle(Color.brandAccent!)
+                                .foregroundStyle(Color.brandAccent)
                         }
                     }
                 }

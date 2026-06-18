@@ -14,8 +14,8 @@ struct HomeEmptyStateCard: View {
             Image(systemName: "book.pages.fill")
                 .font(Font.xLargeTitle)
                 .padding(13)
-                .foregroundStyle(Color.brandPrimary!)
-                .background(Color.brandPrimary!.opacity(0.15))
+                .foregroundStyle(Color.brandPrimary)
+                .background(Color.brandPrimary.opacity(0.15))
                 .clipShape(RoundedRectangle(cornerRadius: Radius.infinity))
             
             // Content
@@ -27,7 +27,7 @@ struct HomeEmptyStateCard: View {
                 // Subtitle
                 Text("Mulai buat resep. Coba memasak dengan panduan suara!")
                     .font(Font.headline)
-                    .foregroundStyle(Color.labelLight!)
+                    .foregroundStyle(Color.labelLight)
             }
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -38,7 +38,7 @@ struct HomeEmptyStateCard: View {
         .overlay(
             RoundedRectangle(cornerRadius: Radius.large)
                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [8, 8]))
-                .foregroundColor(Color.brandPrimary!)
+                .foregroundColor(Color.brandPrimary)
         )
     }
 }

@@ -23,7 +23,7 @@ struct RecipeCard: View {
             HStack {
                 Text(recipeTitle)
                     .font(Font.headline)
-                    .foregroundStyle(Color.labelLightest!)
+                    .foregroundStyle(Color.labelLightest)
                     .lineLimit(2)
                 
                 Spacer()
@@ -92,7 +92,7 @@ struct RecipeCard: View {
         .contentShape(RoundedRectangle(cornerRadius: Radius.large))
         .overlay(
             RoundedRectangle(cornerRadius: Radius.large)
-                .stroke(Color.surfaceElevated ?? .gray, lineWidth: 1.5)
+                .stroke(Color.surfaceElevated, lineWidth: 1.5)
         )
         
     }

@@ -34,7 +34,7 @@ struct DisclosureStyle: DisclosureGroupStyle {
                 } label: {
                     Image(systemName: hasSubInstructions ? (configuration.isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill") : "chevron.down.circle")
                         .font(.title2)
-                        .foregroundStyle(hasSubInstructions ? (Color.brandPrimary ?? .green) : Color.gray.opacity(0.5))
+                        .foregroundStyle(hasSubInstructions ? (Color.brandPrimary) : Color.gray.opacity(0.5))
                 }
                 .disabled(!hasSubInstructions)
                 .padding(.top, 16)
@@ -50,7 +50,7 @@ struct DisclosureStyle: DisclosureGroupStyle {
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(isCurrent ? (Color.brandPrimary ?? .green) : Color.clear, lineWidth: 2)
+                .stroke(isCurrent ? (Color.brandPrimary) : Color.clear, lineWidth: 2)
         )
     }
 }
