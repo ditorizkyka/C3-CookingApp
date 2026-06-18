@@ -9,6 +9,7 @@ import SwiftUI
 
 struct InstructionHelperCompleteView: View {
     @StateObject private var viewModel: InstructionHelperCompleteViewModel
+    @StateObject private var speechManager = SpeechManager()
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.popToRoot) private var popToRoot
@@ -50,6 +51,13 @@ struct InstructionHelperCompleteView: View {
             }
             .ignoresSafeArea()
         )
+        .onAppear {
+            let textToRead = "Horee, Masakanmu sudah siap! \(viewModel.recipe.title)."
+            speechManager.speak(text: textToRead)
+        }
+        .onDisappear {
+            speechManager.stopSpeaking()
+        }
     }
 }
 
