@@ -4,6 +4,7 @@ struct RecipeGridSearchResultView: View {
     var searchQuery: String
     var filteredRecipes: [Recipe]
     var onTapRecipe: (Recipe) -> Void
+    var onDeleteRecipe: ((Recipe) -> Void)? = nil
     
     var body: some View {
         if filteredRecipes.isEmpty {
@@ -39,6 +40,14 @@ struct RecipeGridSearchResultView: View {
                         )
                         .onTapGesture {
                             onTapRecipe(recipe)
+                        }
+                        // 👇 Di sini keajaibannya terjadi
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                onDeleteRecipe?(recipe)
+                            } label: {
+                                Label("Delete Recipe", systemImage: "trash")
+                            }
                         }
                     }
                 }

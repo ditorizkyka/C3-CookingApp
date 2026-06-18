@@ -95,10 +95,10 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
         }
         
         // Validate it's a Cookpad URL
-        guard CookpadScraperService.isValidCookpadURL(cleaned) else {
-            print("❌ [SCRAPER] Not a Cookpad URL")
-            throw ScraperError.notCookpadURL
-        }
+        // guard CookpadScraperService.isValidCookpadURL(cleaned) else {
+        //     print("❌ [SCRAPER] Not a Cookpad URL")
+        //     throw ScraperError.notCookpadURL
+        // }
         
         print("✅ [SCRAPER] URL validated. Loading page with WKWebView...")
         
@@ -211,9 +211,10 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
             
             if let jsonString = result as? String, let jsonData = jsonString.data(using: .utf8) {
                 print("📦 [SCRAPER] Raw JSON found (\(jsonData.count) bytes)")
-                // Print first 500 chars of raw JSON for debugging
-                let preview = String(jsonString.prefix(500))
-                print("📦 [SCRAPER] JSON preview: \(preview)\(jsonString.count > 500 ? "..." : "")")
+                // Print full JSON result as requested
+                print("📦 [SCRAPER] Full JSON result:\n\(jsonString)")
+                // let preview = String(jsonString.prefix(500))
+                // print("📦 [SCRAPER] JSON preview: \(preview)\(jsonString.count > 500 ? "..." : "")")
                 
                 do {
                     let decoder = JSONDecoder()

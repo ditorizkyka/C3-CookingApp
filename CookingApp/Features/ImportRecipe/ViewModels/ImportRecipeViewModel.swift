@@ -57,10 +57,10 @@ class ImportRecipeViewModel: ObservableObject {
         }
         
         // Check if it's a Cookpad URL
-        guard CookpadScraperService.isValidCookpadURL(urlString) else {
-            errorMessage = "Saat ini hanya mendukung link dari Cookpad. Pastikan link berasal dari cookpad.com."
-            return
-        }
+        // guard CookpadScraperService.isValidCookpadURL(urlString) else {
+        //     errorMessage = "Saat ini hanya mendukung link dari Cookpad. Pastikan link berasal dari cookpad.com."
+        //     return
+        // }
         
         // Update link with the cleaned/prefixed version
         link = urlString

@@ -5,13 +5,13 @@ import UniformTypeIdentifiers
 
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
-
+    
     @StateObject private var viewModel: DetailRecipeViewModel
-
+    
     var recipeAssetImage: String? = nil
     var isFromImport: Bool = false
     var onDismiss: (() -> Void)? = nil
-
+    
     @State private var showInstructionHelper: Bool = false
     @State private var showImportConfirmation: Bool = false
     @State private var showEditBackConfirmation: Bool = false
@@ -35,7 +35,7 @@ struct DetailRecipeView: View {
         self.isFromImport = isFromImport
         self.onDismiss = onDismiss
     }
-       
+    
     var body: some View {
         List {
             // MARK: - Header (Image, Title, Button)
@@ -47,14 +47,14 @@ struct DetailRecipeView: View {
                     } else {
                         RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
                         Text(viewModel.recipe.title)
-                            
+                        
                             .padding(.top, 10)
                             .padding(.bottom, 10)
                             .font(.title)
                             .multilineTextAlignment(.leading)
                             .frame(minHeight: 48)
                     }
-
+                    
                     
                     
                 }
@@ -90,33 +90,33 @@ struct DetailRecipeView: View {
             
             // MARK: - Bahan-bahan
             ingredientsSection
-
+            
             // MARK: - Langkah-langkah
             instructionsSection
-
+            
             Section(
             ) {
-               if viewModel.isEdited {
+                if viewModel.isEdited {
                     TotalPortionRow(selectedPortion: $viewModel.recipe.portion)
                     TotalDurationRow(selectedDuration: $viewModel.recipe.durationInMinutes)
-               } else {
-                   HStack {
-                       Text("Jumlah Porsi")
-                           .font(.body)
-                           .foregroundStyle(Color.labelLight!)
-                       
-                       Spacer()
-                       Text("\(viewModel.recipe.portion) Orang")
-                   }
-                   HStack {
-                       Text("Lama Memasak")
-                           .font(.body)
-                           .foregroundStyle(Color.labelLight!)
-                       
-                       Spacer()
-                       Text("\(viewModel.recipe.durationInMinutes) Menit")
-                   }
-               }
+                } else {
+                    HStack {
+                        Text("Jumlah Porsi")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight!)
+                        
+                        Spacer()
+                        Text("\(viewModel.recipe.portion) Orang")
+                    }
+                    HStack {
+                        Text("Lama Memasak")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight!)
+                        
+                        Spacer()
+                        Text("\(viewModel.recipe.durationInMinutes) Menit")
+                    }
+                }
                 
             }
             
@@ -129,11 +129,22 @@ struct DetailRecipeView: View {
                             }
                         }
                     }
+                } else {
+                    Button(role: .destructive) {
+                        showDeleteRecipeConfirmation = true
+                    } label: {
+                        Text("Hapus")
+                            .font(.headline) // Membuat teks lebih tebal
+                            .frame(maxWidth: .infinity) // Membuat background membentang penuh (Infinity)
+                            .padding(.vertical, 8) // [ADJUSTABLE] Padding dalam: Mengatur ketebalan/tinggi tombol
+                    }
+                    .buttonStyle(.borderedProminent) // Gaya 2: Background solid otomatis
+                    //                            .padding(.hori)
                 }
             }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowSeparator(.hidden)
             
         }
         .listStyle(.insetGrouped)
@@ -161,7 +172,7 @@ struct DetailRecipeView: View {
                         } else {
                             print("✅ User chose to save the imported recipe")
                             handleDismiss()
-//                            showImportConfirmation = true
+                            //                            showImportConfirmation = true
                         }
                     } label: {
                         HStack(spacing: 4) {
@@ -172,7 +183,7 @@ struct DetailRecipeView: View {
                     }
                 }
             }
-
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.isEdited {
                     Button {
@@ -192,14 +203,20 @@ struct DetailRecipeView: View {
                             .foregroundStyle(Color.brandPrimary!)
                     }
                 } else {
-                    Menu("More", systemImage: "ellipsis") {
-                        Button("Ubah Resep", systemImage: "pencil") {
-                            viewModel.beginEditing()
-                        }
-                        Button("Hapus Resep", systemImage: "trash", role: .destructive) {
-                            showDeleteRecipeConfirmation = true
-                        }
+                    Button {
+                        viewModel.beginEditing()
+                    }label : {
+                        Text("Ubah")
                     }
+                    
+                    //                    Menu("More", systemImage: "ellipsis") {
+                    //                        Button("Ubah Resep", systemImage: "pencil") {
+                    //                            viewModel.beginEditing()
+                    //                        }
+                    //                        Button("Hapus Resep", systemImage: "trash", role: .destructive) {
+                    //                            showDeleteRecipeConfirmation = true
+                    //                        }
+                    //                    }
                 }
             }
         }
@@ -207,17 +224,6 @@ struct DetailRecipeView: View {
             InstructionHelperView(recipe: viewModel.recipe, onGoToHome: {
                 handleDismiss()
             })
-        }
-        .alert("Simpan Resep Ini?", isPresented: $showImportConfirmation) {
-            Button("Simpan dan Masak Nanti", role: .none) {
-                modelContext.insert(viewModel.recipe)
-                try? modelContext.save()
-                print("✅ User chose to save the imported recipe")
-                handleDismiss()
-            }
-            Button("Nanti", role: .cancel) {}
-        } message: {
-            Text("Apakah kamu ingin menyimpan resep yang sudah diimpor ke koleksimu?")
         }
         // Back navigation while editing — confirm save or discard.
         .alert("Simpan Perubahan?", isPresented: $showEditBackConfirmation) {
@@ -262,7 +268,7 @@ struct DetailRecipeView: View {
             Text("Resep ini akan dihapus secara permanen.")
         }
     }
-
+    
     private func handleDismiss() {
         if let onDismiss = onDismiss {
             onDismiss()
@@ -270,9 +276,9 @@ struct DetailRecipeView: View {
             dismiss()
         }
     }
-
+    
     // MARK: - Sections (extracted to keep the body type-checkable)
-
+    
     @ViewBuilder
     private var ingredientsSection: some View {
         Section(header: Text("Bahan-bahan")
@@ -294,7 +300,7 @@ struct DetailRecipeView: View {
                     }
                 }
             }
-
+            
             if viewModel.isEdited {
                 // Bug 2 Fix: Tambah Bahan
                 ButtonAddIngredientsRow(isGroup: false) {
@@ -310,7 +316,7 @@ struct DetailRecipeView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func groupIngredientRows(_ ingredient: Ingredient) -> some View {
         // --- Group Header ---
@@ -340,7 +346,7 @@ struct DetailRecipeView: View {
                 .padding(.bottom, 2)
                 .listRowSeparator(.hidden)
         }
-
+        
         // --- Sub-ingredients ---
         ForEach(ingredient.groupIngredients ?? []) { sub in
             if viewModel.isEdited {
@@ -380,7 +386,7 @@ struct DetailRecipeView: View {
             
         }
     }
-
+    
     @ViewBuilder
     private func singleIngredientRow(_ ingredient: Ingredient) -> some View {
         if viewModel.isEdited {
@@ -397,7 +403,7 @@ struct DetailRecipeView: View {
             IngredientRowView(quantity: ingredient.quantity, name: ingredient.name, isSubItem: false)
         }
     }
-
+    
     @ViewBuilder
     private var instructionsSection: some View {
         Section(header: Text("Langkah-langkah")
@@ -427,7 +433,7 @@ struct DetailRecipeView: View {
                     }
                 }
             }
-
+            
             if viewModel.isEdited {
                 Button {
                     withAnimation { viewModel.addInstruction() }
@@ -446,9 +452,9 @@ struct DetailRecipeView: View {
             }
         }
     }
-
+    
     // MARK: - Edit Helpers
-
+    
     /// Live bindings to the recipe's relationship arrays (used by the reorder drop delegate).
     private var ingredientsBinding: Binding<[Ingredient]> {
         Binding(
@@ -456,14 +462,14 @@ struct DetailRecipeView: View {
             set: { viewModel.recipe.ingredients = $0 }
         )
     }
-
+    
     private var instructionsBinding: Binding<[Instruction]> {
         Binding(
             get: { viewModel.recipe.instructions },
             set: { viewModel.recipe.instructions = $0 }
         )
     }
-
+    
     /// Build a `Binding<String>` from a model object + key path. The binding captures
     /// the object reference (a class), so it remains valid regardless of array index.
     private func stringBinding<Object: AnyObject>(
@@ -475,8 +481,8 @@ struct DetailRecipeView: View {
             set: { object[keyPath: keyPath] = $0 }
         )
     }
-
-
+    
+    
     // MARK: - ViewBuilders untuk Bahan
     
     @ViewBuilder
@@ -491,7 +497,7 @@ struct DetailRecipeView: View {
             Text(ingredient.name)
                 .font(.body)
         }
-//        .padding(.vertical, 4)
+        //        .padding(.vertical, 4)
     }
     
     @ViewBuilder
@@ -515,7 +521,7 @@ struct DetailRecipeView: View {
                 
                 Spacer()
             }
-//            .padding(.vertical, 4)
+            //            .padding(.vertical, 4)
         }
     }
 }
@@ -551,7 +557,7 @@ struct IngredientRowView: View {
             
             Spacer()
         }
-//        .padding(.vertical, 5)
+        //        .padding(.vertical, 5)
         .padding(.leading, isSubItem ? 8 : 0)
     }
 }
@@ -679,11 +685,11 @@ struct SeparatorView: View {
             Instruction(sequenceNumber: 4, text: "Masukkan nasi, kecap, garam, dan merica. Aduk rata.")
         ]
     )
-
+    
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: Recipe.self, configurations: config)
     container.mainContext.insert(dummyRecipe)
-
+    
     return NavigationStack {
         DetailRecipeView(recipe: dummyRecipe)
     }
