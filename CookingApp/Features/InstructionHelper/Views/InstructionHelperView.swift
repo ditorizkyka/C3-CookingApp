@@ -39,8 +39,15 @@ struct InstructionHelperView: View {
                     .padding(.horizontal, 32)
                 }
                 
-                PulsingMicView(audioLevel: speechManager.audioLevel, isListening: speechManager.isListening)
-                
+                PulsingMicView(
+                    audioLevel: speechManager.audioLevel,
+                    isListening: speechManager.isListening,
+                    isSpeaking: speechManager.isSpeaking
+                )
+
+                // Status label — bisa dibaca sekilas dari jauh saat masak
+                phaseStatusLabel
+
                 VoiceCommandGuideCard(guides: viewModel.guides)
             }
             .padding()
@@ -68,10 +75,16 @@ struct InstructionHelperView: View {
         .background {
             VStack {
                 RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -300, width: 600, height: 600)
-                
+
                 Spacer()
             }
             .ignoresSafeArea()
+        }
+        .overlay {
+            ListeningEdgeGlow(
+                isListening: speechManager.isListening,
+                isSpeaking: speechManager.isSpeaking
+            )
         }
         .overlay {
             if viewModel.showIntro {
@@ -144,14 +157,46 @@ struct InstructionHelperView: View {
         .onDisappear {
             viewModel.cleanUp(speechManager: speechManager)
         }
-        .onChange(of: speechManager.isListening) { _, isListening in
-            if isListening {
-                speechManager.playBeepSound()
-            }
-        }
         .onChange(of: speechManager.recognizedText) { _, newValue in
             viewModel.handleRecognizedText(newValue, speechManager: speechManager)
         }
+    }
+
+    @ViewBuilder
+    private var phaseStatusLabel: some View {
+        let isActive = speechManager.isListening || speechManager.isSpeaking
+        let label   = speechManager.isListening ? "Mendengarkan..." : "Menjawab..."
+        let color   = speechManager.isListening
+            ? Color.brandAccent ?? .green
+            : Color.brandSecondary ?? .yellow
+
+        ZStack {
+            if isActive {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(color)
+                        .frame(width: 8, height: 8)
+
+                    Text(label)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(color)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            Capsule()
+                                .strokeBorder(color.opacity(0.4), lineWidth: 1)
+                        )
+                )
+                .transition(.scale(scale: 0.85).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: speechManager.isListening)
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: speechManager.isSpeaking)
+        .frame(height: 36)
     }
 }
 

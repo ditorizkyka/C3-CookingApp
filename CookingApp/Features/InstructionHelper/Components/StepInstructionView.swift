@@ -34,8 +34,10 @@ struct StepInstructionView: View {
             // Instruction
             Text(instruction)
                 .font(Font.largeTitle)
+                .minimumScaleFactor(0.5)
                 .multilineTextAlignment(.center)
-                .lineLimit(4)
+                .lineLimit(5)
+                .frame(height: 180, alignment: .center)
         }
     }
 }
