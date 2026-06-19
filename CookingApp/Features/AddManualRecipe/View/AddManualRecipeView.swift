@@ -419,8 +419,9 @@ struct GroupedIngredientSectionView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 10)
+                .padding(.leading,25)
             }
-            .listRowBackground(Color.surfaceBrand)
+            
         }
     }
 }

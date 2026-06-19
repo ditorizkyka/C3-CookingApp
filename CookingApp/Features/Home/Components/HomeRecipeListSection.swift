@@ -52,6 +52,7 @@ struct HomeRecipeListSection: View {
                             .padding(.top, viewModel.selectedIndex != nil && index == viewModel.selectedIndex! + 1 ? 160 : 0)
                             .onTapGesture {
                                 if viewModel.selectedIndex == index {
+                                    viewModel.importedRecipe = nil
                                     viewModel.navigateToDetail = true
                                 } else {
                                     withAnimation(.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0)) {
