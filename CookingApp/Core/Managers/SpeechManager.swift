@@ -23,7 +23,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
     
-    // Timer untuk force-refresh mic agar tidak mabuk karena noise
+    // Timer untuk Refresh Session
     private var refreshTimer: Timer?
     
     // State UI
@@ -39,7 +39,8 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
             }
         }
     }
-    // Audio Player for loud beep
+    
+    // Audio Player
     private var audioPlayer: AVAudioPlayer?
     
     override init() {
@@ -81,23 +82,23 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
     func speak(text: String) {
         guard !isMuted else { return }
         
-        // Stop listening right away to prevent overlapping audio issues
+        // stop mendengarkan
         stopListening()
         
-        // Mematikan suara
+        // stop berbicara
         synthesizer.stopSpeaking(at: .immediate)
         
-        // Membuat utterance (ucapan) dari teks yang dikirim
+        // membuat utterance (ucapan) dari teks yang dikirim
         let utterance = AVSpeechUtterance(string: text)
         
-        // Atur bahasa
+        // bahasa
         utterance.voice = AVSpeechSynthesisVoice(language: "id-ID")
         
-        // Atur kecepatan dan nada
+        // mengatur kecepatan dan nada
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         utterance.pitchMultiplier = 1.0
         
-        // Minta bicara
+        // mulai berbicara
         synthesizer.speak(utterance)
     }
     
@@ -105,7 +106,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         synthesizer.stopSpeaking(at: .immediate)
     }
     
-    // Dipanggil otomatis saat TTS mulai berbicara
+    // dipanggil otomatis saat TTS mulai berbicara
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
         stopListening()
         DispatchQueue.main.async {
@@ -114,7 +115,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         }
     }
     
-    // Dipanggil otomatis saat TTS selesai berbicara
+    // dipanggil otomatis saat TTS selesai berbicara
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         DispatchQueue.main.async { self.isSpeaking = false }
         if shouldBeListening {
@@ -126,7 +127,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         }
     }
     
-    // Dipanggil otomatis saat TTS dibatalkan
+    // dipanggil otomatis saat TTS dibatalkan
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
         DispatchQueue.main.async { self.isSpeaking = false }
         if shouldBeListening {
@@ -147,27 +148,27 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         }
         
         do {
-            // Minta izin microphone dan pastikan bisa play suara (TTS)
+            // ngecek izin microphone dan pastikan bisa play suara (TTS)
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, mode: .default, options: [.duckOthers, .defaultToSpeaker])
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             
-            // Buat wadah penampung suara
+            // buat wadah penampung suara
             recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
             guard let recognitionRequest = recognitionRequest else {
                 return
             }
             
-            // Biar hasilnya keluar satu-satu ga nunggu selesai ngomong
+            // biar hasilnya keluar satu-satu ga nunggu selesai ngomong
             recognitionRequest.shouldReportPartialResults = true
             
-            // memaksa pemrosesan di dalam HP (tanpa internet) supaya kebal terhadap putus koneksi karena bising
+            // memaksa pemrosesan di dalam HP tanpa internet
             recognitionRequest.requiresOnDeviceRecognition = true
             
-            // Prepare Mic
+            // menyiapkan microphone
             let inputNode = audioEngine.inputNode
             
-            // Mulai menebak kata
+            // mulai menebak kata
             guard let recognizer = speechRecognizer, recognizer.isAvailable else {
                 self.errorMessage = "Speech recognizer tidak tersedia."
                 return
@@ -175,9 +176,8 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
             
             recognitionTask = recognizer.recognitionTask(with: recognitionRequest) { result, error in
                 if let result = result {
-                    // Update teks yang kedeteksi ke UI
                     DispatchQueue.main.async {
-                        // Ambil string terakhir yang didengar, ubah ke huruf kecil biar gampang dicocokkan
+                        // mengambil dan append string terakhir yang didengar, diubah ke huruf kecil biar gampang dicocokkan
                         self.recognizedText = result.bestTranscription.formattedString.lowercased()
                     }
                 }
@@ -188,19 +188,19 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
                     if self.shouldBeListening && !self.synthesizer.isSpeaking {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             if self.shouldBeListening && !self.synthesizer.isSpeaking {
-                                self.startListening(playBeep: false) // Silent auto-restart
+                                self.startListening(playBeep: false)
                             }
                         }
                     }
                 }
             }
             
-            // Sambung mic ke wadah penampung (recognition request) & hitung audio level
+            // menyambungkan mic ke wadah penampung (recognition request) & menghitung audio level
             let recordingFormat = inputNode.outputFormat(forBus: 0)
             inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
                 self.recognitionRequest?.append(buffer)
                 
-                // Menghitung audio level
+                // menghitung audio level
                 guard let channelData = buffer.floatChannelData?[0] else { return }
                 let frames = Int(buffer.frameLength)
                 var sumSquares: Float = 0.0
@@ -216,7 +216,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
                 }
             }
             
-            // Nyalain engine
+            // menyalakan engine
             audioEngine.prepare()
             try audioEngine.start()
             
@@ -224,7 +224,6 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
                 self.isListening = true
                 self.errorMessage = nil
                 
-                // Bunyikan beep HANYA jika playBeep = true (bukan dari auto-refresh)
                 if playBeep {
                     self.playBeepSound()
                 }
@@ -259,7 +258,6 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
         }
     }
     
-    // Play loud beep sound
     func playBeepSound() {
         let soundURL = URL(fileURLWithPath: "/System/Library/Audio/UISounds/begin_record.caf")
         do {
@@ -275,17 +273,15 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate, @u
     private func scheduleRefreshTimer() {
         refreshTimer?.invalidate() 
         
-        // Tiap 15 detik, restart paksa mic-nya
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: false) { [weak self] _ in
             guard let self = self, self.shouldBeListening, !self.synthesizer.isSpeaking else { return }
             
-            print("🔄 Force refreshing speech recognizer (mencuci telinga dari noise)...")
+            print("Memaksa refresh speech recognizer...")
             self.stopListening()
             
-            // Kasih jeda sekian milidetik biar engine beneran mati, lalu nyalain lagi
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 if self.shouldBeListening && !self.synthesizer.isSpeaking {
-                    self.startListening(playBeep: false) // Silent force refresh
+                    self.startListening(playBeep: false)
                 }
             }
         }
