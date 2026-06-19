@@ -73,3 +73,26 @@ struct NavigationControlsView: View {
         .padding(.bottom, 16)
     }
 }
+
+#Preview {
+    VStack(spacing: 20) {
+        NavigationControlsView(
+            currentPage: 1,
+            totalPages: 3,
+            onPrevious: {},
+            onNext: {},
+            onRepeat: {}
+        )
+        
+        NavigationControlsView(
+            currentPage: 2,
+            totalPages: 3,
+            onPrevious: {},
+            onNext: {},
+            onRepeat: {},
+            onComplete: {}
+        )
+    }
+    .padding()
+    .background(Color.surfaceElevated)
+}

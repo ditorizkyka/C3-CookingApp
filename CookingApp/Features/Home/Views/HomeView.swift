@@ -33,7 +33,6 @@ struct HomeView: View {
                     SearchStateObserver(isSearchActive: $viewModel.isSearchActive)
                     
                     if viewModel.isSearchActive {
-                        // Tampilan saat search aktif (mirip RecipeLibrary)
                         RecipeGridSearchResultView(
                             searchQuery: viewModel.searchRecipe,
                             filteredRecipes: viewModel.filteredRecipes(from: allRecipes),
@@ -46,16 +45,12 @@ struct HomeView: View {
                             }
                         )
                     } else {
-                        // Tampilan default HomeView
-                        
-                        // Add Recipe Buttons Extracted
                         HomeActionButtons(
                             viewModel: viewModel,
                             onboardingStep: $onboardingStep,
                             buttonFrame: $buttonFrame
                         )
                         
-                        // Recipe List Section Extracted
                         HomeRecipeListSection(
                             viewModel: viewModel,
                             allRecipes: allRecipes
@@ -103,7 +98,6 @@ struct HomeView: View {
                     RecipeLibraryView()
                 }
                 
-                // MARK: - Clipboard Toast pinned to bottom
                 VStack {
                     Spacer()
                     if clipboardManager.showClipboardToast, let detectedURL = clipboardManager.detectedURL {
@@ -130,7 +124,6 @@ struct HomeView: View {
             viewModel.resetNavigation()
         }
         .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.large)
-        // MARK: - Clipboard → Website Preview Sheet
         .sheet(isPresented: $viewModel.showWebPreviewFromClipboard) {
             WebsitePreviewSheet(
                 urlString: viewModel.importedLink,
@@ -148,7 +141,6 @@ struct HomeView: View {
         .onDisappear {
             clipboardManager.stopMonitoring()
         }
-        // Re-check clipboard immediately when app comes back to foreground
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 clipboardManager.checkNow()

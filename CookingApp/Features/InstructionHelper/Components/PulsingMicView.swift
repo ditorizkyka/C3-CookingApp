@@ -12,25 +12,21 @@ struct PulsingMicView: View {
         return idlePulse + audioScale
     }
 
-    // Warna luar (paling terang)
     private var outerColor: Color {
         if isSpeaking { return Color(red: 255/255, green: 210/255, blue: 80/255)  } // kuning cerah
         return Color(red: 237/255, green: 255/255, blue: 189/255)                   // hijau muda
     }
 
-    // Warna tengah
     private var midColor: Color {
         if isSpeaking { return Color(red: 255/255, green: 204/255, blue: 33/255)  } // kuning brandSecondary #FFCC21
         return Color(red: 213/255, green: 243/255, blue: 131/255)                   // hijau ovalGreen-mid
     }
 
-    // Warna dalam
     private var innerColor: Color {
         if isSpeaking { return Color(red: 220/255, green: 140/255, blue: 0/255)   } // oranye emas
         return Color(red: 189/255, green: 223/255, blue: 96/255)                    // hijau ovalGreen
     }
 
-    // Warna core (paling dalam)
     private var coreColor: Color {
         if isSpeaking { return Color(red: 120/255, green: 60/255, blue: 0/255)    } // coklat gelap
         return Color(red: 0/255, green: 72/255, blue: 32/255)                       // hijau brandPrimary

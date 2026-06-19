@@ -66,12 +66,10 @@ struct ListeningEdgeGlow: View {
         shimmer = 0.0
 
         if isListening {
-            // Pulsing: napas masuk-keluar menandakan "lagi dengerin"
             withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
                 pulse = 0.45
             }
         } else if isSpeaking {
-            // Shimmer berputar: gelombang menandakan "lagi ngomong"
             withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false)) {
                 shimmer = 1.0
             }
@@ -82,9 +80,16 @@ struct ListeningEdgeGlow: View {
     }
 }
 
-#Preview {
+#Preview("Listening State") {
     ZStack {
         Color.black.ignoresSafeArea()
         ListeningEdgeGlow(isListening: true, isSpeaking: false)
+    }
+}
+
+#Preview("Speaking State") {
+    ZStack {
+        Color.black.ignoresSafeArea()
+        ListeningEdgeGlow(isListening: false, isSpeaking: true)
     }
 }
