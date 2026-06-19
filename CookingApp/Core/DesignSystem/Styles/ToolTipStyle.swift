@@ -50,5 +50,7 @@ struct ToolTipStyle: TipViewStyle {
             }
         }
         .padding(20)
+        // Mencegah konten tooltip terpotong saat berada di dalam List
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

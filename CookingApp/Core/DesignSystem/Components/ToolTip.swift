@@ -14,6 +14,10 @@ struct ToolTip: Tip {
     var iconName: String
     var buttonTitle: String
     
+    var id: String {
+        tipTitle
+    }
+    
     var title: Text {
             Text(tipTitle)
         }

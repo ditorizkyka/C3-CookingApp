@@ -23,8 +23,6 @@ struct DetailRecipeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.popToRoot) private var popToRoot
     
-    let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
-    
     @AppStorage("onboardingStep") private var onboardingStep = 0
     
     // MARK: - Initializers
@@ -67,16 +65,16 @@ struct DetailRecipeView: View {
                 if !viewModel.isEdited {
                     ButtonApp(title: "Mulai Masak", action: {
                         if onboardingStep == 3 {
-                            onboardingStep = 4
+                            updateOnboarding(to: 4)
                         }
                         showInstructionHelper = true
                     })
                     .padding(.bottom, 8)
-                    .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top) { action in
+                    .conditionalTip(onboardingStep == 3, tip: StartCookTip(), arrowEdge: .top) { action in
                         if onboardingStep == 3 {
-                            onboardingStep = 4
+                            updateOnboarding(to: 4)
                         }
-                        startCookTip.invalidate(reason: .actionPerformed)
+                        StartCookTip().invalidate(reason: .actionPerformed)
                     }
                 }
             }
