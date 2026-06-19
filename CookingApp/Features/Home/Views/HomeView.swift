@@ -39,6 +39,7 @@ struct HomeView: View {
                             filteredRecipes: viewModel.filteredRecipes(from: allRecipes),
                             onTapRecipe: { recipe in
                                 if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
+                                    viewModel.importedRecipe = nil
                                     viewModel.selectedIndex = originalIndex
                                     viewModel.navigateToDetail = true
                                 }
@@ -155,6 +156,11 @@ struct HomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("PopToRoot"))) { _ in
             viewModel.resetNavigation()
+        }
+        .onChange(of: viewModel.navigateToDetail) { _, newValue in
+            if !newValue {
+                viewModel.importedRecipe = nil
+            }
         }
     }
 }

@@ -155,18 +155,18 @@ struct DetailRecipeView: View {
                             }
                         }
                     }
-                } else {
-                    Button(role: .destructive) {
-                        showDeleteRecipeConfirmation = true
-                    } label: {
-                        Text("Hapus")
-                            .font(.headline) // Membuat teks lebih tebal
-                            .frame(maxWidth: .infinity) // Membuat background membentang penuh (Infinity)
-                            .padding(.vertical, 8) // [ADJUSTABLE] Padding dalam: Mengatur ketebalan/tinggi tombol
-                    }
-                    .buttonStyle(.borderedProminent) // Gaya 2: Background solid otomatis
-                    //                            .padding(.hori)
-                }
+                } 
+////                    Button(role: .destructive) {
+////                        showDeleteRecipeConfirmation = true
+////                    } label: {
+////                        Text("Hapus")
+////                            .font(.headline) // Membuat teks lebih tebal
+////                            .frame(maxWidth: .infinity) // Membuat background membentang penuh (Infinity)
+////                            .padding(.vertical, 8) // [ADJUSTABLE] Padding dalam: Mengatur ketebalan/tinggi tombol
+////                    }
+////                    .buttonStyle(.borderedProminent) // Gaya 2: Background solid otomatis
+////                    //                            .padding(.hori)
+//                }
             }
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -420,6 +420,7 @@ struct DetailRecipeView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 10)
+                .padding(.leading,25)
             }
             
         }
