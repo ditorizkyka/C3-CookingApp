@@ -24,6 +24,7 @@ struct DetailRecipeView: View {
     @Environment(\.popToRoot) private var popToRoot
     
     @AppStorage("onboardingStep") private var onboardingStep = 0
+    @State private var isTipReady = false
     
     // MARK: - Initializers
     
@@ -70,11 +71,14 @@ struct DetailRecipeView: View {
                         showInstructionHelper = true
                     })
                     .padding(.bottom, 8)
-                    .conditionalTip(onboardingStep == 3, tip: StartCookTip(), arrowEdge: .top) { action in
+                    .conditionalTip(isTipReady, tip: StartCookTip(), arrowEdge: .top) { action in
                         if onboardingStep == 3 {
                             updateOnboarding(to: 4)
                         }
                         StartCookTip().invalidate(reason: .actionPerformed)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            handleDismiss()
+                        }
                     }
                 }
             }
@@ -264,6 +268,15 @@ struct DetailRecipeView: View {
             Button("Batal", role: .cancel) { }
         } message: {
             Text("Resep ini akan dihapus secara permanen.")
+        }
+        .onAppear {
+            guard onboardingStep == 3 else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isTipReady = true
+            }
+        }
+        .onDisappear {
+            isTipReady = false
         }
     }
     
