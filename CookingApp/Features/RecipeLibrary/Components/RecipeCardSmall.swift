@@ -38,7 +38,7 @@ struct RecipeCardSmall: View {
                 // Total Serving
                 HStack(spacing: 2) {
                     Image(systemName: "person.2.fill")
-                    Text("\(recipePortion)")
+                    Text(recipePortion == 0 ? "-" : "\(recipePortion)")
                 }
                 
                 // Time Serving
