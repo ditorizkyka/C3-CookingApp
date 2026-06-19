@@ -21,6 +21,7 @@ struct AddManualRecipeView: View {
     @State private var draggingInstructionID: UUID? = nil
     @State private var portion: Int = 1
     @State private var durationInMinutes: Int = 10
+    @State private var category: RecipeCategory = .lainnya
     @State private var coverImageData: Data? = nil
     
     // Photo picker
@@ -118,10 +119,11 @@ struct AddManualRecipeView: View {
             // MARK: - Langkah-langkah
             instructionsSection
 
-            // MARK: - Porsi & Durasi
+            // MARK: - Porsi & Durasi & Kategori
             Section {
                 TotalPortionRow(selectedPortion: $portion)
                 TotalDurationRow(selectedDuration: $durationInMinutes)
+                RecipeCategoryRow(selectedCategory: $category)
             }
             
             // MARK: - Simpan
@@ -333,7 +335,8 @@ struct AddManualRecipeView: View {
             portion: portion,
             durationInMinutes: durationInMinutes,
             ingredients: ingredients,
-            instructions: instructions
+            instructions: instructions,
+            category: category
         )
         
         print("✅ Manual Recipe Draft created: \"\(recipe.title)\" with \(ingredients.count) ingredients, \(instructions.count) instructions")

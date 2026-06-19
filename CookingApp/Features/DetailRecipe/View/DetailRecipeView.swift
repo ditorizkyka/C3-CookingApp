@@ -7,9 +7,9 @@ import UniformTypeIdentifiers
 struct DetailRecipeView: View {
     
     @StateObject private var viewModel: DetailRecipeViewModel
+    @State var isFromImport: Bool
     
     var recipeAssetImage: String? = nil
-    var isFromImport: Bool = false
     var onDismiss: (() -> Void)? = nil
     
     @State private var showInstructionHelper: Bool = false
@@ -31,7 +31,7 @@ struct DetailRecipeView: View {
     /// Initialize with a Recipe model (used for import flow and when passing a recipe directly)
     init(recipe: Recipe, isFromImport: Bool = false, onDismiss: (() -> Void)? = nil) {
         self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe, isFromImport: isFromImport))
-        self.isFromImport = isFromImport
+        self._isFromImport = State(initialValue: isFromImport)
         self.onDismiss = onDismiss
     }
     
@@ -101,6 +101,7 @@ struct DetailRecipeView: View {
                 if viewModel.isEdited {
                     TotalPortionRow(selectedPortion: $viewModel.recipe.portion)
                     TotalDurationRow(selectedDuration: $viewModel.recipe.durationInMinutes)
+                    RecipeCategoryRow(selectedCategory: $viewModel.recipe.category)
                 } else {
                     HStack {
                         Text("Jumlah Porsi")
@@ -108,7 +109,13 @@ struct DetailRecipeView: View {
                             .foregroundStyle(Color.labelLight)
                         
                         Spacer()
-                        Text("\(viewModel.recipe.portion) Orang")
+                        if viewModel.recipe.portion == 0 {
+                            Text("Tidak tahu")
+                        } else if viewModel.recipe.portion == 11 {
+                            Text("Lebih dari 10 Orang")
+                        } else {
+                            Text("\(viewModel.recipe.portion) Orang")
+                        }
                     }
                     HStack {
                         Text("Lama Memasak")
@@ -116,7 +123,19 @@ struct DetailRecipeView: View {
                             .foregroundStyle(Color.labelLight)
                         
                         Spacer()
-                        Text("\(viewModel.recipe.durationInMinutes) Menit")
+                        if viewModel.recipe.durationInMinutes == 121 {
+                            Text("> 120 Menit")
+                        } else {
+                            Text("\(viewModel.recipe.durationInMinutes) Menit")
+                        }
+                    }
+                    HStack {
+                        Text("Kategori")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight)
+                        
+                        Spacer()
+                        Text("\(viewModel.recipe.category.icon) \(viewModel.recipe.category.rawValue)")
                     }
                 }
                 
@@ -127,7 +146,12 @@ struct DetailRecipeView: View {
                     ButtonApp(title: "Simpan") {
                         if viewModel.commitEditing() {
                             if !isFromImport {
-                                try? modelContext.save()
+                                do { try modelContext.save() } catch { print("Save error: \(error)") }
+                            } else {
+                                modelContext.insert(viewModel.recipe)
+                                do { try modelContext.save() } catch { print("Insert save error: \(error)") }
+                                isFromImport = false
+                                print("✅ Saved imported recipe from ButtonApp")
                             }
                         }
                     }
@@ -191,11 +215,12 @@ struct DetailRecipeView: View {
                     Button {
                         if viewModel.commitEditing() {
                             if !isFromImport {
-                                try? modelContext.save()
+                                do { try modelContext.save() } catch { print("Save error: \(error)") }
                             } else {
                                 modelContext.insert(viewModel.recipe)
-                                try? modelContext.save()
-                                print("✅ User chose to save the imported recipe")
+                                do { try modelContext.save() } catch { print("Insert save error: \(error)") }
+                                isFromImport = false
+                                print("✅ User chose to save the imported recipe from Checkmark")
                             }
                         }
                     } label: {
@@ -234,9 +259,11 @@ struct DetailRecipeView: View {
                 if viewModel.commitEditing() {
                     if isFromImport {
                         modelContext.insert(viewModel.recipe)
-                        try? modelContext.save()
+                        do { try modelContext.save() } catch { print("Insert save error: \(error)") }
+                        isFromImport = false
                         handleDismiss()
                     } else {
+                        do { try modelContext.save() } catch { print("Save error: \(error)") }
                         handleDismiss()
                     }
                 }

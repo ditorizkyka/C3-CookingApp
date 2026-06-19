@@ -25,16 +25,13 @@ struct RecipeGridSearchResultView: View {
                 LazyVGrid(columns: columns, spacing: 10) {
                     ForEach(filteredRecipes.indices, id: \.self) { index in
                         let recipe = filteredRecipes[index]
-                        let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
-                        let color = colors[index % colors.count]
-                        
                         RecipeCardSmall(
                             recipeTitle: recipe.title,
-                            recipeCategoryIcon: "🍲",
+                            recipeCategoryIcon: recipe.category.icon,
                             imageName: nil,
                             imageUrl: recipe.coverImageUrl,
                             imageData: recipe.coverImageData,
-                            recipeColor: color,
+                            recipeColor: recipe.category.color,
                             recipePortion: recipe.portion,
                             recipeDuration: recipe.durationInMinutes
                         )

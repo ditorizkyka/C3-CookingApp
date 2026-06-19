@@ -100,7 +100,7 @@ enum CookpadYield: Codable {
         } else if let strVal = try? container.decode(String.self) {
             self = .string(strVal)
         } else {
-            self = .string("1")
+            self = .string("0")
         }
     }
     
@@ -120,7 +120,7 @@ enum CookpadYield: Codable {
         case .string(let str):
             // Extract first number from string like "4 porsi" or "4"
             let digits = str.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-            return Int(digits) ?? 1
+            return Int(digits) ?? 0
         }
     }
 }
@@ -249,7 +249,7 @@ extension CookpadRawRecipe {
         print("   Parsed minutes: \(duration)")
         
         // Parse yield
-        let portion = recipeYield?.intValue ?? 1
+        let portion = recipeYield?.intValue ?? 0
         print("\n🍽️ YIELD:")
         print("   Raw recipeYield: \(String(describing: recipeYield))")
         print("   Parsed portion: \(portion)")
@@ -261,12 +261,17 @@ extension CookpadRawRecipe {
         print("Total instructions: \(recipeInstructionsList.count)")
         print("========================================\n")
         
+        var finalDuration = duration > 0 ? duration : 30
+        if finalDuration > 120 {
+            finalDuration = 121
+        }
+        
         return Recipe(
             title: recipeName,
             author: recipeAuthor,
             coverImageUrl: coverUrl,
-            portion: portion,
-            durationInMinutes: duration,
+            portion: 0,
+            durationInMinutes: finalDuration,
             ingredients: recipeIngredients,
             instructions: recipeInstructionsList
         )

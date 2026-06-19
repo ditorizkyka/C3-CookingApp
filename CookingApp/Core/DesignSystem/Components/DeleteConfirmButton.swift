@@ -42,15 +42,15 @@ struct DeleteConfirmButton: View {
                     }
                     .buttonStyle(.bordered)
 
-                    Button(role: .destructive) {
-                        confirming = false
-                        onConfirm()
-                    } label: {
-                        Text("Hapus")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.actionDelete)
+//                    Button(role: .destructive) {
+//                        confirming = false
+//                        onConfirm()
+//                    } label: {
+//                        Text("Hapus")
+//                            .frame(maxWidth: .infinity)
+//                    }
+//                    .buttonStyle(.borderedProminent)
+//                    .tint(Color.actionDelete)
                 }
             }
             .padding(16)

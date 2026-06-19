@@ -35,16 +35,13 @@ struct HomeRecipeListSection: View {
                         ForEach(allRecipes.prefix(6).indices, id: \.self) { index in
                             let isSelected = viewModel.selectedIndex == index
                             let recipe = allRecipes[index]
-                            let colors: [Color] = [.recipeCardBronze ?? .orange, .recipeCardCyan ?? .cyan, .recipeCardGreen ?? .green, .recipeCardPurple ?? .purple, .recipeCardRed ?? .red]
-                            let color = colors[index % colors.count]
-                            
                             RecipeCard(
                                 recipeTitle: recipe.title,
-                                recipeCategoryIcon: "🍲",
+                                recipeCategoryIcon: recipe.category.icon,
                                 imageName: nil,
                                 imageUrl: recipe.coverImageUrl,
                                 imageData: recipe.coverImageData,
-                                recipeColor: color,
+                                recipeColor: recipe.category.color,
                                 recipePortion: recipe.portion,
                                 recipeDuration: recipe.durationInMinutes
                             )

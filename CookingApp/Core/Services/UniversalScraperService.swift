@@ -154,12 +154,17 @@ struct ScrapedRecipeDTO: Codable {
         print("Total instructions: \(recipeInstructionsList.count)")
         print("=================================================\n")
 
+        var finalDuration = duration > 0 ? duration : 30
+        if finalDuration > 120 {
+            finalDuration = 121
+        }
+
         return Recipe(
             title: recipeName,
             author: recipeAuthor,
             coverImageUrl: coverURL,
-            portion: max(portion, 1),
-            durationInMinutes: duration > 0 ? duration : 30,
+            portion: 0,
+            durationInMinutes: finalDuration,
             ingredients: recipeIngredients,
             instructions: recipeInstructionsList
         )

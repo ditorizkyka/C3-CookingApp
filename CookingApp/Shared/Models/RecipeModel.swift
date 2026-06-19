@@ -1,5 +1,35 @@
 import Foundation
 import SwiftData
+import SwiftUI
+
+// MARK: - RecipeCategory
+enum RecipeCategory: String, Codable, CaseIterable {
+    case ayamBebek = "Ayam / Bebek"
+    case daging = "Daging"
+    case vegetarian = "Vegetarian"
+    case seafood = "Seafood / Ikan"
+    case lainnya = "Lainnya"
+    
+    var icon: String {
+        switch self {
+        case .ayamBebek: return "🍗"
+        case .daging: return "🍖"
+        case .vegetarian: return "🥦"
+        case .seafood: return "🐟"
+        case .lainnya: return "🍴"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .ayamBebek: return .recipeCardBronze
+        case .daging: return .recipeCardRed
+        case .vegetarian: return .recipeCardGreen
+        case .seafood: return .recipeCardCyan
+        case .lainnya: return .recipeCardPurple
+        }
+    }
+}
 
 // MARK: - Recipe
 @Model
@@ -18,11 +48,25 @@ class Recipe: Identifiable {
     @Relationship(deleteRule: .cascade) var instructions: [Instruction]
     
     var tips: String?
+    var categoryRawValue: String?
+    
+    // Computed property to prevent SwiftData migration crash for existing nil values
+    var category: RecipeCategory {
+        get {
+            guard let rawValue = categoryRawValue, let cat = RecipeCategory(rawValue: rawValue) else {
+                return .lainnya
+            }
+            return cat
+        }
+        set {
+            categoryRawValue = newValue.rawValue
+        }
+    }
     
     /// Locally stored cover image data (when user picks a photo from library)
     var coverImageData: Data?
     
-    init(id: UUID = UUID(), title: String, author: Author? = nil, coverImageUrl: URL? = nil, coverImageData: Data? = nil, portion: Int, durationInMinutes: Int, ingredients: [Ingredient] = [], instructions: [Instruction] = [], tips: String? = nil) {
+    init(id: UUID = UUID(), title: String, author: Author? = nil, coverImageUrl: URL? = nil, coverImageData: Data? = nil, portion: Int, durationInMinutes: Int, ingredients: [Ingredient] = [], instructions: [Instruction] = [], tips: String? = nil, category: RecipeCategory = .lainnya) {
         self.id = id
         self.title = title
         self.author = author
@@ -33,6 +77,7 @@ class Recipe: Identifiable {
         self.ingredients = ingredients
         self.instructions = instructions
         self.tips = tips
+        self.categoryRawValue = category.rawValue
     }
 }
 
