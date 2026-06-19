@@ -18,8 +18,7 @@
         
         @AppStorage("onboardingStep") private var onboardingStep = 0
         @State private var textFieldFrame: CGRect = .zero
-        
-        let pasteLinkTip = ToolTip(tipTitle: "Tempel Link", tipSubtitle: "Gunakan link resep yang sudah terisi otomatis di sini ini untuk mencoba fitur ekstrak resep.", iconName: "doc.on.clipboard.fill", buttonTitle: "")
+        @State private var tipReady = false
         
         var body: some View {
             ZStack {
@@ -32,7 +31,7 @@
                     ZStack {
                         // Judul di tengah
                         Text("Import Resep")
-                            .font(.headline) // Atau .title3
+                            .font(.headline)
                         
                         // Tombol X di ujung kiri
                         HStack {
@@ -44,17 +43,16 @@
                                     .font(.headline)
                                     .foregroundColor(Color.labelDark)
                                     .frame(width: 45, height: 45)
-                                    .background(Color.surfaceDefault) // Warna bulat abu-abu
+                                    .background(Color.surfaceDefault)
                                     .clipShape(Circle())
                             }
-                            Spacer() // Mendorong tombol ke ujung kiri
+                            Spacer()
                         }
                     }
                     
                     VStack(spacing:16) {
                         Text("Masukkan link resep dari website untuk memproses bahan dan langkah memasak secara otomatis.")
                             .font(.body)
-                        // Opsional: Gunakan .tint() untuk mengubah warna link agar sesuai tema aplikasimu
                             .tint(Color.brandPrimary)
                             .multilineTextAlignment(.leading)
     //                        .padding()
@@ -72,13 +70,13 @@
                             .tint(Color.brandPrimary)
                             .trackFrame(in: .named("SheetSpace"), $textFieldFrame)
                             .onChange(of: viewModel.link) { _, _ in
-                                // Clear error when user edits the link
                                 viewModel.errorMessage = nil
                                 if onboardingStep == 1 {
-                                    onboardingStep = 2
+
+                                    updateOnboarding(to: 2)
                                 }
                             }
-                            .conditionalPopoverTip(onboardingStep == 1, tip: pasteLinkTip, arrowEdge: .bottom)
+                            .conditionalTip(onboardingStep == 1 && tipReady, tip: PasteLinkTip(), arrowEdge: .bottom)
                         
                         // Error message
                         if let errorMessage = viewModel.errorMessage {
@@ -115,7 +113,6 @@
                         onImport: {
                             viewModel.showWebPreview = false
                             dismiss()
-                            // Tell parent to navigate to LoadingRecipeView with the URL
                             onImport(viewModel.link)
                         },
                         onDismiss: {
@@ -128,6 +125,15 @@
             .coordinateSpace(name: "SheetSpace")
             .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 1 }, set: { if !$0 && onboardingStep == 1 { onboardingStep = 2 } }), holeFrame: textFieldFrame, cornerRadius: Radius.infinity)
             .interactiveDismissDisabled(onboardingStep == 1)
+            .onAppear {
+                guard onboardingStep == 1 else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    tipReady = true
+                }
+            }
+            .onDisappear {
+                tipReady = false
+            }
         }
     }
 
