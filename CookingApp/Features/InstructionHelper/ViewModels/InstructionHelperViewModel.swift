@@ -71,6 +71,7 @@ class InstructionHelperViewModel: ObservableObject {
             speechManager.stopSpeaking()
             speechManager.speak(text: allGranularSteps[currentStepIndex].text)
         } else {
+            speechManager.stopListening(permanent: true)
             speechManager.stopSpeaking()
             navigateToComplete = true
         }
@@ -92,6 +93,7 @@ class InstructionHelperViewModel: ObservableObject {
     }
     
     func completeFlow(speechManager: SpeechManager) {
+        speechManager.stopListening(permanent: true)
         speechManager.stopSpeaking()
         navigateToComplete = true
     }

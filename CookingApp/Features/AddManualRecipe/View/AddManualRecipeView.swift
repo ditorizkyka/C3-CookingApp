@@ -184,11 +184,10 @@ struct AddManualRecipeView: View {
         }
         .navigationDestination(isPresented: $navigateToBreakdown) {
             if let recipe = createdRecipe {
-                BreakdownLoadingView(
-                    recipe: recipe,
-                    onBreakdownComplete: onManualComplete,
-                    onError: { _ in
-                        dismiss()
+                ImportLoadingView(
+                    initialRecipe: recipe,
+                    onComplete: { completedRecipe in
+                        onManualComplete?(completedRecipe)
                     }
                 )
             }

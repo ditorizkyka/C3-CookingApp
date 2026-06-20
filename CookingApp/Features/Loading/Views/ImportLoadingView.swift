@@ -1,21 +1,19 @@
-//
-//  BreakdownLoadingView.swift
-//  CookingApp
-//
-
 import SwiftUI
 import Translation
 
-struct BreakdownLoadingView: View {
-    var onBreakdownComplete: ((Recipe) -> Void)? = nil
-    var onError: ((String) -> Void)? = nil
+struct ImportLoadingView: View {
+    var urlToScrape: String? = nil
+    var initialRecipe: Recipe? = nil
+    var onComplete: ((Recipe) -> Void)? = nil
     
-    @StateObject private var viewModel: BreakdownLoadingViewModel
+    @StateObject private var viewModel: ImportLoadingViewModel
+    @Environment(\.dismiss) var dismiss
     
-    init(recipe: Recipe, onBreakdownComplete: ((Recipe) -> Void)? = nil, onError: ((String) -> Void)? = nil) {
-        self.onBreakdownComplete = onBreakdownComplete
-        self.onError = onError
-        _viewModel = StateObject(wrappedValue: BreakdownLoadingViewModel(recipe: recipe))
+    init(urlToScrape: String? = nil, initialRecipe: Recipe? = nil, onComplete: ((Recipe) -> Void)? = nil) {
+        self.urlToScrape = urlToScrape
+        self.initialRecipe = initialRecipe
+        self.onComplete = onComplete
+        _viewModel = StateObject(wrappedValue: ImportLoadingViewModel(recipe: initialRecipe))
     }
     
     var body: some View {
@@ -27,7 +25,7 @@ struct BreakdownLoadingView: View {
                         .font(.system(size: 48))
                         .foregroundColor(Color.brandSecondary)
                     
-                    Text("Gagal Memproses Langkah")
+                    Text("Proses Terhenti")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(Color.labelDark)
@@ -39,14 +37,20 @@ struct BreakdownLoadingView: View {
                         .padding(.horizontal, 32)
                     
                     ButtonApp(title: "Coba Lagi", action: {
-                        viewModel.resetAndRetry()
+                        viewModel.resetAndRetry(url: urlToScrape, onComplete: { recipe in
+                            onComplete?(recipe)
+                        })
                     })
                     .padding(.horizontal, 40)
                     
                     Button(action: {
-                        onBreakdownComplete?(viewModel.recipe)
+                        if let recipe = viewModel.recipe {
+                            onComplete?(recipe)
+                        } else {
+                            dismiss()
+                        }
                     }) {
-                        Text("Lanjutkan Tanpa Rincian")
+                        Text(viewModel.recipe != nil ? "Lanjutkan Tanpa Rincian" : "Batal")
                             .font(.body)
                             .fontWeight(.semibold)
                             .foregroundColor(Color.brandPrimary)
@@ -58,27 +62,47 @@ struct BreakdownLoadingView: View {
                 ProgressView()
                     .scaleEffect(2)
                     .tint(Color.brandPrimary)
-                Text("Memproses Langkah Memasak...")
+                
+                Text(viewModel.state.message)
                     .font(.title3)
                     .fontWeight(.semibold)
                     .foregroundColor(Color.labelDark)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
                 
-                Text("Menerjemahkan dan menyusun panduan")
-                    .font(.subheadline)
-                    .foregroundColor(Color.labelLight)
+                Button(action: {
+                    viewModel.cancel()
+                    dismiss()
+                }) {
+                    Text("Batal")
+                        .font(.body)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color.labelLight)
+                }
+                .padding(.top, 32)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.surfaceDefault.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            viewModel.startBreakdown()
+            viewModel.start(url: urlToScrape, onComplete: { recipe in
+                onComplete?(recipe)
+            })
         }
         .translationTask(viewModel.configIdToEn) { session in
             await viewModel.translateToEnglish(session: session)
         }
         .translationTask(viewModel.configEnToId) { session in
-            await viewModel.translateToIndonesian(session: session, onComplete: onBreakdownComplete)
+            await viewModel.translateToIndonesian(session: session, onComplete: { recipe in
+                onComplete?(recipe)
+            })
         }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        ImportLoadingView(urlToScrape: "https://cookpad.com/id/resep/example")
     }
 }

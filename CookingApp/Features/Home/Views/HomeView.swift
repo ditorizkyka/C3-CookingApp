@@ -90,7 +90,7 @@ struct HomeView: View {
                     }
                 }
                 .navigationDestination(isPresented: $viewModel.navigateToLoading) {
-                    LoadingRecipeView(urlToScrape: viewModel.urlToScrape, onScrapingComplete: { recipe in
+                    ImportLoadingView(urlToScrape: viewModel.urlToScrape, onComplete: { recipe in
                         viewModel.handleScrapingComplete(recipe: recipe)
                     })
                 }

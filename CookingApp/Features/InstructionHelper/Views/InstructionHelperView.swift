@@ -167,8 +167,8 @@ struct InstructionHelperView: View {
         let isActive = speechManager.isListening || speechManager.isSpeaking
         let label   = speechManager.isListening ? "Mendengarkan..." : "Menjawab..."
         let color   = speechManager.isListening
-            ? Color.brandAccent ?? .green
-            : Color.brandSecondary ?? .yellow
+            ? Color.brandAccent
+            : Color.brandSecondary
 
         ZStack {
             if isActive {
