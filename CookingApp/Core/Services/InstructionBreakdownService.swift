@@ -5,7 +5,7 @@ import NaturalLanguage
 @available(iOS 18.2, *)
 public struct InstructionBreakdownService {
     
-    func breakdownInstructions(englishInstructions: [String]) async throws -> [[String]] {
+    func breakdownInstructions(englishInstructions: [String], ingredients: [String] = []) async throws -> [[String]] {
         var allBreakdownsEN: [[String]] = []
         
         guard case .available = SystemLanguageModel.default.availability else {
@@ -23,12 +23,15 @@ public struct InstructionBreakdownService {
             
             let prompt = """
             You are a cooking assistant. The following is a 'Current step to refine' that has been pre-split by a grammar parser.
-            Your job is to refine it strictly based on the provided text:
+            Your job is to refine it strictly based on the provided text and the context of the recipe's ingredients.
             - CRITICAL: DO NOT invent, hallucinate, or add any new cooking steps, temperatures, times, or ingredients. ONLY reformat the text provided in the 'Current step to refine'. Do NOT write a recipe from scratch.
-            - Resolve any implicit pronouns or missing objects based on the 'Context from previous steps'. (e.g., if the current step says "wash thoroughly", and the context mentions "chicken", you output "wash the chicken thoroughly"). Each step you return must make sense fully on its own.
+            - Resolve any implicit pronouns or missing objects based on the 'Context from previous steps' and 'Recipe Ingredients'. (e.g., if the current step says "wash thoroughly", and the context/ingredients mentions "chicken", you output "wash the chicken thoroughly"). Each step you return must make sense fully on its own.
             - Merge any steps that are too fragmented and belong together.
             - If a condition or waiting state appears, convert it into an explicit waiting step: "Wait until [condition]".
             - CRITICAL: Return ONLY the refined steps for the 'Current step to refine'. DO NOT include, repeat, or summarize any steps from the 'Context from previous steps'.
+            
+            Recipe Ingredients:
+            \(ingredients.isEmpty ? "None provided." : ingredients.joined(separator: ", "))
             
             Context from previous steps:
             \(contextString)

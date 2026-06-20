@@ -32,6 +32,7 @@ class ImportLoadingViewModel: ObservableObject {
     
     // Internal State
     private var englishInstructions: [String]?
+    private var englishIngredients: [String]?
     private var intermediateBreakdownsEN: [[String]]?
     private var activeTask: Task<Void, Never>?
     private var hasStarted = false
@@ -96,6 +97,14 @@ class ImportLoadingViewModel: ObservableObject {
             }
             self.englishInstructions = translated
             
+            let idIngredients = extractIngredientNames()
+            var enIngredients: [String] = []
+            for ingredient in idIngredients {
+                let response = try await session.translate(ingredient)
+                enIngredients.append(response.targetText)
+            }
+            self.englishIngredients = enIngredients
+            
             if Task.isCancelled { return }
             await processLanguageModel()
         } catch {
@@ -110,7 +119,11 @@ class ImportLoadingViewModel: ObservableObject {
         await MainActor.run { self.state = .breakingDown }
         
         do {
-            let breakdowns = try await nlpService.breakdownInstructions(englishInstructions: enTexts)
+            let ingredientNames = englishIngredients ?? []
+            let breakdowns = try await nlpService.breakdownInstructions(
+                englishInstructions: enTexts,
+                ingredients: ingredientNames
+            )
             if Task.isCancelled { return }
             
             await MainActor.run {
@@ -124,6 +137,19 @@ class ImportLoadingViewModel: ObservableObject {
         } catch {
             handleError("Gagal memproses AI Model: \(error.localizedDescription)")
         }
+    }
+    
+    private func extractIngredientNames() -> [String] {
+        guard let ingredients = recipe?.ingredients else { return [] }
+        var names: [String] = []
+        for ingredient in ingredients {
+            if ingredient.isGroup, let subs = ingredient.groupIngredients {
+                names.append(contentsOf: subs.map { "\($0.quantity) \($0.name)".trimmingCharacters(in: .whitespaces) })
+            } else {
+                names.append("\(ingredient.quantity) \(ingredient.name)".trimmingCharacters(in: .whitespaces))
+            }
+        }
+        return names
     }
     
     func translateToIndonesian(session: TranslationSession, onComplete: @escaping (Recipe) -> Void) async {
