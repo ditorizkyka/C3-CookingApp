@@ -1,66 +1,20 @@
 //
-//  CookpadScraperService.swift
+//  WebScraperService.swift
 //  CookingApp
 //
 //  Created by Andito Rizkyka Rianto on 06/06/26.
 //
 
-//
-//  CookpadScraperService.swift
-//  CookingApp - Universal Recipe Scraper
-//
-//  EXPLANATION:
-//  This file is our "Service". We use `WebKit` (WKWebView).
-//  Why WebKit? Some websites block basic URL requests or require JavaScript to run before
-//  they show their data. By using WKWebView, we create an invisible browser that acts exactly
-//  like Safari, loads the page fully, and then we inject JavaScript to grab the data we need!
-//
-//  STRATEGY (Universal — supports ANY recipe website):
-//  1. PRIMARY: Look for JSON-LD structured data (Schema.org Recipe)
-//     → This is the standard most recipe sites use (AllRecipes, BBC Good Food, Tasty, Cookpad, etc.)
-//  2. FALLBACK: If no JSON-LD found, scrape Open Graph meta tags for basic info
-//     → This gives us at least the title, image, and description
-//  3. NLP FALLBACK: If JSON-LD has no ingredients/instructions (article websites),
-//     use ArticleRecipeExtractor (Apple Intelligence) to extract from raw page text
-//
-
 import Foundation
 import WebKit
-
-// MARK: - Custom Error Types
-enum ScraperError: LocalizedError {
-    case invalidURL
-    case notCookpadURL
-    case networkFailed(Error)
-    case noRecipeFound
-    case decodingFailed(Error)
-    case timeout
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "URL yang kamu masukkan tidak valid. Pastikan dimulai dengan https://"
-        case .notCookpadURL:
-            return "Saat ini hanya mendukung link dari Cookpad. Pastikan link berasal dari cookpad.com."
-        case .networkFailed(let e):
-            return "Gagal terhubung: \(e.localizedDescription)"
-        case .noRecipeFound:
-            return "Tidak ditemukan data resep di halaman ini. Situs mungkin tidak menggunakan format resep standar, atau link bukan halaman resep."
-        case .decodingFailed(let e):
-            return "Gagal membaca data resep: \(e.localizedDescription)"
-        case .timeout:
-            return "Halaman terlalu lama dimuat. Periksa koneksi internet dan coba lagi."
-        }
-    }
-}
 
 // MARK: - WebKit Scraper Service (Universal — supports ANY recipe website)
 // We use @MainActor because WKWebView MUST be created and used on the main thread.
 @MainActor
-final class CookpadScraperService: NSObject, WKNavigationDelegate {
+final class WebScraperService: NSObject, WKNavigationDelegate {
     
     // Singleton so we can reuse the same invisible browser
-    static let shared = CookpadScraperService()
+    static let shared = WebScraperService()
     
     private var webView: WKWebView!
     private var continuation: CheckedContinuation<Recipe, Error>?
@@ -351,32 +305,77 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
                     // ========== DECODE: Try ScrapedRecipeDTO first (universal), fallback to CookpadRawRecipe ==========
                     let decoder = JSONDecoder()
                     var recipe: Recipe
+                    var scrapedDTO: ScrapedRecipeDTO?
                     
                     if let dto = try? decoder.decode(ScrapedRecipeDTO.self, from: recipeData) {
                         print("✅ [SCRAPER] Successfully decoded ScrapedRecipeDTO (universal)")
+                        scrapedDTO = dto
                         recipe = dto.toRecipe()
-                    } else if let rawRecipe = try? decoder.decode(CookpadRawRecipe.self, from: recipeData) {
-                        print("✅ [SCRAPER] Fallback: decoded CookpadRawRecipe (legacy)")
+                    } else if let rawRecipe = try? decoder.decode(FallbackRecipeDTO.self, from: recipeData) {
+                        print("✅ [SCRAPER] Fallback: decoded FallbackRecipeDTO (legacy)")
                         recipe = rawRecipe.toRecipe()
                     } else {
                         // If both decoders fail, try a more lenient approach
                         print("⚠️ [SCRAPER] Both decoders failed, attempting lenient decode...")
                         let dto = try decoder.decode(ScrapedRecipeDTO.self, from: recipeData)
+                        scrapedDTO = dto
                         recipe = dto.toRecipe()
                     }
                     
                     print("✅ [SCRAPER] Successfully mapped to Recipe model")
                     
-                    // ========== NLP FALLBACK: If JSON-LD has no ingredients/instructions ==========
+                    // ========== HYBRID ARCHITECTURE: HEURISTIC MATCHING & NLP FALLBACK ==========
                     let hasIngredients = !recipe.ingredients.isEmpty
                     let hasInstructions = !recipe.instructions.isEmpty
                     
-                    if (!hasIngredients || !hasInstructions) && !pageText.isEmpty {
-                        print("⚠️ [SCRAPER] JSON-LD incomplete (ingredients: \(hasIngredients), instructions: \(hasInstructions))")
-                        print("🤖 [SCRAPER] Attempting NLP extraction via ArticleRecipeExtractor...")
+                    if hasIngredients {
+                        // JALUR A: JSON-LD ADA -> Gunakan Heuristic Matcher (Tanpa AI)
+                        print("⚡️ [HYBRID] JSON-LD ingredients found. Running Heuristic Group Matcher...")
+                        if #available(iOS 18.1, *) {
+                            // Extract raw string names from the JSON-LD ingredients to match exact website strings
+                            let rawIngredientStrings = scrapedDTO?.recipeIngredient ?? recipe.ingredients.map { "\($0.quantity) \($0.name)".trimmingCharacters(in: .whitespaces) }
+                            let heuristicGroups = IngredientGroupMatcher.group(ingredients: rawIngredientStrings, from: pageText)
+                            
+                            if !heuristicGroups.isEmpty && (heuristicGroups.count > 1 || !heuristicGroups.first!.groupName.isEmpty) {
+                                print("✅ [HYBRID] Heuristic Matcher found \(heuristicGroups.count) groups. Overwriting flat ingredients.")
+                                var newIngredients: [Ingredient] = []
+                                
+                                for group in heuristicGroups {
+                                    print("   📂 GROUP: '\(group.groupName)' (\(group.ingredients.count) items)")
+                                    if group.groupName.isEmpty {
+                                        // Flat
+                                        for raw in group.ingredients {
+                                            print("      - \(raw)")
+                                            let parts = ScrapedRecipeDTO.parseIngredientString(raw)
+                                            newIngredients.append(Ingredient(quantity: parts.quantity, name: parts.name))
+                                        }
+                                    } else {
+                                        // Grouped
+                                        let groupIngredient = Ingredient(quantity: "", name: group.groupName, groupIngredients: [])
+                                        for raw in group.ingredients {
+                                            print("      - \(raw)")
+                                            let parts = ScrapedRecipeDTO.parseIngredientString(raw)
+                                            groupIngredient.groupIngredients?.append(Ingredient(quantity: parts.quantity, name: parts.name))
+                                        }
+                                        newIngredients.append(groupIngredient)
+                                    }
+                                }
+                                recipe.ingredients = newIngredients
+                            } else {
+                                print("ℹ️ [HYBRID] Heuristic Matcher confirmed ingredients are flat (no groups).")
+                            }
+                        }
+                        
+                        // Because we already have ingredients and instructions from JSON-LD, we can return immediately
+                        self.continuation?.resume(returning: recipe)
+                        self.continuation = nil
+                        
+                    } else if !pageText.isEmpty {
+                        // JALUR B: JSON-LD TIDAK ADA -> Gunakan Apple Intelligence (NLP)
+                        print("⚠️ [HYBRID] JSON-LD incomplete (no ingredients). Falling back to Apple Intelligence...")
                         
                         #if canImport(FoundationModels)
-                        if #available(iOS 26.0, *) {
+                        if #available(iOS 18.2, *) {
                             Task { @MainActor in
                                 do {
                                     let extractor = ArticleRecipeExtractor()
@@ -386,13 +385,25 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
                                     )
                                     
                                     // Fill in missing ingredients from NLP
-                                    if !hasIngredients && !nlpResult.ingredients.isEmpty {
-                                        let nlpIngredients = nlpResult.ingredients.map { raw -> Ingredient in
-                                            let parts = ScrapedRecipeDTO.parseIngredientString(raw)
-                                            return Ingredient(quantity: parts.quantity, name: parts.name)
+                                    if !nlpResult.ingredientGroups.isEmpty {
+                                        var nlpIngredients: [Ingredient] = []
+                                        for group in nlpResult.ingredientGroups {
+                                            if group.groupName.isEmpty {
+                                                for raw in group.ingredients {
+                                                    let parts = ScrapedRecipeDTO.parseIngredientString(raw)
+                                                    nlpIngredients.append(Ingredient(quantity: parts.quantity, name: parts.name))
+                                                }
+                                            } else {
+                                                let groupIngredient = Ingredient(quantity: "", name: group.groupName, groupIngredients: [])
+                                                for raw in group.ingredients {
+                                                    let parts = ScrapedRecipeDTO.parseIngredientString(raw)
+                                                    groupIngredient.groupIngredients?.append(Ingredient(quantity: parts.quantity, name: parts.name))
+                                                }
+                                                nlpIngredients.append(groupIngredient)
+                                            }
                                         }
                                         recipe.ingredients = nlpIngredients
-                                        print("✅ [NLP] Filled \(nlpIngredients.count) ingredients from article text")
+                                        print("✅ [NLP] Extracted ingredients using \(nlpResult.ingredientGroups.count) AI groups")
                                     }
                                     
                                     // Fill in missing instructions from NLP
@@ -401,10 +412,9 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
                                             Instruction(sequenceNumber: index + 1, text: text)
                                         }
                                         recipe.instructions = nlpInstructions
-                                        print("✅ [NLP] Filled \(nlpInstructions.count) instructions from article text")
+                                        print("✅ [NLP] Extracted \(nlpInstructions.count) instructions from article text")
                                     }
                                     
-                                    // Update recipe name if NLP found one and current is generic
                                     if !nlpResult.recipeName.isEmpty && (recipe.title == "Resep Tanpa Judul" || recipe.title == "Unknown Recipe") {
                                         recipe.title = nlpResult.recipeName
                                     }
@@ -413,20 +423,23 @@ final class CookpadScraperService: NSObject, WKNavigationDelegate {
                                     self.continuation = nil
                                 } catch {
                                     print("⚠️ [NLP] Article extraction failed: \(error.localizedDescription)")
-                                    print("📋 [SCRAPER] Returning recipe with available JSON-LD data only")
                                     self.continuation?.resume(returning: recipe)
                                     self.continuation = nil
                                 }
                             }
-                            return // Don't resume below — NLP Task handles it
+                            return // NLP Task handles resumption
                         }
                         #endif
                         
-                        // If FoundationModels not available, return whatever we have
-                        print("📋 [SCRAPER] FoundationModels not available, returning partial recipe")
+                        print("📋 [HYBRID] FoundationModels not available, returning empty ingredients")
+                        self.continuation?.resume(returning: recipe)
+                        self.continuation = nil
+                    } else {
+                        // JALUR C: JSON-LD KOSONG dan RAW TEXT KOSONG
+                        print("❌ [HYBRID] No JSON-LD and no Raw Text available.")
+                        self.continuation?.resume(returning: recipe)
+                        self.continuation = nil
                     }
-                    
-                    self.continuation?.resume(returning: recipe)
                 } catch {
                     print("❌ [SCRAPER] Decoding failed: \(error)")
                     self.continuation?.resume(throwing: ScraperError.decodingFailed(error))

@@ -80,7 +80,7 @@ class ImportRecipeViewModel: ObservableObject {
         scrapingFinished = false
         
         do {
-            let result = try await CookpadScraperService.shared.scrape(urlString: link)
+            let result = try await WebScraperService.shared.scrape(urlString: link)
             scrapedRecipe = result
             scrapingFinished = true
         } catch let error as ScraperError {

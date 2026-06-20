@@ -2,15 +2,8 @@ import Foundation
 import FoundationModels
 import NaturalLanguage
 
-@available(iOS 18.1, *)
-@Generable
-struct RecipeActivityList {
-    @Guide(description: "A list of individual cooking activity steps extracted from the recipe instruction. Each step must be a single, actionable cooking command.")
-    var steps: [String]
-}
-
 @available(iOS 18.2, *)
-struct RecipeNLPService {
+public struct InstructionBreakdownService {
     
     func breakdownInstructions(englishInstructions: [String]) async throws -> [[String]] {
         var allBreakdownsEN: [[String]] = []

@@ -37,8 +37,8 @@ class ImportLoadingViewModel: ObservableObject {
     private var hasStarted = false
     
     // Dependencies
-    private let scraperService = CookpadScraperService.shared
-    private let nlpService = RecipeNLPService()
+    private let scraperService = WebScraperService.shared
+    private let nlpService = InstructionBreakdownService()
     
     init(recipe: Recipe? = nil) {
         self.recipe = recipe

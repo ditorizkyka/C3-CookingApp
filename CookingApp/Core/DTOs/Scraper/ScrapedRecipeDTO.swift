@@ -83,7 +83,7 @@ struct ScrapedRecipeDTO: Codable {
             let hasQuantity = !parts.quantity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             print("   [\(index)] RAW: \"\(rawIngredient)\" → qty: \"\(parts.quantity)\" | name: \"\(parts.name)\"")
 
-            if !hasQuantity {
+            if !hasQuantity && Self.isGroupHeader(parts.name) {
                 // Group header — opens a new group
                 let group = Ingredient(quantity: "", name: parts.name, groupIngredients: [])
                 recipeIngredients.append(group)
@@ -152,6 +152,29 @@ struct ScrapedRecipeDTO: Codable {
     }
 
     // MARK: - Parsing Helpers
+
+    /// Keywords that strongly indicate a group header rather than an ingredient
+    private static let groupHeaderKeywords: Set<String> = [
+        "bumbu", "bahan", "untuk", "saus", "kuah", "marinasi", "kaldu", "pelengkap", "isian",
+        "for", "sauce", "marinade", "broth", "garnish", "topping", "dressing", "syrup", "sirup",
+        "baluran", "celupan", "taburan"
+    ]
+
+    /// Determines if a string without quantity is a group header or just a single ingredient
+    static func isGroupHeader(_ text: String) -> Bool {
+        let lower = text.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        if lower.hasSuffix(":") { return true }
+        
+        let words = lower.components(separatedBy: .whitespacesAndNewlines)
+        for word in words {
+            if groupHeaderKeywords.contains(word) { return true }
+        }
+        
+        // Matches "Bahan A", "Bahan B", etc.
+        if lower.hasPrefix("bahan") { return true }
+        
+        return false
+    }
 
     /// Unicode fraction characters mapped to their decimal string equivalents
     private static let unicodeFractions: [Character: String] = [
