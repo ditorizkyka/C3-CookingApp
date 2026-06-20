@@ -52,7 +52,7 @@ struct ButtonApp: View {
     private var backgroundColor: Color {
         switch type {
         case .primary:
-            return .brandAccent ?? Color.blue
+            return .brandAccent
         case .secondary:
             return Color(UIColor.systemGray5)
         case .tertiary:
