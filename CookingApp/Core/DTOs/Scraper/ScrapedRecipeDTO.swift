@@ -185,12 +185,11 @@ struct ScrapedRecipeDTO: Codable {
         "⅛": "1/8", "⅜": "3/8", "⅝": "5/8", "⅞": "7/8"
     ]
 
-    /// Known measurement units (Indonesian + English)
-    private static let knownUnits: Set<String> = [
+    private static let knownUnitsArray: [String] = [
         // Indonesian
-        "sdm", "sdt", "ml", "gram", "g", "kg", "liter", "l",
-        "buah", "siung", "butir", "lembar", "batang", "bungkus",
-        "sendok", "cc", "potong", "iris", "helai", "tangkai",
+        "sdm", "sdt", "ml", "gram", "gr", "g", "kg", "liter", "l",
+        "buah", "siung", "butir", "lembar", "batang", "bungkus", "bks",
+        "sendok", "cc", "potong", "iris", "helai", "tangkai", "lonjor",
         "genggam", "sejumput", "sachet", "biji", "ekor", "ikat",
         "ruas", "kotak", "kaleng", "gelas", "mangkok", "cangkir",
         "ons", "secukupnya",
@@ -201,7 +200,7 @@ struct ScrapedRecipeDTO: Codable {
         "pinch", "dash", "bunch", "can", "package", "packet",
         "ounce", "ounces", "pound", "pounds", "quart", "pint",
         "fillet", "fillets", "head", "stalk", "stalks", "sprig", "sprigs"
-    ]
+    ].sorted { $0.count > $1.count }
 
     /// Parses "500 gram daging sapi" → (quantity: "500 gram", name: "daging sapi")
     static func parseIngredientString(_ raw: String) -> (quantity: String, name: String) {
@@ -230,7 +229,8 @@ struct ScrapedRecipeDTO: Codable {
         }
 
         // Try regex for number + optional unit + name
-        let pattern = #"^([\d¼½¾⅓⅔⅛⅜⅝⅞/.,\s-–]+)\s*(gram|g|kg|ml|liter|l|cup|cups|tbsp|tsp|sdm|sdt|buah|butir|siung|lembar|batang|ikat|bungkus|sachet|ons|mangkok|sendok|potong|iris|helai|lonjor|oz|ounce|ounces|lb|lbs|pound|pounds|piece|pieces|clove|cloves|slice|slices|pinch|dash|bunch|can|package|packet|tablespoon|tablespoons|teaspoon|teaspoons)?\s*(.+)$"#
+        let unitsPattern = knownUnitsArray.joined(separator: "|")
+        let pattern = #"^([\d¼½¾⅓⅔⅛⅜⅝⅞/.,\s-–]+)\s*(?:(\#(unitsPattern))\b)?\s*(.+)$"#
         if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
             let nsString = normalized as NSString
             let results = regex.matches(in: normalized, range: NSRange(location: 0, length: nsString.length))

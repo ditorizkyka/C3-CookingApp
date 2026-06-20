@@ -251,12 +251,12 @@ final class WebScraperService: NSObject, WKNavigationDelegate {
                             "image": ogImage
                         };
                         result.recipeJSON = JSON.stringify(fallback);
-                        return JSON.stringify(result);
                     }
 
-                    return null;
+                    // Always return the result wrapper so we get the pageText even if recipeJSON is null
+                    return JSON.stringify(result);
                 } catch(err) {
-                    return null;
+                    return JSON.stringify({ recipeJSON: null, pageText: '' });
                 }
             })();
         """
@@ -270,15 +270,21 @@ final class WebScraperService: NSObject, WKNavigationDelegate {
                 
                 do {
                     // Parse the wrapper to get recipeJSON and pageText
-                    guard let wrapper = try JSONSerialization.jsonObject(with: wrapperData) as? [String: Any],
-                          let recipeJSONString = wrapper["recipeJSON"] as? String,
-                          let recipeData = recipeJSONString.data(using: .utf8) else {
+                    guard let wrapper = try JSONSerialization.jsonObject(with: wrapperData) as? [String: Any] else {
                         self.continuation?.resume(throwing: ScraperError.noRecipeFound)
                         self.continuation = nil
                         return
                     }
                     
                     let pageText = wrapper["pageText"] as? String ?? ""
+                    let recipeJSONString = wrapper["recipeJSON"] as? String
+                    
+                    // If absolutely no data and no text, then we fail
+                    if recipeJSONString == nil && pageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        self.continuation?.resume(throwing: ScraperError.noRecipeFound)
+                        self.continuation = nil
+                        return
+                    }
                     
                     // ========== PRINT FULL RAW SCRAPING RESULT ==========
                     print("\n" + String(repeating: "=", count: 60))
@@ -286,14 +292,39 @@ final class WebScraperService: NSObject, WKNavigationDelegate {
                     print(String(repeating: "=", count: 60))
                     print("📎 Source URL: \(self.currentURL)")
                     print(String(repeating: "-", count: 60))
-                    print("📄 RAW JSON-LD DATA:")
-                    if let jsonObj = try? JSONSerialization.jsonObject(with: recipeData),
-                       let prettyData = try? JSONSerialization.data(withJSONObject: jsonObj, options: .prettyPrinted),
-                       let prettyString = String(data: prettyData, encoding: .utf8) {
-                        print(prettyString)
+                    
+                    var recipe: Recipe
+                    var scrapedDTO: ScrapedRecipeDTO?
+                    
+                    if let recipeJSONString = recipeJSONString, let recipeData = recipeJSONString.data(using: .utf8) {
+                        print("📄 RAW JSON-LD/OG DATA:")
+                        if let jsonObj = try? JSONSerialization.jsonObject(with: recipeData),
+                           let prettyData = try? JSONSerialization.data(withJSONObject: jsonObj, options: .prettyPrinted),
+                           let prettyString = String(data: prettyData, encoding: .utf8) {
+                            print(prettyString)
+                        } else {
+                            print(recipeJSONString)
+                        }
+                        
+                        // ========== DECODE: Try ScrapedRecipeDTO first (universal), fallback to CookpadRawRecipe ==========
+                        let decoder = JSONDecoder()
+                        if let dto = try? decoder.decode(ScrapedRecipeDTO.self, from: recipeData) {
+                            print("✅ [SCRAPER] Successfully decoded ScrapedRecipeDTO (universal)")
+                            scrapedDTO = dto
+                            recipe = dto.toRecipe()
+                        } else if let rawRecipe = try? decoder.decode(FallbackRecipeDTO.self, from: recipeData) {
+                            print("✅ [SCRAPER] Fallback: decoded FallbackRecipeDTO (legacy)")
+                            recipe = rawRecipe.toRecipe()
+                        } else {
+                            print("⚠️ [SCRAPER] Both decoders failed, using empty fallback")
+                            recipe = Recipe(title: "Resep Tanpa Judul", portion: 0, durationInMinutes: 0)
+                        }
+                        print("✅ [SCRAPER] Successfully mapped to Recipe model")
                     } else {
-                        print(recipeJSONString)
+                        print("⚠️ [SCRAPER] No JSON-LD or OG tags found. Creating empty Recipe to be filled by NLP.")
+                        recipe = Recipe(title: "Resep Tanpa Judul", portion: 0, durationInMinutes: 0)
                     }
+                    
                     print(String(repeating: "-", count: 60))
                     print("📝 RAW PAGE TEXT (first 3000 chars):")
                     print(String(pageText.prefix(3000)))
@@ -301,28 +332,6 @@ final class WebScraperService: NSObject, WKNavigationDelegate {
                     
                     // Store page text for potential NLP processing
                     self.lastPageText = pageText
-                    
-                    // ========== DECODE: Try ScrapedRecipeDTO first (universal), fallback to CookpadRawRecipe ==========
-                    let decoder = JSONDecoder()
-                    var recipe: Recipe
-                    var scrapedDTO: ScrapedRecipeDTO?
-                    
-                    if let dto = try? decoder.decode(ScrapedRecipeDTO.self, from: recipeData) {
-                        print("✅ [SCRAPER] Successfully decoded ScrapedRecipeDTO (universal)")
-                        scrapedDTO = dto
-                        recipe = dto.toRecipe()
-                    } else if let rawRecipe = try? decoder.decode(FallbackRecipeDTO.self, from: recipeData) {
-                        print("✅ [SCRAPER] Fallback: decoded FallbackRecipeDTO (legacy)")
-                        recipe = rawRecipe.toRecipe()
-                    } else {
-                        // If both decoders fail, try a more lenient approach
-                        print("⚠️ [SCRAPER] Both decoders failed, attempting lenient decode...")
-                        let dto = try decoder.decode(ScrapedRecipeDTO.self, from: recipeData)
-                        scrapedDTO = dto
-                        recipe = dto.toRecipe()
-                    }
-                    
-                    print("✅ [SCRAPER] Successfully mapped to Recipe model")
                     
                     // ========== HYBRID ARCHITECTURE: HEURISTIC MATCHING & NLP FALLBACK ==========
                     let hasIngredients = !recipe.ingredients.isEmpty
