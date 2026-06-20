@@ -415,8 +415,9 @@ final class WebScraperService: NSObject, WKNavigationDelegate {
                                         print("✅ [NLP] Extracted \(nlpInstructions.count) instructions from article text")
                                     }
                                     
-                                    if !nlpResult.recipeName.isEmpty && (recipe.title == "Resep Tanpa Judul" || recipe.title == "Unknown Recipe") {
+                                    if !nlpResult.recipeName.isEmpty && nlpResult.recipeName != "Resep Tanpa Judul" {
                                         recipe.title = nlpResult.recipeName
+                                        print("✅ [NLP] Updated recipe title to: '\(recipe.title)'")
                                     }
                                     
                                     self.continuation?.resume(returning: recipe)
