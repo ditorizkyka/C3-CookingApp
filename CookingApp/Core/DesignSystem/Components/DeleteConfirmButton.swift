@@ -21,7 +21,10 @@ struct DeleteConfirmButton: View {
             confirming = true
         } label: {
             Image(systemName: AppIcon.minusFill)
+                .imageScale(.large)
                 .foregroundStyle(Color.actionDelete)
+                .frame(minWidth: 28, minHeight: 28)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .popover(isPresented: $confirming) {
@@ -42,15 +45,15 @@ struct DeleteConfirmButton: View {
                     }
                     .buttonStyle(.bordered)
 
-//                    Button(role: .destructive) {
-//                        confirming = false
-//                        onConfirm()
-//                    } label: {
-//                        Text("Hapus")
-//                            .frame(maxWidth: .infinity)
-//                    }
-//                    .buttonStyle(.borderedProminent)
-//                    .tint(Color.actionDelete)
+                    Button(role: .destructive) {
+                        confirming = false
+                        onConfirm()
+                    } label: {
+                        Text("Hapus")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color.actionDelete)
                 }
             }
             .padding(16)

@@ -89,6 +89,7 @@ struct EditInstructionRow: View {
             }
         }
         .padding(.horizontal, 10)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     
@@ -122,6 +123,7 @@ struct EditBreakdownInstructionRow: View {
                 }
         }
         .padding(.vertical, 6)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

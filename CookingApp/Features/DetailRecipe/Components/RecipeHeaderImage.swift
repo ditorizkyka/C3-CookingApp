@@ -114,18 +114,18 @@ struct RecipeEditHeader: View {
                             )
                             .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                         
-                        Button(action: {
-                            // Remove the cover image
-                            viewModel.recipe.coverImageData = nil
-                            viewModel.recipe.coverImageUrl = nil
-                        }) {
-                            Image(systemName: AppIcon.minusFill)
-                                .font(.title2)
-                                .foregroundColor(Color.actionDelete)
-                                .background(Color.surfaceElevated)
-                                .clipShape(Circle())
-                        }
-                        .offset(x: 10, y: -10)
+//                        Button(action: {
+//                            // Remove the cover image
+//                            viewModel.recipe.coverImageData = nil
+//                            viewModel.recipe.coverImageUrl = nil
+//                        }) {
+//                            Image(systemName: AppIcon.minusFill)
+//                                .font(.title2)
+//                                .foregroundColor(Color.actionDelete)
+//                                .background(Color.surfaceElevated)
+//                                .clipShape(Circle())
+//                        }
+//                        .offset(x: 10, y: -10)
                     }
                     .onTapGesture {
                         showPhotoPicker = true

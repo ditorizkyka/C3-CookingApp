@@ -52,6 +52,7 @@ struct EditIngredientsRow: View {
             Spacer()
         }
         .padding(.horizontal, 10)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
 }
