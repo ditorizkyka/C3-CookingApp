@@ -45,13 +45,13 @@ struct DetailRecipeView: View {
                         RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
                     } else {
                         RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
-                        Text(viewModel.recipe.title)
-                        
-                            .padding(.top, 10)
-                            .padding(.bottom, 10)
-                            .font(.title)
-                            .multilineTextAlignment(.leading)
-                            .frame(minHeight: 48)
+                        HStack {
+                            Text(viewModel.recipe.title)
+                                .font(.title)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(.top, 10)
+                        .padding(.bottom, 10)
                     }
                     
                     
