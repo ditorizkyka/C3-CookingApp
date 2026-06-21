@@ -59,16 +59,18 @@ struct ImportLoadingView: View {
                 }
             } else {
                 // Loading state
+
                 ProgressView()
                     .scaleEffect(2)
                     .tint(Color.brandPrimary)
                 
                 Text(viewModel.state.message)
-                    .font(.title3)
+                    .font(.body)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelDark)
+                    .foregroundColor(Color.brandPrimary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
+                    .padding(.top, 24)
                 
                 Button(action: {
                     viewModel.cancel()
@@ -79,11 +81,20 @@ struct ImportLoadingView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(Color.labelLight)
                 }
-                .padding(.top, 32)
+//                .padding(.top, 32)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.surfaceDefault.ignoresSafeArea())
+        .background {
+            VStack {
+                RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: -125, width: 600, height: 600)
+                
+                Spacer()
+                
+                RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: 125, width: 600, height: 600)
+            }
+            .ignoresSafeArea()
+        }
         .navigationBarBackButtonHidden(true)
         .onAppear {
             viewModel.start(url: urlToScrape, onComplete: { recipe in
