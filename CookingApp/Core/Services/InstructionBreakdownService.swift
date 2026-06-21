@@ -18,29 +18,39 @@ public struct InstructionBreakdownService {
             let lmSession = LanguageModelSession()
             let taggerChunks = prechunkWithTagger(input: enText)
             
-            let combinedInput = taggerChunks.joined(separator: ". ")
+            let chunksList = taggerChunks.map { "- \($0)" }.joined(separator: "\n")
             let contextString = previousContext.isEmpty ? "No previous context." : previousContext.suffix(2).joined(separator: " ")
             
             let prompt = """
-            You are a cooking assistant. The following is a 'Current step to refine' that has been pre-split by a grammar parser.
-            Your job is to refine it strictly based on the provided text and the context of the recipe's ingredients.
-            - CRITICAL: DO NOT invent, hallucinate, or add any new cooking steps, temperatures, times, or ingredients. ONLY reformat the text provided in the 'Current step to refine'. Do NOT write a recipe from scratch.
-            - Resolve any implicit pronouns or missing objects based on the 'Context from previous steps' and 'Recipe Ingredients'. (e.g., if the current step says "wash thoroughly", and the context/ingredients mentions "chicken", you output "wash the chicken thoroughly"). Each step you return must make sense fully on its own.
-            - Merge any steps that are too fragmented and belong together.
-            - If a condition or waiting state appears, convert it into an explicit waiting step: "Wait until [condition]".
-            - CRITICAL: Return ONLY the refined steps for the 'Current step to refine'. DO NOT include, repeat, or summarize any steps from the 'Context from previous steps'.
+            You are an expert cooking assistant. Your job is to break down the 'Current recipe text' into a list of singular, atomic cooking actions.
             
-            Recipe Ingredients:
-            \(ingredients.isEmpty ? "None provided." : ingredients.joined(separator: ", "))
+            RULES:
+            1. Extract EVERY action from the text into its own step. Do NOT skip or omit any actions from the text.
+            2. DO NOT invent or hallucinate new steps that are not explicitly in the text.
+            3. Resolve pronouns (it, them) to the actual ingredients they refer to (e.g., "Set aside" -> "Set the anchovies aside").
+            4. If a step is just the word "Remove", change it to "Remove from heat".
+            5. If a step is just the word "Serve", change it to "Serve the dish".
+            6. Return ONLY the broken-down steps for the 'Current recipe text'. Do not include steps from the 'Context'.
+            
+            Original full text (for context):
+            \(enText)
             
             Context from previous steps:
             \(contextString)
             
-            Current step to refine: \(combinedInput)
+            Current recipe text (pre-split into suggested chunks):
+            \(chunksList)
             """
             
             let response = try await lmSession.respond(to: prompt, generating: RecipeActivityList.self)
             let refinedSteps = response.content.steps
+            
+            print("\n🤖 [AI BREAKDOWN] Original: \"\(enText)\"")
+            print("   ↳ 🔪 Refined Steps:")
+            for (index, step) in refinedSteps.enumerated() {
+                print("       [\(index + 1)] \(step)")
+            }
+            print("--------------------------------------------------\n")
             
             allBreakdownsEN.append(refinedSteps)
             previousContext.append(enText)
@@ -104,7 +114,7 @@ public struct InstructionBreakdownService {
             let sentence = String(input[tokenRange]).trimmingCharacters(in: .whitespacesAndNewlines)
             tagger.string = sentence
             var lastIndex = sentence.startIndex
-            let splitTriggers = ["and", "then", "after", "next", ","]
+            let splitTriggers = ["and", "then", "after", "next"]
             var potentialSplitPoint: String.Index? = nil
             
             tagger.enumerateTags(in: sentence.startIndex..<sentence.endIndex, unit: .word, scheme: .lexicalClass, options: options) { tag, wordRange in
