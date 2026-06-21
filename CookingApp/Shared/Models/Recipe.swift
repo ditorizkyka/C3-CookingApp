@@ -14,7 +14,18 @@ class Recipe: Identifiable {
     
     // Cascade berarti jika Recipe dihapus, ingredients & instructions ini ikut terhapus
     @Relationship(deleteRule: .cascade) var ingredients: [Ingredient]
+    
+    // Ingredients sorted by their intended order
+    var sortedIngredients: [Ingredient] {
+        ingredients.sorted { $0.sequenceNumber < $1.sequenceNumber }
+    }
+    
     @Relationship(deleteRule: .cascade) var instructions: [Instruction]
+    
+    // Instructions sorted by their intended order
+    var sortedInstructions: [Instruction] {
+        instructions.sorted { $0.sequenceNumber < $1.sequenceNumber }
+    }
     
     var tips: String?
     var categoryRawValue: String?

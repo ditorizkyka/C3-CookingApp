@@ -45,13 +45,13 @@ struct DetailRecipeView: View {
                         RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
                     } else {
                         RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
-                        Text(viewModel.recipe.title)
-                        
-                            .padding(.top, 10)
-                            .padding(.bottom, 10)
-                            .font(.title)
-                            .multilineTextAlignment(.leading)
-                            .frame(minHeight: 48)
+                        HStack {
+                            Text(viewModel.recipe.title)
+                                .font(.title)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(.top, 10)
+                        .padding(.bottom, 10)
                     }
                     
                     
@@ -324,8 +324,9 @@ struct DetailRecipeView: View {
             .fontWeight(.semibold)
             .foregroundColor(Color.labelLight)
         ) {
-            if !viewModel.recipe.ingredients.isEmpty {
-                ForEach(viewModel.recipe.ingredients) { ingredient in
+            let sortedIngredients = viewModel.recipe.sortedIngredients
+            if !sortedIngredients.isEmpty {
+                ForEach(sortedIngredients) { ingredient in
                     if viewModel.recipe.ingredients.contains(where: { $0.id == ingredient.id }) {
                         Group {
                             if ingredient.isGroup {
@@ -386,7 +387,7 @@ struct DetailRecipeView: View {
         }
         
         // --- Sub-ingredients ---
-        ForEach(ingredient.groupIngredients ?? []) { sub in
+        ForEach(ingredient.sortedGroupIngredients ?? []) { sub in
             if viewModel.isEdited {
                 EditIngredientsRow(
                     isBreakdown: true,
@@ -408,7 +409,8 @@ struct DetailRecipeView: View {
                     if ingredient.groupIngredients == nil {
                         ingredient.groupIngredients = []
                     }
-                    ingredient.groupIngredients?.append(Ingredient(quantity: "", name: ""))
+                    let newSeq = (ingredient.groupIngredients?.count ?? 0) + 1
+                    ingredient.groupIngredients?.append(Ingredient(quantity: "", name: "", sequenceNumber: newSeq))
                 }
             } label: {
                 HStack {

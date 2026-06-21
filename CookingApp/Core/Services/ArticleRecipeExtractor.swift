@@ -38,12 +38,12 @@ struct ArticleRecipeExtractor {
         CRITICAL RULES:
         1. Extract the data exactly as written in the original language (Indonesian or English). Do NOT translate.
         2. Group the ingredients EXACTLY as they are grouped in the text.
-           - If an ingredient is NOT under any specific sub-group (e.g. it's just under "Bahan-bahan", "Bahan Utama", or "Ingredients"), you MUST put its `groupName` as an empty string `""`.
+           - If an ingredient is NOT under any specific sub-group, or if it is under a generic header like "Bahan-bahan", "Bahan", "Bahan Utama", or "Ingredients", you MUST set its `groupName` to an empty string `""`.
            - If the text explicitly splits ingredients into sub-groups (e.g., "Bumbu Halus", "Bahan Kuah", "Topping"), use those exact names for `groupName`.
-           - DO NOT invent group names like "Bahan A" or "Group 1". If there is no specific sub-group header, the groupName MUST be `""`.
+           - STRICTLY PROHIBITED: Do NOT use "Bahan-bahan", "Bahan", "Bahan Utama", "Ingredients", or "Group 1" as a `groupName`. Use `""` instead.
         3. Ignore all medical advice, blog stories, unrelated articles, and author commentary.
         4. If there are no clear ingredients or instructions, return empty arrays.
-        5. For the `recipeName` field: If a recipe title is visible, extract it. Otherwise, use 'Resep Tanpa Judul'. Do NOT use 'Resep Tanpa Judul' as an ingredient groupName.
+        5. For the `recipeName` field: Generate a CLEAN, short, and accurate recipe name based on the text (e.g., instead of "Daftar Resep Ayam Rica Rica, Cocok untuk Menu Makan Siang", just return "Ayam Rica Rica").
 
         === RELEVANT TEXT ===
         \(relevantText)

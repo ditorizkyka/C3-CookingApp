@@ -94,9 +94,7 @@ struct ImportLoadingView: View {
             await viewModel.translateToEnglish(session: session)
         }
         .translationTask(viewModel.configEnToId) { session in
-            await viewModel.translateToIndonesian(session: session, onComplete: { recipe in
-                onComplete?(recipe)
-            })
+            await viewModel.translateToIndonesian(session: session)
         }
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import Translation
+import NaturalLanguage
 
 @MainActor
 class ImportLoadingViewModel: ObservableObject {
@@ -32,9 +33,12 @@ class ImportLoadingViewModel: ObservableObject {
     
     // Internal State
     private var englishInstructions: [String]?
+    private var englishIngredients: [String]?
     private var intermediateBreakdownsEN: [[String]]?
     private var activeTask: Task<Void, Never>?
     private var hasStarted = false
+    private var sourceLanguageIsEnglish = false
+    private var completionHandler: ((Recipe) -> Void)?
     
     // Dependencies
     private let scraperService = WebScraperService.shared
@@ -48,17 +52,13 @@ class ImportLoadingViewModel: ObservableObject {
         guard !hasStarted else { return }
         hasStarted = true
         errorMessage = nil
+        self.completionHandler = onComplete
         
         activeTask = Task {
             do {
                 if recipe != nil {
-                    // Skip scraping, go straight to translation
-                    await MainActor.run { 
-                        self.state = .translatingIDtoEN
-                        self.configIdToEn = TranslationSession.Configuration(
-                            source: Locale.Language(identifier: "id-ID"),
-                            target: Locale.Language(identifier: "en-US")
-                        )
+                    await MainActor.run {
+                        self.processRecipeLanguage(recipe: self.recipe!)
                     }
                 } else if let validUrl = url {
                     // 1. Scraping
@@ -68,12 +68,7 @@ class ImportLoadingViewModel: ObservableObject {
                     
                     await MainActor.run { 
                         self.recipe = result
-                        // 2. Trigger Translation to EN
-                        self.state = .translatingIDtoEN
-                        self.configIdToEn = TranslationSession.Configuration(
-                            source: Locale.Language(identifier: "id-ID"),
-                            target: Locale.Language(identifier: "en-US")
-                        )
+                        self.processRecipeLanguage(recipe: result)
                     }
                 }
             } catch let error as ScraperError {
@@ -81,6 +76,44 @@ class ImportLoadingViewModel: ObservableObject {
             } catch {
                 handleError(error.localizedDescription)
             }
+        }
+    }
+    
+    private func processRecipeLanguage(recipe: Recipe) {
+        let combinedText = recipe.instructions.map { $0.text }.joined(separator: " ")
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(combinedText)
+        
+        let rawLang = recognizer.dominantLanguage?.rawValue ?? "id"
+        let detectedLanguage: String
+        switch rawLang {
+        case "id": detectedLanguage = "id-ID"
+        case "en": detectedLanguage = "en-US"
+        case "ja": detectedLanguage = "ja-JP"
+        case "ko": detectedLanguage = "ko-KR"
+        case "zh": detectedLanguage = "zh-CN"
+        case "fr": detectedLanguage = "fr-FR"
+        case "es": detectedLanguage = "es-ES"
+        case "de": detectedLanguage = "de-DE"
+        case "it": detectedLanguage = "it-IT"
+        default: detectedLanguage = rawLang
+        }
+        
+        if rawLang == "en" {
+            self.sourceLanguageIsEnglish = true
+            self.englishInstructions = recipe.instructions.map { $0.text }
+            self.englishIngredients = self.extractIngredientNames()
+            
+            Task {
+                await self.processLanguageModel()
+            }
+        } else {
+            self.sourceLanguageIsEnglish = false
+            self.state = .translatingIDtoEN
+            self.configIdToEn = TranslationSession.Configuration(
+                source: Locale.Language(identifier: detectedLanguage),
+                target: Locale.Language(identifier: "en-US")
+            )
         }
     }
     
@@ -96,6 +129,14 @@ class ImportLoadingViewModel: ObservableObject {
             }
             self.englishInstructions = translated
             
+            let idIngredients = extractIngredientNames()
+            var enIngredients: [String] = []
+            for ingredient in idIngredients {
+                let response = try await session.translate(ingredient)
+                enIngredients.append(response.targetText)
+            }
+            self.englishIngredients = enIngredients
+            
             if Task.isCancelled { return }
             await processLanguageModel()
         } catch {
@@ -110,7 +151,11 @@ class ImportLoadingViewModel: ObservableObject {
         await MainActor.run { self.state = .breakingDown }
         
         do {
-            let breakdowns = try await nlpService.breakdownInstructions(englishInstructions: enTexts)
+            let ingredientNames = englishIngredients ?? []
+            let breakdowns = try await nlpService.breakdownInstructions(
+                englishInstructions: enTexts,
+                ingredients: ingredientNames
+            )
             if Task.isCancelled { return }
             
             await MainActor.run {
@@ -126,7 +171,21 @@ class ImportLoadingViewModel: ObservableObject {
         }
     }
     
-    func translateToIndonesian(session: TranslationSession, onComplete: @escaping (Recipe) -> Void) async {
+    private func extractIngredientNames() -> [String] {
+        guard let ingredients = recipe?.ingredients else { return [] }
+        var names: [String] = []
+        for ingredient in ingredients {
+            if ingredient.isGroup, let subs = ingredient.groupIngredients {
+                names.append(contentsOf: subs.map { "\($0.quantity) \($0.name)".trimmingCharacters(in: .whitespaces) })
+            } else {
+                names.append("\(ingredient.quantity) \(ingredient.name)".trimmingCharacters(in: .whitespaces))
+            }
+        }
+        return names
+    }
+    
+
+    func translateToIndonesian(session: TranslationSession) async {
         guard let breakdownsEN = intermediateBreakdownsEN, let recipe = recipe else { return }
         if Task.isCancelled { return }
         
@@ -157,7 +216,7 @@ class ImportLoadingViewModel: ObservableObject {
             }
             
             if Task.isCancelled { return }
-            onComplete(recipe)
+            self.completionHandler?(recipe)
         } catch {
             handleError("Gagal menyusun terjemahan akhir: \(error.localizedDescription)")
         }

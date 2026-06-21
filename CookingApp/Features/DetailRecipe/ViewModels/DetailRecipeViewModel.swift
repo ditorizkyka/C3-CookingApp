@@ -56,6 +56,7 @@ class DetailRecipeViewModel: ObservableObject {
             return false
         }
         renumberInstructions()
+        renumberIngredients()
         snapshot = nil
         withAnimation { isEdited = false }
         return true
@@ -78,12 +79,14 @@ class DetailRecipeViewModel: ObservableObject {
     // it pointed to after the array shrank.
 
     func addIngredient() {
-        recipe.ingredients.append(Ingredient(quantity: "", name: ""))
+        let newSeq = recipe.ingredients.count + 1
+        recipe.ingredients.append(Ingredient(quantity: "", name: "", sequenceNumber: newSeq))
     }
 
     func addIngredientGroup() {
+        let newSeq = recipe.ingredients.count + 1
         recipe.ingredients.append(
-            Ingredient(quantity: "", name: "", groupIngredients: [Ingredient(quantity: "", name: "")])
+            Ingredient(quantity: "", name: "", sequenceNumber: newSeq, groupIngredients: [Ingredient(quantity: "", name: "", sequenceNumber: 1)])
         )
     }
 
@@ -118,8 +121,33 @@ class DetailRecipeViewModel: ObservableObject {
     /// Keep `sequenceNumber` aligned with the visual top-to-bottom order (1, 2, 3, …)
     /// so cooking mode and any stored numbering stay consistent after edits.
     func renumberInstructions() {
-        for (index, instruction) in recipe.instructions.enumerated() {
+        let sorted = recipe.instructions.sorted { $0.sequenceNumber < $1.sequenceNumber }
+        for (index, instruction) in sorted.enumerated() {
             instruction.sequenceNumber = index + 1
+        }
+        
+        // Also renumber breakdown instructions just in case
+        for instruction in recipe.instructions {
+            let sortedBreakdown = instruction.breakdownInstruction.sorted { $0.sequenceNumber < $1.sequenceNumber }
+            for (index, sub) in sortedBreakdown.enumerated() {
+                sub.sequenceNumber = index + 1
+            }
+        }
+    }
+    
+    /// Keep `sequenceNumber` aligned with the visual top-to-bottom order
+    func renumberIngredients() {
+        let sorted = recipe.ingredients.sorted { $0.sequenceNumber < $1.sequenceNumber }
+        for (index, ingredient) in sorted.enumerated() {
+            ingredient.sequenceNumber = index + 1
+            
+            // Also renumber sub-ingredients
+            if let group = ingredient.groupIngredients {
+                let sortedSub = group.sorted { $0.sequenceNumber < $1.sequenceNumber }
+                for (subIndex, sub) in sortedSub.enumerated() {
+                    sub.sequenceNumber = subIndex + 1
+                }
+            }
         }
     }
 
