@@ -21,6 +21,7 @@ struct AddManualRecipeView: View {
     @State private var draggingInstructionID: UUID? = nil
     @State private var portion: Int = 1
     @State private var durationInMinutes: Int = 10
+    @State private var category: RecipeCategory = .lainnya
     @State private var coverImageData: Data? = nil
     
     // Photo picker
@@ -58,8 +59,8 @@ struct AddManualRecipeView: View {
                             } label: {
                                 Image(systemName: AppIcon.minusFill)
                                     .font(.title2)
-                                    .foregroundColor(Color.actionDelete!)
-                                    .background(Color.surfaceElevated!)
+                                    .foregroundColor(Color.actionDelete)
+                                    .background(Color.surfaceElevated)
                                     .clipShape(Circle())
                             }
                             .offset(x: 10, y: -10)
@@ -71,27 +72,27 @@ struct AddManualRecipeView: View {
                                 ZStack(alignment: .bottomTrailing) {
                                     Image(systemName: "photo")
                                         .font(.system(size: 40))
-                                        .foregroundColor(Color.labelLight!)
+                                        .foregroundColor(Color.labelLight)
                                     
                                     Image(systemName: AppIcon.plusFill)
                                         .font(.system(size: 16))
-                                        .foregroundColor(Color.labelLight!)
-                                        .background(Color.surfaceElevated!)
+                                        .foregroundColor(Color.labelLight)
+                                        .background(Color.surfaceElevated)
                                         .clipShape(Circle())
                                         .offset(x: 4, y: 4)
                                 }
                                 
                                 Text("Tambah Foto")
                                     .font(.callout)
-                                    .foregroundColor(Color.labelLight!)
+                                    .foregroundColor(Color.labelLight)
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 221)
-                            .background(Color.surfaceElevated!)
+                            .background(Color.surfaceElevated)
                             .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                             .overlay(
                                 RoundedRectangle(cornerRadius: Radius.small)
-                                    .stroke(Color.labelLight!, style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
+                                    .stroke(Color.labelLight, style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
                             )
                         }
                         .buttonStyle(.plain)
@@ -118,10 +119,11 @@ struct AddManualRecipeView: View {
             // MARK: - Langkah-langkah
             instructionsSection
 
-            // MARK: - Porsi & Durasi
+            // MARK: - Porsi & Durasi & Kategori
             Section {
                 TotalPortionRow(selectedPortion: $portion)
                 TotalDurationRow(selectedDuration: $durationInMinutes)
+                RecipeCategoryRow(selectedCategory: $category)
             }
             
             // MARK: - Simpan
@@ -132,6 +134,7 @@ struct AddManualRecipeView: View {
             
         }
         .listStyle(.insetGrouped)
+        .scrollDismissesKeyboard(.interactively)
         .background(Color.surfaceDefault)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -149,7 +152,7 @@ struct AddManualRecipeView: View {
                         Image(systemName: "chevron.left")
                             .font(.body.weight(.semibold))
                     }
-                    .foregroundStyle(Color.brandPrimary!)
+                    .foregroundStyle(Color.brandPrimary)
                 }
             }
             ToolbarItem(placement: .principal) {
@@ -181,11 +184,10 @@ struct AddManualRecipeView: View {
         }
         .navigationDestination(isPresented: $navigateToBreakdown) {
             if let recipe = createdRecipe {
-                BreakdownLoadingView(
-                    recipe: recipe,
-                    onBreakdownComplete: onManualComplete,
-                    onError: { _ in
-                        dismiss()
+                ImportLoadingView(
+                    initialRecipe: recipe,
+                    onComplete: { completedRecipe in
+                        onManualComplete?(completedRecipe)
                     }
                 )
             }
@@ -199,7 +201,7 @@ struct AddManualRecipeView: View {
         Section(header: Text("Bahan-bahan")
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(Color.labelLight!)
+            .foregroundColor(Color.labelLight)
         ) {
             // Iterate the model objects (not indices) so deletes by id never
             // crash with "Index out of range".
@@ -255,7 +257,7 @@ struct AddManualRecipeView: View {
         Section(header: Text("Langkah")
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(Color.labelLight!)
+            .foregroundColor(Color.labelLight)
         ) {
             // Iterate the objects directly (stable identity) — the enumerated form
             // breaks live drag-reordering. Number is computed from current position.
@@ -332,7 +334,8 @@ struct AddManualRecipeView: View {
             portion: portion,
             durationInMinutes: durationInMinutes,
             ingredients: ingredients,
-            instructions: instructions
+            instructions: instructions,
+            category: category
         )
         
         print("✅ Manual Recipe Draft created: \"\(recipe.title)\" with \(ingredients.count) ingredients, \(instructions.count) instructions")
@@ -364,7 +367,7 @@ struct GroupedIngredientSectionView: View {
     var onDeleteGroup: () -> Void
 
     var body: some View {
-        if let groupIngredients = ingredient.groupIngredients {
+        if let _ = ingredient.groupIngredients {
             // --- Group Header ---
             HStack {
                 DeleteConfirmButton {
@@ -373,18 +376,15 @@ struct GroupedIngredientSectionView: View {
 
                 TextField("Nama Grup", text: $ingredient.name)
                 .font(.headline)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
 
                 Spacer()
-
-                Image(systemName: AppIcon.line3Horizontal)
-                    .foregroundStyle(Color.labelLight!)
             }
             .padding(.horizontal, 10)
             .listRowSeparator(.hidden)
 
             // --- Sub-ingredients ---
-            ForEach(groupIngredients) { sub in
+            ForEach(ingredient.groupIngredients ?? []) { sub in
                 EditIngredientsRow(
                     isBreakdown: true,
                     ingredientsItemsName: Binding(
@@ -402,6 +402,25 @@ struct GroupedIngredientSectionView: View {
                     }
                 )
             }
+            
+            // --- Tambah Anggota Grup ---
+            Button {
+                withAnimation {
+                    ingredient.groupIngredients?.append(Ingredient(quantity: "", name: ""))
+                }
+            } label: {
+                HStack {
+                    Image(systemName: AppIcon.plusFill)
+                        .foregroundStyle(Color.brandPrimary)
+                    Text("Tambah Anggota")
+                        .font(.body)
+                        .foregroundStyle(Color.brandPrimary)
+                    Spacer()
+                }
+                .padding(.horizontal, 10)
+                .padding(.leading,25)
+            }
+            
         }
     }
 }

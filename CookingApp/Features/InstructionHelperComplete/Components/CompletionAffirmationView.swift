@@ -15,7 +15,7 @@ struct CompletionAffirmationView: View {
             
             Text("Masakanmu sudah siap!")
                 .font(Font.title)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
         }
     }
 }

@@ -16,47 +16,39 @@ struct RecipeDetailHeader: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Group {
-                if let data = imageData, let uiImage = UIImage(data: data) {
-                    // Show locally saved image (user picked from photo library)
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                } else if let url = imageUrl {
-                    // Show image from scraped URL
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
+            Color.clear
+                .frame(height: 208)
+                .overlay(
+                    Group {
+                        if let data = imageData, let uiImage = UIImage(data: data) {
+                            Image(uiImage: uiImage)
                                 .resizable()
                                 .scaledToFill()
-                        case .failure(_):
+                        } else if let url = imageUrl {
+                            AsyncImage(url: url) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                case .failure(_):
+                                    ImagePlaceholder()
+                                case .empty:
+                                    ProgressView()
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                        } else if let name = imageName, !name.isEmpty {
+                            Image(name)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
                             ImagePlaceholder()
-                        case .empty:
-                            ProgressView()
-                                .frame(height: 250)
-                        @unknown default:
-                            EmptyView()
                         }
                     }
-                } else if let name = imageName, !name.isEmpty {
-                    Image(name)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    ImagePlaceholder()
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 221)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.small))
-            
-            Text(titleRecipe)
-                .padding(.horizontal, 0)
-                .padding(.vertical, 36)
-                .frame(height: 48)
-                .font(.title)
-                .cornerRadius(Radius.infinity)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: Radius.small))
         }
     }
 }
@@ -70,9 +62,9 @@ struct ImagePlaceholder: View {
             Text("No Image")
                 .font(.caption)
         }
-        .foregroundColor(Color.labelLightest!)
+        .foregroundColor(Color.labelLightest)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.tertiarySystemFill))
+        .background(Color.labelLight)
     }
 }
 
@@ -115,23 +107,25 @@ struct RecipeEditHeader: View {
                 if hasImage {
                     // Show current image with delete button
                     ZStack(alignment: .topTrailing) {
-                        currentImageView
-                            .frame(maxWidth: .infinity)
+                        Color.clear
                             .frame(height: 221)
+                            .overlay(
+                                currentImageView
+                            )
                             .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                         
-                        Button(action: {
-                            // Remove the cover image
-                            viewModel.recipe.coverImageData = nil
-                            viewModel.recipe.coverImageUrl = nil
-                        }) {
-                            Image(systemName: AppIcon.minusFill)
-                                .font(.title2)
-                                .foregroundColor(Color.actionDelete!)
-                                .background(Color.surfaceElevated!)
-                                .clipShape(Circle())
-                        }
-                        .offset(x: 10, y: -10)
+//                        Button(action: {
+//                            // Remove the cover image
+//                            viewModel.recipe.coverImageData = nil
+//                            viewModel.recipe.coverImageUrl = nil
+//                        }) {
+//                            Image(systemName: AppIcon.minusFill)
+//                                .font(.title2)
+//                                .foregroundColor(Color.actionDelete)
+//                                .background(Color.surfaceElevated)
+//                                .clipShape(Circle())
+//                        }
+//                        .offset(x: 10, y: -10)
                     }
                     .onTapGesture {
                         showPhotoPicker = true
@@ -145,42 +139,44 @@ struct RecipeEditHeader: View {
                             ZStack(alignment: .bottomTrailing) {
                                 Image(systemName: "photo")
                                     .font(.system(size: 40))
-                                    .foregroundColor(Color.labelLight!)
+                                    .foregroundColor(Color.labelLight)
                                 
                                 Image(systemName: AppIcon.plusFill)
                                     .font(.system(size: 16))
-                                    .foregroundColor(Color.labelLight!)
-                                    .background(Color.surfaceElevated!)
+                                    .foregroundColor(Color.labelLight)
+                                    .background(Color.surfaceElevated)
                                     .clipShape(Circle())
                                     .offset(x: 4, y: 4)
                             }
                             
                             Text("Tambah Foto")
                                 .font(.callout)
-                                .foregroundColor(Color.labelLight!)
+                                .foregroundColor(Color.labelLight)
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 221)
-                        .background(Color.surfaceElevated!)
+                        .background(Color.surfaceElevated)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                         .overlay(
                             RoundedRectangle(cornerRadius: Radius.small)
-                                .stroke(Color.labelLight!, style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
+                                .stroke(Color.labelLight, style: StrokeStyle(lineWidth: 1, dash: [6, 6]))
                         )
                     }
                     .buttonStyle(.plain)
                 }
             }
-            
-            TextField("Nama Resep", text: $viewModel.recipe.title)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 36)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .font(.title)
-                .background(Color.surfaceElevated)
-                .cornerRadius(Radius.infinity)
-                .padding(.vertical, 20)
+            HStack {
+                TextField("Nama Resep", text: $viewModel.recipe.title, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .font(.title)
+                    .multilineTextAlignment(.leading)
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(Color.surfaceElevated)
+            .cornerRadius(Radius.small)
+            .padding(.vertical, 20)
         }
         .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhotoItem, matching: .images)
         .onChange(of: selectedPhotoItem) { _, newItem in
@@ -229,6 +225,11 @@ struct RecipeEditHeader: View {
 #Preview {
     @Previewable @State var title = "Mie Kuah Spesial"
     ScrollView {
-        // Preview is simplified
+        RecipeDetailHeader(
+             titleRecipe: "HaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHaloHalo"
+        )
+        ButtonApp(title: "Halo",action:  {
+            print("halo")
+        })
     }
 }

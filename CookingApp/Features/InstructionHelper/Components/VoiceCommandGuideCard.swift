@@ -3,7 +3,7 @@ import SwiftUI
 struct VoiceCommandGuideCard: View {
     var guides: [String: String]
     
-    private let guideOrder = ["Lanjut", "Ulangi", "Balik", "Kembali"]
+    private let guideOrder = ["Kembali", "Ulangi", "Lanjut"]
     
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
@@ -32,12 +32,12 @@ struct VoiceCommandGuideCard: View {
                     if index < allKeys.count - 1 {
                         Divider()
                             .frame(height: 35)
-                            .overlay(Color.labelLight?.opacity(0.3) ?? .gray.opacity(0.3))
+                            .overlay(Color.labelLight.opacity(0.3))
                     }
                 }
             }
         }
-        .foregroundStyle(Color.labelLight!)
+        .foregroundStyle(Color.labelLight)
         .padding(15)
     }
 }

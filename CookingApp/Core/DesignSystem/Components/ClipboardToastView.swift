@@ -22,17 +22,17 @@ struct ClipboardToastView: View {
             // MARK: - Icon
             Image(systemName: "link.badge.plus")
                 .font(.title2)
-                .foregroundStyle(Color.brandPrimary!)
+                .foregroundStyle(Color.brandPrimary)
             
             // MARK: - Text
             VStack(alignment: .leading, spacing: 2) {
                 Text("Link Terdeteksi")
-                    .font(.subheadline)
+                    .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
                 Text(displayHost)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
@@ -45,17 +45,16 @@ struct ClipboardToastView: View {
                 Text("Import")
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(Color.labelLightest!)
+                    .foregroundColor(Color.labelLightest)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.brandPrimary!)
+                    .background(Color.brandPrimary)
                     .clipShape(Capsule())
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(24)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: Radius.large)
                 .fill(.regularMaterial)
                 .shadow(color: .black.opacity(0.12), radius: 12, x: 0, y: 4)
         )

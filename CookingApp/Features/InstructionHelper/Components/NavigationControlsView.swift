@@ -43,7 +43,7 @@ struct NavigationControlsView: View {
                     Text("Ulangi")
                         .fontWeight(.semibold)
                 }
-                .foregroundStyle(Color.brandPrimary ?? .green)
+                .foregroundStyle(Color.brandPrimary)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 12)
             }
@@ -72,4 +72,27 @@ struct NavigationControlsView: View {
         .padding(.horizontal, 24)
         .padding(.bottom, 16)
     }
+}
+
+#Preview {
+    VStack(spacing: 20) {
+        NavigationControlsView(
+            currentPage: 1,
+            totalPages: 3,
+            onPrevious: {},
+            onNext: {},
+            onRepeat: {}
+        )
+        
+        NavigationControlsView(
+            currentPage: 2,
+            totalPages: 3,
+            onPrevious: {},
+            onNext: {},
+            onRepeat: {},
+            onComplete: {}
+        )
+    }
+    .padding()
+    .background(Color.surfaceElevated)
 }

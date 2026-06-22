@@ -30,7 +30,7 @@ struct EditInstructionRow: View {
                 HStack {
                     Text("\(displayNumber)")
                         .font(.footnote)
-                        .foregroundColor(Color.labelDark!)
+                        .foregroundColor(Color.labelDark)
                         .frame(width: 20, height: 20)
                         .background(Color.brandSecondary)
                         .clipShape(Circle())
@@ -40,15 +40,14 @@ struct EditInstructionRow: View {
                 }
 
                 Spacer()
-
-                dragHandle
             }
 
             if allowBreakdown {
                 // MARK: - Breakdown Instructions
                 if !instruction.breakdownInstruction.isEmpty {
                     VStack(alignment: .leading, spacing: 0) {
-                        ForEach(instruction.breakdownInstruction) { subStep in
+                        let sortedBreakdowns = instruction.breakdownInstruction.sorted { $0.sequenceNumber < $1.sequenceNumber }
+                        ForEach(sortedBreakdowns) { subStep in
                             EditBreakdownInstructionRow(
                                 subInstruction: subStep,
                                 onDelete: {
@@ -60,7 +59,7 @@ struct EditInstructionRow: View {
                         }
                     }
 //                    .padding(.leading, 28)
-                    .padding(.top, 8)
+                    .padding(.vertical  , 8)
                 }
 
                 // MARK: - Tambah Langkah Breakdown
@@ -78,10 +77,10 @@ struct EditInstructionRow: View {
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: AppIcon.plusFill)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                         Text("Tambah Langkah Breakdown")
                             .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                     }
                 }
                 .buttonStyle(.plain)
@@ -90,20 +89,10 @@ struct EditInstructionRow: View {
             }
         }
         .padding(.horizontal, 10)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
-    @ViewBuilder
-    private var dragHandle: some View {
-        let handle = Image(systemName: AppIcon.line3Horizontal)
-            .font(.body)
-            .foregroundStyle(Color.labelLight!)
-
-        if let onDrag {
-            handle.onDrag(onDrag)
-        } else {
-            handle
-        }
-    }
+    
 }
 
 // MARK: - Breakdown Instruction Row
@@ -112,27 +101,29 @@ struct EditBreakdownInstructionRow: View {
     var onDelete: (() -> Void)? = nil
 
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(alignment: .top) {
             DeleteConfirmButton {
                 onDelete?()
             }
 
             Circle()
-                .fill(Color.labelDark!)
+                .fill(Color.labelDark)
                 .frame(width: 3, height: 3)
-                .padding(.horizontal,10)
+                .padding(.horizontal, 10)
+                .padding(.top, 6)
             
             TextField("Tulis sub-langkah...", text: $subInstruction.text, axis: .vertical)
                 .font(.subheadline)
-                .foregroundStyle(Color.labelLight!)
-            
-            Spacer()
-            
-            Image(systemName: AppIcon.line3Horizontal)
-                .font(.body)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .scrollDismissesKeyboard(.immediately)
+                .submitLabel(.done)
+                .onSubmit {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
         }
         .padding(.vertical, 6)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -151,7 +142,7 @@ struct PhotoPickerHStack: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)
-                        .foregroundColor(Color.labelLight!)
+                        .foregroundColor(Color.labelLight)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     
                     if selectedImage != nil {
@@ -162,9 +153,9 @@ struct PhotoPickerHStack: View {
                         }) {
                             Image(systemName: "minus")
                                 .font(.caption2.bold())
-                                .foregroundColor(Color.labelLightest!)
+                                .foregroundColor(Color.labelLightest)
                                 .padding(8)
-                                .background(Color.actionDelete!)
+                                .background(Color.actionDelete)
                                 .clipShape(Circle())
                         }
                         .offset(x: 10, y: -10)
@@ -179,26 +170,26 @@ struct PhotoPickerHStack: View {
                         ZStack(alignment: .bottomTrailing) {
                             Image(systemName: "photo")
                                 .font(.system(size: 40))
-                                .foregroundColor(Color.labelLight!)
+                                .foregroundColor(Color.labelLight)
                             
                             Image(systemName: AppIcon.plusFill)
                                 .font(.title3)
-                                .foregroundColor(Color.labelLight!)
-                                .background(Color.surfaceElevated!)
+                                .foregroundColor(Color.labelLight)
+                                .background(Color.surfaceElevated)
                                 .clipShape(Circle())
                                 .offset(x: 5, y: 5)
                         }
                         
                         Text("Tambah Foto")
                             .font(.caption)
-                            .foregroundColor(Color.labelLight!)
+                            .foregroundColor(Color.labelLight)
                     }
                     .frame(width: 100, height: 100)
-                    .background(Color.surfaceElevated!)
+                    .background(Color.surfaceElevated)
                     .clipShape(RoundedRectangle(cornerRadius: Radius.small))
                     .overlay(
                         RoundedRectangle(cornerRadius: Radius.small)
-                            .stroke(Color.labelLight!, style: StrokeStyle(lineWidth: 1, dash: [5]))
+                            .stroke(Color.labelLight, style: StrokeStyle(lineWidth: 1, dash: [5]))
                     )
                 }
                 .buttonStyle(.plain)
@@ -214,19 +205,16 @@ struct PhotoPickerHStack: View {
 }
 
 #Preview {
-//    let container = PreviewContainer.shared
-//    let ctx = container.mainContext
-//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
-//    let instruction = recipes.first?.instructions.first(where: { !$0.breakdownInstruction.isEmpty })
-//        ?? recipes.first?.instructions.first
-//    
-//    return Group {
-//        if let instr = instruction {
-//            @State var editableInstruction = instr
-//            EditInstructionRow(instruction: $editableInstruction)
-//        } else {
-//            Text("No instructions in sample data")
-//        }
-//    }
-//    .modelContainer(container)
+    @Previewable @State var dummyInstruction = Instruction(
+        sequenceNumber: 1,
+        text: "Potong ayam menjadi bagian-bagian kecil lalu cuci bersih.",
+        breakdownInstruction: [
+            Instruction(sequenceNumber: 1, text: "Gunakan pisau tajam agar potongan rapis.ssssssssssssssss"),
+            Instruction(sequenceNumber: 2, text: "Tiriskan ayam setelah dicuci.")
+        ]
+    )
+    
+    List {
+        EditInstructionRow(instruction: dummyInstruction, displayNumber: 1)
+    }
 }

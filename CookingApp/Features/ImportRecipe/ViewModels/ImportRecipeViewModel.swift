@@ -23,14 +23,17 @@ class ImportRecipeViewModel: ObservableObject {
     
     // MARK: - Validation
     
-    /// Check if the entered link is a valid Cookpad URL
-    var isValidCookpadLink: Bool {
+    /// Check if the entered link is a valid recipe URL (any website)
+    var isValidRecipeLink: Bool {
         let cleaned = link.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard let url = URL(string: cleaned), let host = url.host?.lowercased() else {
+        // Add https:// if missing for validation
+        let urlString = cleaned.hasPrefix("http://") || cleaned.hasPrefix("https://") ? cleaned : "https://" + cleaned
+        guard let url = URL(string: urlString), url.host != nil else {
             return false
         }
-        return host.contains("cookpad.com")
+        return true
     }
+
     
     /// Validate the link and show the web preview if valid
     func validateAndShowPreview() {
@@ -57,10 +60,10 @@ class ImportRecipeViewModel: ObservableObject {
         }
         
         // Check if it's a Cookpad URL
-        guard CookpadScraperService.isValidCookpadURL(urlString) else {
-            errorMessage = "Saat ini hanya mendukung link dari Cookpad. Pastikan link berasal dari cookpad.com."
-            return
-        }
+        // guard CookpadScraperService.isValidCookpadURL(urlString) else {
+        //     errorMessage = "Saat ini hanya mendukung link dari Cookpad. Pastikan link berasal dari cookpad.com."
+        //     return
+        // }
         
         // Update link with the cleaned/prefixed version
         link = urlString
@@ -77,7 +80,7 @@ class ImportRecipeViewModel: ObservableObject {
         scrapingFinished = false
         
         do {
-            let result = try await CookpadScraperService.shared.scrape(urlString: link)
+            let result = try await WebScraperService.shared.scrape(urlString: link)
             scrapedRecipe = result
             scrapingFinished = true
         } catch let error as ScraperError {

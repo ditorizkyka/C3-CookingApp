@@ -15,7 +15,7 @@ struct ToolTipStyle: TipViewStyle {
             if let image = configuration.image {
                 image
                     .font(Font.title)
-                    .foregroundStyle(Color.brandAccent!)
+                    .foregroundStyle(Color.brandAccent)
             }
             
             // Content
@@ -43,12 +43,14 @@ struct ToolTipStyle: TipViewStyle {
                         Button(action: action.handler) {
                             action.label()
                                 .font(Font.subheadline)
-                                .foregroundStyle(Color.brandAccent!)
+                                .foregroundStyle(Color.brandAccent)
                         }
                     }
                 }
             }
         }
         .padding(20)
+        // Mencegah konten tooltip terpotong saat berada di dalam List
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

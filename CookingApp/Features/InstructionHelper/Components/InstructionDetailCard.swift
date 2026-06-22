@@ -13,15 +13,17 @@ struct InstructionDetailCard: View {
     let subInstructions: [String]
     var isCurrent: Bool = false
     var activeSubInstruction: String = ""
+    var onSelect: ((String) -> Void)? = nil
     
     @State private var isExpanded: Bool
     
-    init(stepNumber: Int, mainInstruction: String, subInstructions: [String], isCurrent: Bool = false, activeSubInstruction: String = "") {
+    init(stepNumber: Int, mainInstruction: String, subInstructions: [String], isCurrent: Bool = false, activeSubInstruction: String = "", onSelect: ((String) -> Void)? = nil) {
         self.stepNumber = stepNumber
         self.mainInstruction = mainInstruction
         self.subInstructions = subInstructions
         self.isCurrent = isCurrent
         self.activeSubInstruction = activeSubInstruction
+        self.onSelect = onSelect
         self._isExpanded = State(initialValue: isCurrent && !subInstructions.isEmpty)
     }
     
@@ -36,7 +38,7 @@ struct InstructionDetailCard: View {
                     
                     HStack(alignment: .top, spacing: 12) {
                         Circle()
-                            .fill(isActiveSub ? (Color.ovalGreen ?? .green) : Color.gray.opacity(0.3))
+                            .fill(isActiveSub ? (Color.ovalGreen) : Color.gray.opacity(0.3))
                             .frame(width: 4, height: 4)
                             .padding(.top, 8)
                         
@@ -44,13 +46,29 @@ struct InstructionDetailCard: View {
                             .font(.subheadline)
                             .foregroundStyle(isActiveSub ? .primary : .secondary)
                             .fontWeight(isActiveSub ? .bold : .regular)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        onSelect?(subInstructions[index])
+                    }
                 }
             }
         } label: {
-            Text(mainInstruction)
+            Button(action: {
+                if subInstructions.isEmpty {
+                    onSelect?(mainInstruction)
+                } else {
+                    onSelect?(subInstructions.first!)
+                }
+            }) {
+                Text(mainInstruction)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
         }
         .disclosureGroupStyle(DisclosureStyle(stepNumber: stepNumber, isCurrent: isCurrent, hasSubInstructions: !subInstructions.isEmpty))
         .onChange(of: isCurrent) { _, newValue in

@@ -18,15 +18,15 @@ struct ButtonAddIngredientsRow: View {
             } label: {
                 HStack {
                     Image(systemName: AppIcon.plusFill)
-                        .foregroundStyle(Color.brandPrimary!)
+                        .foregroundStyle(Color.brandPrimary)
                     if isGroup {
                         Text("Tambah Grup")
                             .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                     } else {
                         Text("Tambah Bahan")
                             .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                     }
                     Spacer()
                 }

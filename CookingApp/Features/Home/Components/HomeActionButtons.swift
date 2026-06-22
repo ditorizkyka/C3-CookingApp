@@ -11,7 +11,6 @@ struct HomeActionButtons: View {
     @Binding var onboardingStep: Int
     @Binding var buttonFrame: CGRect
     
-    let importRecipeTip = ToolTip(tipTitle: "Ambil Resep dari Web", tipSubtitle: "Tempel link resep pilihanmu di sini. Kami akan menyusun bahan dan langkah masaknya secara otomatis.", iconName: "link.badge.plus", buttonTitle: "")
     
     var body: some View {
         HStack() {
@@ -21,13 +20,13 @@ struct HomeActionButtons: View {
                 descriptionButton: "Tambahkan resep dari link website",
                 action: {
                     if onboardingStep == 0 {
-                        onboardingStep = 1
+                        updateOnboarding(to: 1)
                     }
                     viewModel.isShowingImportSheet = true
                 }
             )
             .trackGlobalFrame($buttonFrame)
-            .conditionalPopoverTip(onboardingStep == 0, tip: importRecipeTip, arrowEdge: .top)
+            .conditionalTip(onboardingStep == 0, tip: ImportRecipeTip(), arrowEdge: .top)
             
             AddRecipeButton(
                 isManual: true,

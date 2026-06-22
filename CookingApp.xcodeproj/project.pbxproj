@@ -10,9 +10,22 @@
 		0771030D2FD2A7A600532D32 /* CookingApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CookingApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0782BB2A2FE0F5AD0072A402 /* Exceptions for "CookingApp" folder in "CookingApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0771030C2FD2A7A600532D32 /* CookingApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0771030F2FD2A7A600532D32 /* CookingApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0782BB2A2FE0F5AD0072A402 /* Exceptions for "CookingApp" folder in "CookingApp" target */,
+			);
 			path = CookingApp;
 			sourceTree = "<group>";
 		};
@@ -251,8 +264,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SJ25JWH9X6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = HiChef;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Menggunakan mikrofon Anda untuk memungkinkan Anda mengontrol langkah-langkah memasak dengan perintah suara — sehingga Anda dapat memasak tanpa menggunakan tangan.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Menggunakan pengenalan ucapan untuk memahami perintah suara Anda saat Anda mengikuti resep langkah demi langkah.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -265,7 +280,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ditorizkyka.CookingApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.C3Leggo.CookingApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -284,8 +299,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SJ25JWH9X6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = HiChef;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Menggunakan mikrofon Anda untuk memungkinkan Anda mengontrol langkah-langkah memasak dengan perintah suara — sehingga Anda dapat memasak tanpa menggunakan tangan.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Menggunakan pengenalan ucapan untuk memahami perintah suara Anda saat Anda mengikuti resep langkah demi langkah.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -298,7 +315,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = ditorizkyka.CookingApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.C3Leggo.CookingApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

@@ -20,13 +20,20 @@ final class ClipboardManager: ObservableObject {
     // Track the pasteboard change count so we only act on real changes
     private var lastChangeCount: Int = -1
     
-    // Domain yang ingin dideteksi (bisa ditambahkan domain lain)
-    private let supportedDomains = [
-        "cookpad.com",
-        "allrecipes.com",
-        "food.com",
-        "yummy.co.id",
-        "sajian sedap.com"
+    // Daftar domain yang DIABAIKAN (Blacklist)
+    private let blockedDomains = [
+        "tiktok.com", "vt.tiktok.com",
+        "instagram.com", "ig.me",
+        "twitter.com", "x.com", "t.co",
+        "youtube.com", "youtu.be",
+        "facebook.com", "fb.com", "fb.watch",
+        "linkedin.com",
+        "pinterest.com", "pin.it",
+        "whatsapp.com", "wa.me",
+        "google.com", "drive.google.com", "docs.google.com",
+        "shopee.co.id", "shopee.com",
+        "tokopedia.com", "lazada.co.id", "blibli.com",
+        "amazon.com", "apple.com", "github.com", "spotify.com"
     ]
     
     func startMonitoring() {
@@ -80,11 +87,12 @@ final class ClipboardManager: ObservableObject {
               let host = url.host?.lowercased(),
               url.scheme == "http" || url.scheme == "https" else { return }
         
-        let isSupported = supportedDomains.contains { domain in
+        // Gunakan metode Blacklist (Semua domain diizinkan KECUALI yang ada di blockedDomains)
+        let isBlocked = blockedDomains.contains { domain in
             host == domain || host.hasSuffix(".\(domain)")
         }
         
-        guard isSupported else { return }
+        guard !isBlocked else { return }
         
         // Show toast only if this is a different URL than the last one shown
         if trimmed != lastProcessedURL {

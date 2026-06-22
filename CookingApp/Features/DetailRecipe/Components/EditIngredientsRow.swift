@@ -24,7 +24,7 @@ struct EditIngredientsRow: View {
             if isBreakdown {
                 HStack(alignment: .center) {
                     Circle()
-                        .fill(Color.labelDark!)
+                        .fill(Color.labelDark)
                         .frame(width: 3, height: 3)
                         .padding(.horizontal, 5)
                     
@@ -50,24 +50,11 @@ struct EditIngredientsRow: View {
             }
             
             Spacer()
-
-            dragHandle
         }
         .padding(.horizontal, 10)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
-    @ViewBuilder
-    private var dragHandle: some View {
-        let handle = Image(systemName: AppIcon.line3Horizontal)
-            .font(.body)
-            .foregroundStyle(Color.labelLight!)
-
-        if let onDrag {
-            handle.onDrag(onDrag)
-        } else {
-            handle
-        }
-    }
 }
 
 struct EditIngredientsGroupRow: View {
@@ -80,17 +67,13 @@ struct EditIngredientsGroupRow: View {
                     print("deleted group")
                 } label: {
                     Image(systemName: AppIcon.minusFill)
-                        .foregroundStyle(Color.actionDelete!)
+                        .foregroundStyle(Color.actionDelete)
                 }
                 
                 TextField("Nama Grup", text: $ingredient.name)
                     .font(.headline)
                 
                 Spacer()
-                
-                Image(systemName: AppIcon.line3Horizontal)
-                    .font(.body)
-                    .foregroundStyle(Color.labelLight!)
             }
         }
     }
@@ -100,10 +83,20 @@ struct EditIngredientsGroupRow: View {
 #Preview {
     @Previewable @State var name = "Bawang Merah"
     @Previewable @State var qty = "10 siung"
-    @Previewable @State var ingredients: [Ingredient] = []
+    @Previewable @State var subName = "Garam"
+    @Previewable @State var subQty = "Secukupnya"
+    @Previewable @State var ingredients: [Ingredient] = [
+        Ingredient(quantity: "", name: "Bumbu Halus")
+    ]
     
-    VStack(spacing: 20) {
-        EditIngredientsRow(isBreakdown: true, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
-        EditIngredientsRow(isBreakdown: false, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
+    List {
+        Section("Bahan Satuan") {
+            EditIngredientsRow(isBreakdown: false, ingredientsItemsName: $name, ingredientsItemsQty: $qty)
+        }
+        
+        Section("Bahan Grup") {
+            EditIngredientsGroupRow(ingredients: $ingredients)
+            EditIngredientsRow(isBreakdown: true, ingredientsItemsName: $subName, ingredientsItemsQty: $subQty)
+        }
     }
 }

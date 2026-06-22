@@ -77,6 +77,6 @@ class HomeViewModel: ObservableObject {
     
     func dismissDetail() {
         navigateToDetail = false
-        importedRecipe = nil // Reset agar tidak bocor
+        importedRecipe = nil 
     }
 }

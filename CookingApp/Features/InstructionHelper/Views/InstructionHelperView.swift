@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct InstructionHelperView: View {
     @Environment(\.dismiss) var dismiss
@@ -38,8 +39,15 @@ struct InstructionHelperView: View {
                     .padding(.horizontal, 32)
                 }
                 
-                PulsingMicView(audioLevel: speechManager.audioLevel, isListening: speechManager.isListening)
-                
+                PulsingMicView(
+                    audioLevel: speechManager.audioLevel,
+                    isListening: speechManager.isListening,
+                    isSpeaking: speechManager.isSpeaking
+                )
+
+                // Status label — bisa dibaca sekilas dari jauh saat masak
+                phaseStatusLabel
+
                 VoiceCommandGuideCard(guides: viewModel.guides)
             }
             .padding()
@@ -66,11 +74,17 @@ struct InstructionHelperView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .background {
             VStack {
-                RadialGradientCircle(color: Color.ovalGreen!.opacity(0.75), offset: -300, width: 600, height: 600)
+                RadialGradientCircle(color: Color.ovalGreen.opacity(0.75), offset: -300, width: 600, height: 600)
                 
                 Spacer()
             }
             .ignoresSafeArea()
+        }
+        .overlay {
+            ListeningEdgeGlow(
+                isListening: speechManager.isListening,
+                isSpeaking: speechManager.isSpeaking
+            )
         }
         .overlay {
             if viewModel.showIntro {
@@ -128,14 +142,16 @@ struct InstructionHelperView: View {
             InfoSheet()
                 .presentationDetents([.fraction(0.6)])
                 .presentationDragIndicator(.visible)
-                .presentationBackground(Color.surfaceElevated!)
+                .presentationBackground(Color.surfaceElevated)
         }
         .sheet(isPresented: $viewModel.showStepSheet) {
             if viewModel.currentStepIndex >= 0 && viewModel.currentStepIndex < viewModel.allGranularSteps.count {
-                StepSheet(instructions: viewModel.recipe.instructions, activeGranularText: viewModel.allGranularSteps[viewModel.currentStepIndex].text)
+                StepSheet(instructions: viewModel.recipe.instructions, activeGranularText: viewModel.allGranularSteps[viewModel.currentStepIndex].text) { selectedText in
+                    viewModel.jumpToStep(withText: selectedText, speechManager: speechManager)
+                }
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
-                    .presentationBackground(Color.surfaceElevated ?? .white)
+                    .presentationBackground(Color.surfaceElevated)
             }
         }
         .onDisappear {
@@ -144,6 +160,43 @@ struct InstructionHelperView: View {
         .onChange(of: speechManager.recognizedText) { _, newValue in
             viewModel.handleRecognizedText(newValue, speechManager: speechManager)
         }
+    }
+
+    @ViewBuilder
+    private var phaseStatusLabel: some View {
+        let isActive = speechManager.isListening || speechManager.isSpeaking
+        let label   = speechManager.isListening ? "Mendengarkan..." : "Menjawab..."
+        let color   = speechManager.isListening
+            ? Color.brandAccent
+            : Color.brandSecondary
+
+        ZStack {
+            if isActive {
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(color)
+                        .frame(width: 8, height: 8)
+
+                    Text(label)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(color)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            Capsule()
+                                .strokeBorder(color.opacity(0.4), lineWidth: 1)
+                        )
+                )
+                .transition(.scale(scale: 0.85).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: speechManager.isListening)
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: speechManager.isSpeaking)
+        .frame(height: 36)
     }
 }
 

@@ -5,13 +5,13 @@ import UniformTypeIdentifiers
 
 // MARK: - Halaman Utama
 struct DetailRecipeView: View {
-
+    
     @StateObject private var viewModel: DetailRecipeViewModel
-
+    @State var isFromImport: Bool
+    
     var recipeAssetImage: String? = nil
-    var isFromImport: Bool = false
     var onDismiss: (() -> Void)? = nil
-
+    
     @State private var showInstructionHelper: Bool = false
     @State private var showImportConfirmation: Bool = false
     @State private var showEditBackConfirmation: Bool = false
@@ -23,33 +23,40 @@ struct DetailRecipeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.popToRoot) private var popToRoot
     
-    let startCookTip = ToolTip(tipTitle: "Mulai Simulasi Masak", tipSubtitle: "Mari lihat bagaimana aplikasi ini memandu instruksi resepmu tanpa perlu menyentuh layar.", iconName: "flame.fill", buttonTitle: "Lewati")
-    
     @AppStorage("onboardingStep") private var onboardingStep = 0
+    @State private var isTipReady = false
     
     // MARK: - Initializers
     
     /// Initialize with a Recipe model (used for import flow and when passing a recipe directly)
     init(recipe: Recipe, isFromImport: Bool = false, onDismiss: (() -> Void)? = nil) {
         self._viewModel = StateObject(wrappedValue: DetailRecipeViewModel(recipe: recipe, isFromImport: isFromImport))
-        self.isFromImport = isFromImport
+        self._isFromImport = State(initialValue: isFromImport)
         self.onDismiss = onDismiss
     }
-       
+    
     var body: some View {
         List {
             // MARK: - Header (Image, Title, Button)
-            VStack(alignment: .leading) {
-                
-                if viewModel.isEdited {
-                    RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
-                } else {
-                    RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+            Section {
+                VStack(alignment: .leading) {
+                    
+                    if viewModel.isEdited {
+                        RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+                    } else {
+                        RecipeHeader(viewModel: viewModel, isEdited: viewModel.isEdited)
+                        HStack {
+                            Text(viewModel.recipe.title)
+                                .font(.title)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .padding(.top, 10)
+                        .padding(.bottom, 10)
+                    }
+                    
+                    
                     
                 }
-
-                
-                
             }
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
@@ -59,12 +66,20 @@ struct DetailRecipeView: View {
                 if !viewModel.isEdited {
                     ButtonApp(title: "Mulai Masak", action: {
                         if onboardingStep == 3 {
-                            onboardingStep = 4
+                            updateOnboarding(to: 4)
                         }
                         showInstructionHelper = true
                     })
                     .padding(.bottom, 8)
-                    .conditionalPopoverTip(onboardingStep == 3, tip: startCookTip, arrowEdge: .top)
+                    .conditionalTip(isTipReady, tip: StartCookTip(), arrowEdge: .top) { action in
+                        if onboardingStep == 3 {
+                            updateOnboarding(to: 4)
+                        }
+                        StartCookTip().invalidate(reason: .actionPerformed)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            handleDismiss()
+                        }
+                    }
                 }
             }
             .listRowBackground(Color.clear)
@@ -77,33 +92,52 @@ struct DetailRecipeView: View {
             
             // MARK: - Bahan-bahan
             ingredientsSection
-
+            
             // MARK: - Langkah-langkah
             instructionsSection
-
+            
             Section(
             ) {
-               if viewModel.isEdited {
+                if viewModel.isEdited {
                     TotalPortionRow(selectedPortion: $viewModel.recipe.portion)
                     TotalDurationRow(selectedDuration: $viewModel.recipe.durationInMinutes)
-               } else {
-                   HStack {
-                       Text("Jumlah Porsi")
-                           .font(.body)
-                           .foregroundStyle(Color.labelLight!)
-                       
-                       Spacer()
-                       Text("\(viewModel.recipe.portion) Orang")
-                   }
-                   HStack {
-                       Text("Lama Memasak")
-                           .font(.body)
-                           .foregroundStyle(Color.labelLight!)
-                       
-                       Spacer()
-                       Text("\(viewModel.recipe.durationInMinutes) Menit")
-                   }
-               }
+                    RecipeCategoryRow(selectedCategory: $viewModel.recipe.category)
+                } else {
+                    HStack {
+                        Text("Jumlah Porsi")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight)
+                        
+                        Spacer()
+                        if viewModel.recipe.portion == 0 {
+                            Text("Tidak tahu")
+                        } else if viewModel.recipe.portion == 11 {
+                            Text("Lebih dari 10 Orang")
+                        } else {
+                            Text("\(viewModel.recipe.portion) Orang")
+                        }
+                    }
+                    HStack {
+                        Text("Lama Memasak")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight)
+                        
+                        Spacer()
+                        if viewModel.recipe.durationInMinutes == 121 {
+                            Text("> 120 Menit")
+                        } else {
+                            Text("\(viewModel.recipe.durationInMinutes) Menit")
+                        }
+                    }
+                    HStack {
+                        Text("Kategori")
+                            .font(.body)
+                            .foregroundStyle(Color.labelLight)
+                        
+                        Spacer()
+                        Text("\(viewModel.recipe.category.icon) \(viewModel.recipe.category.rawValue)")
+                    }
+                }
                 
             }
             
@@ -112,22 +146,48 @@ struct DetailRecipeView: View {
                     ButtonApp(title: "Simpan") {
                         if viewModel.commitEditing() {
                             if !isFromImport {
-                                try? modelContext.save()
+                                do { try modelContext.save() } catch { print("Save error: \(error)") }
+                            } else {
+                                modelContext.insert(viewModel.recipe)
+                                do { try modelContext.save() } catch { print("Insert save error: \(error)") }
+                                isFromImport = false
+                                print("✅ Saved imported recipe from ButtonApp")
                             }
                         }
                     }
-                }
+                } 
+////                    Button(role: .destructive) {
+////                        showDeleteRecipeConfirmation = true
+////                    } label: {
+////                        Text("Hapus")
+////                            .font(.headline) // Membuat teks lebih tebal
+////                            .frame(maxWidth: .infinity) // Membuat background membentang penuh (Infinity)
+////                            .padding(.vertical, 8) // [ADJUSTABLE] Padding dalam: Mengatur ketebalan/tinggi tombol
+////                    }
+////                    .buttonStyle(.borderedProminent) // Gaya 2: Background solid otomatis
+////                    //                            .padding(.hori)
+//                }
             }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .listRowSeparator(.hidden)
-            
+            .listRowBackground(Color.clear)
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowSeparator(.hidden)
             
         }
         .listStyle(.insetGrouped)
+        .scrollDismissesKeyboard(.interactively)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(isFromImport || viewModel.isEdited)
         .toolbar {
+            // Keyboard dismiss button
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Selesai") {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.brandPrimary)
+            }
+            
             // Back button — intercepted while editing (confirm save/discard) or
             // during the import flow (confirm keep/discard).
             if isFromImport || viewModel.isEdited {
@@ -136,42 +196,54 @@ struct DetailRecipeView: View {
                         if viewModel.isEdited {
                             showEditBackConfirmation = true
                         } else {
-                            showImportConfirmation = true
+                            print("✅ User chose to save the imported recipe")
+                            handleDismiss()
+                            //                            showImportConfirmation = true
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
                                 .font(.body.weight(.semibold))
-                            Text("Kembali")
-                                .font(.body)
                         }
-                        .foregroundStyle(Color.brandPrimary!)
+                        .foregroundStyle(Color.brandPrimary)
                     }
                 }
             }
-
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.isEdited {
                     Button {
                         if viewModel.commitEditing() {
                             if !isFromImport {
-                                try? modelContext.save()
+                                do { try modelContext.save() } catch { print("Save error: \(error)") }
+                            } else {
+                                modelContext.insert(viewModel.recipe)
+                                do { try modelContext.save() } catch { print("Insert save error: \(error)") }
+                                isFromImport = false
+                                print("✅ User chose to save the imported recipe from Checkmark")
                             }
                         }
                     } label: {
-                        Text("Selesai")
+                        Image(systemName: "checkmark")
                             .font(.body)
                             .fontWeight(.semibold)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                     }
                 } else {
                     Button {
-                        showRecipeActions = true
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                        viewModel.beginEditing()
+                    }label : {
+                        Text("Ubah")
                     }
+                    
+                    //                    Menu("More", systemImage: "ellipsis") {
+                    //                        Button("Ubah Resep", systemImage: "pencil") {
+                    //                            viewModel.beginEditing()
+                    //                        }
+                    //                        Button("Hapus Resep", systemImage: "trash", role: .destructive) {
+                    //                            showDeleteRecipeConfirmation = true
+                    //                        }
+                    //                    }
                 }
             }
         }
@@ -180,21 +252,6 @@ struct DetailRecipeView: View {
                 handleDismiss()
             })
         }
-        .alert("Simpan Resep Ini?", isPresented: $showImportConfirmation) {
-            Button("Simpan dan Masak Nanti", role: .none) {
-                modelContext.insert(viewModel.recipe)
-                try? modelContext.save()
-                print("✅ User chose to save the imported recipe")
-                handleDismiss()
-            }
-            Button("Hapus Perubahan", role: .destructive) {
-                print("↩️ User discarded the imported recipe")
-                handleDismiss()
-            }
-            Button("Batal", role: .cancel) {}
-        } message: {
-            Text("Apakah kamu ingin menyimpan resep yang sudah diimpor ke koleksimu?")
-        }
         // Back navigation while editing — confirm save or discard.
         .alert("Simpan Perubahan?", isPresented: $showEditBackConfirmation) {
             Button("Simpan", role: .none) {
@@ -202,9 +259,11 @@ struct DetailRecipeView: View {
                 if viewModel.commitEditing() {
                     if isFromImport {
                         modelContext.insert(viewModel.recipe)
-                        try? modelContext.save()
+                        do { try modelContext.save() } catch { print("Insert save error: \(error)") }
+                        isFromImport = false
                         handleDismiss()
                     } else {
+                        do { try modelContext.save() } catch { print("Save error: \(error)") }
                         handleDismiss()
                     }
                 }
@@ -227,16 +286,6 @@ struct DetailRecipeView: View {
         } message: {
             Text(viewModel.validationMessage)
         }
-        // ⋯ menu: edit or delete this recipe.
-        .confirmationDialog("Resep", isPresented: $showRecipeActions, titleVisibility: .hidden) {
-            Button("Ubah Resep") {
-                viewModel.beginEditing()
-            }
-            Button("Hapus Resep", role: .destructive) {
-                showDeleteRecipeConfirmation = true
-            }
-            Button("Batal", role: .cancel) { }
-        }
         // Confirm before permanently deleting the recipe.
         .alert("Hapus Resep?", isPresented: $showDeleteRecipeConfirmation) {
             Button("Hapus", role: .destructive) {
@@ -247,8 +296,17 @@ struct DetailRecipeView: View {
         } message: {
             Text("Resep ini akan dihapus secara permanen.")
         }
+        .onAppear {
+            guard onboardingStep == 3 else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isTipReady = true
+            }
+        }
+        .onDisappear {
+            isTipReady = false
+        }
     }
-
+    
     private func handleDismiss() {
         if let onDismiss = onDismiss {
             onDismiss()
@@ -256,39 +314,48 @@ struct DetailRecipeView: View {
             dismiss()
         }
     }
-
+    
     // MARK: - Sections (extracted to keep the body type-checkable)
-
+    
     @ViewBuilder
     private var ingredientsSection: some View {
         Section(header: Text("Bahan-bahan")
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(Color.labelLight!)
+            .foregroundColor(Color.labelLight)
         ) {
-            if !viewModel.recipe.ingredients.isEmpty {
-                ForEach(viewModel.recipe.ingredients) { ingredient in
+            let sortedIngredients = viewModel.recipe.sortedIngredients
+            if !sortedIngredients.isEmpty {
+                ForEach(sortedIngredients) { ingredient in
                     if viewModel.recipe.ingredients.contains(where: { $0.id == ingredient.id }) {
                         Group {
                             if ingredient.isGroup {
                                 groupIngredientRows(ingredient)
                             } else {
                                 singleIngredientRow(ingredient)
+                                
                             }
                         }
                     }
                 }
             }
-
+            
             if viewModel.isEdited {
+                // Bug 2 Fix: Tambah Bahan
                 ButtonAddIngredientsRow(isGroup: false) {
                     withAnimation { viewModel.addIngredient() }
+                }
+                .listRowBackground(Color.surfaceBrand)
+                
+                // Bug 2 Fix: Tambah Grup
+                ButtonAddIngredientsRow(isGroup: true) {
+                    withAnimation { viewModel.addIngredientGroup() }
                 }
                 .listRowBackground(Color.surfaceBrand)
             }
         }
     }
-
+    
     @ViewBuilder
     private func groupIngredientRows(_ ingredient: Ingredient) -> some View {
         // --- Group Header ---
@@ -299,14 +366,9 @@ struct DetailRecipeView: View {
                 }
                 TextField("Nama Grup", text: stringBinding(ingredient, \.name))
                     .font(.headline)
-                    .foregroundColor(Color.labelDark!)
+                    .foregroundColor(Color.labelDark)
                 Spacer()
-                Image(systemName: AppIcon.line3Horizontal)
-                    .foregroundStyle(Color.labelLight!)
-                    .onDrag {
-                        draggingIngredientID = ingredient.id
-                        return NSItemProvider(object: ingredient.id.uuidString as NSString)
-                    }
+                
             }
             .padding(.horizontal, 10)
             .listRowSeparator(.hidden)
@@ -318,14 +380,14 @@ struct DetailRecipeView: View {
         } else {
             Text(ingredient.name)
                 .font(.headline)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
                 .padding(.top, 8)
                 .padding(.bottom, 2)
                 .listRowSeparator(.hidden)
         }
-
+        
         // --- Sub-ingredients ---
-        ForEach(ingredient.groupIngredients ?? []) { sub in
+        ForEach(ingredient.sortedGroupIngredients ?? []) { sub in
             if viewModel.isEdited {
                 EditIngredientsRow(
                     isBreakdown: true,
@@ -339,8 +401,33 @@ struct DetailRecipeView: View {
                 IngredientRowView(quantity: sub.quantity, name: sub.name, isSubItem: true)
             }
         }
+        
+        // Bug 3 Fix: Tambah Anggota Grup
+        if viewModel.isEdited {
+            Button {
+                withAnimation {
+                    if ingredient.groupIngredients == nil {
+                        ingredient.groupIngredients = []
+                    }
+                    let newSeq = (ingredient.groupIngredients?.count ?? 0) + 1
+                    ingredient.groupIngredients?.append(Ingredient(quantity: "", name: "", sequenceNumber: newSeq))
+                }
+            } label: {
+                HStack {
+                    Image(systemName: AppIcon.plusFill)
+                        .foregroundStyle(Color.brandPrimary)
+                    Text("Tambah Anggota")
+                        .font(.body)
+                        .foregroundStyle(Color.brandPrimary)
+                    Spacer()
+                }
+                .padding(.horizontal, 10)
+                .padding(.leading,25)
+            }
+            
+        }
     }
-
+    
     @ViewBuilder
     private func singleIngredientRow(_ ingredient: Ingredient) -> some View {
         if viewModel.isEdited {
@@ -351,71 +438,52 @@ struct DetailRecipeView: View {
                 onDelete: {
                     viewModel.deleteIngredient(ingredient)
                 },
-                onDrag: {
-                    draggingIngredientID = ingredient.id
-                    return NSItemProvider(object: ingredient.id.uuidString as NSString)
-                }
             )
-            .onDrop(of: [.text], delegate: ReorderDropDelegate(
-                item: ingredient,
-                items: ingredientsBinding,
-                draggingID: $draggingIngredientID
-            ))
+            
         } else {
             IngredientRowView(quantity: ingredient.quantity, name: ingredient.name, isSubItem: false)
         }
     }
-
+    
     @ViewBuilder
     private var instructionsSection: some View {
         Section(header: Text("Langkah-langkah")
             .font(.body)
             .fontWeight(.semibold)
-            .foregroundColor(Color.labelLight!)
+            .foregroundColor(Color.labelLight)
         ) {
-            if !viewModel.recipe.instructions.isEmpty {
-                ForEach(viewModel.recipe.instructions) { instructionItem in
-                    if let index = viewModel.recipe.instructions.firstIndex(where: { $0.id == instructionItem.id }) {
-                        if viewModel.isEdited {
-                            EditInstructionRow(
-                                instruction: instructionItem,
-                                displayNumber: index + 1,
-                                onDelete: {
-                                    viewModel.deleteInstruction(instructionItem)
-                                },
-                                onDrag: {
-                                    draggingInstructionID = instructionItem.id
-                                    return NSItemProvider(object: instructionItem.id.uuidString as NSString)
-                                }
-                            )
-                            .listRowSeparator(.hidden)
-                            .onDrop(of: [.text], delegate: ReorderDropDelegate(
-                                item: instructionItem,
-                                items: instructionsBinding,
-                                draggingID: $draggingInstructionID,
-                                onComplete: { viewModel.renumberInstructions() }
-                            ))
-                        } else {
-                            InstructionRowView(
-                                instruction: instructionItem,
-                                displayNumber: index + 1
-                            )
-                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        }
+            let sortedInstructions = viewModel.recipe.instructions.sorted { $0.sequenceNumber < $1.sequenceNumber }
+            if !sortedInstructions.isEmpty {
+                ForEach(Array(sortedInstructions.enumerated()), id: \.element.id) { index, instructionItem in
+                    if viewModel.isEdited {
+                        EditInstructionRow(
+                            instruction: instructionItem,
+                            displayNumber: index + 1,
+                            onDelete: {
+                                viewModel.deleteInstruction(instructionItem)
+                            },
+                        )
+                        .listRowSeparator(.hidden)
+                    } else {
+                        InstructionRowView(
+                            instruction: instructionItem,
+                            displayNumber: index + 1
+                        )
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                 }
             }
-
+            
             if viewModel.isEdited {
                 Button {
                     withAnimation { viewModel.addInstruction() }
                 } label: {
                     HStack {
                         Image(systemName: AppIcon.plusFill)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                         Text("Tambah Langkah")
                             .font(.body)
-                            .foregroundStyle(Color.brandPrimary!)
+                            .foregroundStyle(Color.brandPrimary)
                         Spacer()
                     }
                     .padding(.horizontal, 10)
@@ -424,9 +492,9 @@ struct DetailRecipeView: View {
             }
         }
     }
-
+    
     // MARK: - Edit Helpers
-
+    
     /// Live bindings to the recipe's relationship arrays (used by the reorder drop delegate).
     private var ingredientsBinding: Binding<[Ingredient]> {
         Binding(
@@ -434,14 +502,14 @@ struct DetailRecipeView: View {
             set: { viewModel.recipe.ingredients = $0 }
         )
     }
-
+    
     private var instructionsBinding: Binding<[Instruction]> {
         Binding(
             get: { viewModel.recipe.instructions },
             set: { viewModel.recipe.instructions = $0 }
         )
     }
-
+    
     /// Build a `Binding<String>` from a model object + key path. The binding captures
     /// the object reference (a class), so it remains valid regardless of array index.
     private func stringBinding<Object: AnyObject>(
@@ -453,8 +521,8 @@ struct DetailRecipeView: View {
             set: { object[keyPath: keyPath] = $0 }
         )
     }
-
-
+    
+    
     // MARK: - ViewBuilders untuk Bahan
     
     @ViewBuilder
@@ -463,12 +531,13 @@ struct DetailRecipeView: View {
             if !ingredient.quantity.isEmpty {
                 Text(ingredient.quantity)
                     .font(.body)
+                    .foregroundColor(Color.labelDark)
             }
             
             Text(ingredient.name)
                 .font(.body)
         }
-        .padding(.vertical, 4)
+        //        .padding(.vertical, 4)
     }
     
     @ViewBuilder
@@ -476,13 +545,14 @@ struct DetailRecipeView: View {
         ForEach(items) { ingredient in
             HStack(alignment: .center, spacing: 12) {
                 Circle()
-                    .fill(Color.labelDark!)
+                    .fill(Color.labelDark)
                     .frame(width: 3, height: 3)
                 
                 HStack {
                     if !ingredient.quantity.isEmpty {
                         Text(ingredient.quantity)
                             .font(.body)
+                            .foregroundColor(Color.labelDark)
                     }
                     
                     Text(ingredient.name)
@@ -491,7 +561,7 @@ struct DetailRecipeView: View {
                 
                 Spacer()
             }
-            .padding(.vertical, 4)
+            //            .padding(.vertical, 4)
         }
     }
 }
@@ -508,30 +578,26 @@ struct IngredientRowView: View {
             // Bullet dot for sub-items
             if isSubItem {
                 Circle()
-                    .fill(Color.labelLight!)
+                    .fill(Color.labelLight)
                     .frame(width: 4, height: 4)
             }
             
             // Quantity pill badge
             if !quantity.isEmpty {
                 Text(quantity)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Color.brandPrimary!)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.surfaceBrand)
-                    .clipShape(Capsule())
+                    .font(.body)
+                    .foregroundColor(Color.labelDark)
+                
             }
             
             // Ingredient name
             Text(name)
                 .font(.body)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
             
             Spacer()
         }
-        .padding(.vertical, 5)
+        //        .padding(.vertical, 5)
         .padding(.leading, isSubItem ? 8 : 0)
     }
 }
@@ -559,7 +625,7 @@ struct InstructionRowView: View {
             
             Text("\(displayNumber)")
                 .font(.footnote)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
                 .frame(width: 22, height: 22)
                 .background(Color.brandSecondary)
                 .clipShape(Circle())
@@ -568,7 +634,7 @@ struct InstructionRowView: View {
             
             Text(instruction.text)
                 .font(.body)
-                .foregroundColor(Color.labelDark!)
+                .foregroundColor(Color.labelDark)
                 .padding(.vertical, 16)
             
             Spacer()
@@ -580,10 +646,10 @@ struct InstructionRowView: View {
                         isExpanded.toggle()
                     }
                 }) {
-                    Image(systemName: "chevron.right.circle")
+                    Image(systemName: "chevron.down.circle")
                         .font(.title2)
-                        .foregroundColor(isExpanded ? Color.brandPrimary! : Color.labelLight)
-                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .foregroundColor(isExpanded ? Color.brandPrimary : Color.labelLight)
+                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
                         .padding(.trailing, 16)
                 }
                 .buttonStyle(.plain)
@@ -598,7 +664,8 @@ struct InstructionRowView: View {
             
             
             VStack(alignment: .leading, spacing: 14) {
-                ForEach(instruction.breakdownInstruction) { subStep in
+                let sortedBreakdowns = instruction.breakdownInstruction.sorted { $0.sequenceNumber < $1.sequenceNumber }
+                ForEach(sortedBreakdowns) { subStep in
                     SubStepRow(subStep: subStep)
                 }
             }
@@ -614,12 +681,12 @@ struct InstructionRowView: View {
     private func SubStepRow(subStep: Instruction) -> some View {
         HStack(alignment: .center, spacing: 32) {
             Circle()
-                .fill(Color.labelLight!)
+                .fill(Color.labelLight)
                 .frame(width: 3, height: 3)
             
             Text(subStep.text)
                 .font(.subheadline)
-                .foregroundStyle(Color.labelLight!)
+                .foregroundStyle(Color.labelLight)
         }
     }
 }
@@ -636,15 +703,36 @@ struct SeparatorView: View {
 
 // MARK: - Preview
 #Preview {
-//    let container = PreviewContainer.shared
-//    let ctx = container.mainContext
-//    let recipes = (try? ctx.fetch(FetchDescriptor<Recipe>())) ?? []
-//    return NavigationStack {
-//        if let first = recipes.first {
-//            DetailRecipeView(recipe: first)
-//        } else {
-//            Text("No sample data")
-//        }
-//    }
-//    .modelContainer(container)
+    let dummyRecipe = Recipe(
+        title: "Nasi Goreng Spesial",
+        portion: 2,
+        durationInMinutes: 30,
+        ingredients: [
+            Ingredient(quantity: "2 piring", name: "Nasi Putih"),
+            Ingredient(quantity: "3 siung", name: "Bawang Merah"),
+            Ingredient(quantity: "2 siung", name: "Bawang Putih"),
+            Ingredient(quantity: "1 butir", name: "Telur", groupIngredients: [
+                Ingredient(quantity: "secukupnya", name: "Garam"),
+                Ingredient(quantity: "secukupnya", name: "Merica")
+            ])
+        ],
+        instructions: [
+            Instruction(sequenceNumber: 1, text: "Haluskan bawang merah dan bawang putih."),
+            Instruction(sequenceNumber: 2, text: "Panaskan minyak, orak-arik telur."),
+            Instruction(sequenceNumber: 3, text: "Masukkan bumbu halus, tumis hingga harum.", breakdownInstruction: [
+                Instruction(sequenceNumber: 1, text: "Gunakan api sedang."),
+                Instruction(sequenceNumber: 2, text: "Aduk terus agar tidak gosong.")
+            ]),
+            Instruction(sequenceNumber: 4, text: "Masukkan nasi, kecap, garam, dan merica. Aduk rata.")
+        ]
+    )
+    
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Recipe.self, configurations: config)
+    container.mainContext.insert(dummyRecipe)
+    
+    return NavigationStack {
+        DetailRecipeView(recipe: dummyRecipe)
+    }
+    .modelContainer(container)
 }

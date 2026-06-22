@@ -33,28 +33,24 @@ struct HomeView: View {
                     SearchStateObserver(isSearchActive: $viewModel.isSearchActive)
                     
                     if viewModel.isSearchActive {
-                        // Tampilan saat search aktif (mirip RecipeLibrary)
                         RecipeGridSearchResultView(
                             searchQuery: viewModel.searchRecipe,
                             filteredRecipes: viewModel.filteredRecipes(from: allRecipes),
                             onTapRecipe: { recipe in
                                 if let originalIndex = allRecipes.firstIndex(where: { $0.id == recipe.id }) {
+                                    viewModel.importedRecipe = nil
                                     viewModel.selectedIndex = originalIndex
                                     viewModel.navigateToDetail = true
                                 }
                             }
                         )
                     } else {
-                        // Tampilan default HomeView
-                        
-                        // Add Recipe Buttons Extracted
                         HomeActionButtons(
                             viewModel: viewModel,
                             onboardingStep: $onboardingStep,
                             buttonFrame: $buttonFrame
                         )
                         
-                        // Recipe List Section Extracted
                         HomeRecipeListSection(
                             viewModel: viewModel,
                             allRecipes: allRecipes
@@ -67,7 +63,7 @@ struct HomeView: View {
                             .presentationDragIndicator(.visible)
                         }
                         .padding(.horizontal)
-                        .padding(.vertical, 24)
+                        .padding(.bottom, 24)
                         .frame(maxHeight: .infinity)
                     }
                 }
@@ -94,7 +90,7 @@ struct HomeView: View {
                     }
                 }
                 .navigationDestination(isPresented: $viewModel.navigateToLoading) {
-                    LoadingRecipeView(urlToScrape: viewModel.urlToScrape, onScrapingComplete: { recipe in
+                    ImportLoadingView(urlToScrape: viewModel.urlToScrape, onComplete: { recipe in
                         viewModel.handleScrapingComplete(recipe: recipe)
                     })
                 }
@@ -102,7 +98,6 @@ struct HomeView: View {
                     RecipeLibraryView()
                 }
                 
-                // MARK: - Clipboard Toast pinned to bottom
                 VStack {
                     Spacer()
                     if clipboardManager.showClipboardToast, let detectedURL = clipboardManager.detectedURL {
@@ -128,8 +123,7 @@ struct HomeView: View {
         .environment(\.popToRoot) {
             viewModel.resetNavigation()
         }
-        .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.small)
-        // MARK: - Clipboard → Website Preview Sheet
+        .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 0 }, set: { if !$0 && onboardingStep == 0 { onboardingStep = 1 } }), holeFrame: buttonFrame, cornerRadius: Radius.large)
         .sheet(isPresented: $viewModel.showWebPreviewFromClipboard) {
             WebsitePreviewSheet(
                 urlString: viewModel.importedLink,
@@ -147,7 +141,6 @@ struct HomeView: View {
         .onDisappear {
             clipboardManager.stopMonitoring()
         }
-        // Re-check clipboard immediately when app comes back to foreground
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 clipboardManager.checkNow()
@@ -155,6 +148,11 @@ struct HomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("PopToRoot"))) { _ in
             viewModel.resetNavigation()
+        }
+        .onChange(of: viewModel.navigateToDetail) { _, newValue in
+            if !newValue {
+                viewModel.importedRecipe = nil
+            }
         }
     }
 }

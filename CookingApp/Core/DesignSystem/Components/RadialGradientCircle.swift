@@ -32,5 +32,5 @@ struct RadialGradientCircle: View {
 }
 
 #Preview {
-    RadialGradientCircle(color: Color.ovalGreen!, offset: 0, width: 600, height: 600)
+    RadialGradientCircle(color: Color.ovalGreen, offset: 0, width: 600, height: 600)
 }

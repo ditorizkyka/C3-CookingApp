@@ -1,0 +1,5 @@
+2026-06-18 23:19:47.129 xcodebuild[21292:2693904] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+/Users/ditorizkyka/Desktop/Apple Developer Academy/projects/CookingApp/CookingApp/Core/DesignSystem/Components/AddRecipeButton.swift:53:81: warning: left side of nil coalescing operator '??' has non-optional type 'Color', so the right side is never used
+            .foregroundStyle((isManual ? Color.labelDark : Color.labelLightest) ?? .white)
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
+                                                                               

@@ -10,16 +10,16 @@
 import Foundation
 
 // MARK: - Raw Cookpad Recipe (Codable)
-struct CookpadRawRecipe: Codable {
+struct FallbackRecipeDTO: Codable {
     let name: String?
-    let author: CookpadRawAuthor?
-    let image: CookpadImage?
-    let recipeYield: CookpadYield?
+    let author: FallbackAuthor?
+    let image: FallbackImage?
+    let recipeYield: FallbackYield?
     let totalTime: String?
     let cookTime: String?
     let prepTime: String?
     let recipeIngredient: [String]?
-    let recipeInstructions: [CookpadRawInstruction]?
+    let recipeInstructions: [FallbackInstruction]?
     
     enum CodingKeys: String, CodingKey {
         case name, author, image
@@ -28,146 +28,21 @@ struct CookpadRawRecipe: Codable {
     }
 }
 
-// MARK: - Author
-struct CookpadRawAuthor: Codable {
-    let name: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case name
-    }
-    
-    // Handle both string and object formats
-    init(from decoder: Decoder) throws {
-        // Try decoding as a keyed container (object)
-        if let container = try? decoder.container(keyedBy: CodingKeys.self) {
-            self.name = try? container.decode(String.self, forKey: .name)
-        }
-        // Try decoding as a single string value
-        else if let singleValue = try? decoder.singleValueContainer(),
-                let stringValue = try? singleValue.decode(String.self) {
-            self.name = stringValue
-        } else {
-            self.name = nil
-        }
-    }
-}
-
-// MARK: - Image (can be string or array of strings)
-enum CookpadImage: Codable {
-    case single(String)
-    case multiple([String])
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let single = try? container.decode(String.self) {
-            self = .single(single)
-        } else if let multiple = try? container.decode([String].self) {
-            self = .multiple(multiple)
-        } else {
-            self = .single("")
-        }
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case .single(let value):
-            try container.encode(value)
-        case .multiple(let values):
-            try container.encode(values)
-        }
-    }
-    
-    var firstImageURL: URL? {
-        switch self {
-        case .single(let urlString):
-            return URL(string: urlString)
-        case .multiple(let urlStrings):
-            return urlStrings.first.flatMap { URL(string: $0) }
-        }
-    }
-}
-
-// MARK: - Yield (can be string or number)
-enum CookpadYield: Codable {
-    case string(String)
-    case number(Int)
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        if let intVal = try? container.decode(Int.self) {
-            self = .number(intVal)
-        } else if let strVal = try? container.decode(String.self) {
-            self = .string(strVal)
-        } else {
-            self = .string("1")
-        }
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        switch self {
-        case .string(let value):
-            try container.encode(value)
-        case .number(let value):
-            try container.encode(value)
-        }
-    }
-    
-    var intValue: Int {
-        switch self {
-        case .number(let val): return val
-        case .string(let str):
-            // Extract first number from string like "4 porsi" or "4"
-            let digits = str.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-            return Int(digits) ?? 1
-        }
-    }
-}
-
-// MARK: - Instruction
-struct CookpadRawInstruction: Codable {
-    let text: String?
-    let name: String?
-    let image: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case text, name, image
-    }
-    
-    // Handle both string and object formats
-    init(from decoder: Decoder) throws {
-        if let container = try? decoder.container(keyedBy: CodingKeys.self) {
-            self.text = try? container.decode(String.self, forKey: .text)
-            self.name = try? container.decode(String.self, forKey: .name)
-            self.image = try? container.decode(String.self, forKey: .image)
-        } else if let singleValue = try? decoder.singleValueContainer(),
-                  let stringValue = try? singleValue.decode(String.self) {
-            self.text = stringValue
-            self.name = nil
-            self.image = nil
-        } else {
-            self.text = nil
-            self.name = nil
-            self.image = nil
-        }
-    }
-}
 
 // MARK: - Mapping to App's SwiftData Model
-extension CookpadRawRecipe {
+extension FallbackRecipeDTO {
     
     /// Convert scraped Cookpad LD+JSON data into the app's SwiftData `Recipe` model.
     ///
     /// DATA FLOW:
     /// 1. LD+JSON `<script type="application/ld+json">` tag is found in the HTML
     /// 2. JavaScript extracts the JSON string from the page
-    /// 3. JSON is decoded into `CookpadRawRecipe` (this struct)
-    /// 4. This function maps `CookpadRawRecipe` → `Recipe` (SwiftData model)
+    /// 3. JSON is decoded into `FallbackRecipeDTO` (this struct)
+    /// 4. This function maps `FallbackRecipeDTO` → `Recipe` (SwiftData model)
     func toRecipe() -> Recipe {
         print("\n========== 🍳 SCRAPE DATA REPORT ==========")
         print("📍 Data Source: LD+JSON (schema.org/Recipe) from HTML <script> tag")
-        print("📍 Decoded into: CookpadRawRecipe (Codable struct)")
+        print("📍 Decoded into: FallbackRecipeDTO (Codable struct)")
         print("📍 Mapping to: Recipe (SwiftData @Model)")
         print("============================================")
         
@@ -205,7 +80,7 @@ extension CookpadRawRecipe {
             let hasQuantity = !parts.quantity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             print("   [\(index)] RAW: \"\(rawIngredient)\" → qty: \"\(parts.quantity)\" | name: \"\(parts.name)\"")
 
-            if !hasQuantity {
+            if !hasQuantity && Self.isGroupHeader(parts.name) {
                 // Group header — opens a new group.
                 let group = Ingredient(quantity: "", name: parts.name, groupIngredients: [])
                 recipeIngredients.append(group)
@@ -249,7 +124,7 @@ extension CookpadRawRecipe {
         print("   Parsed minutes: \(duration)")
         
         // Parse yield
-        let portion = recipeYield?.intValue ?? 1
+        let portion = recipeYield?.intValue ?? 0
         print("\n🍽️ YIELD:")
         print("   Raw recipeYield: \(String(describing: recipeYield))")
         print("   Parsed portion: \(portion)")
@@ -261,18 +136,45 @@ extension CookpadRawRecipe {
         print("Total instructions: \(recipeInstructionsList.count)")
         print("========================================\n")
         
+        var finalDuration = duration > 0 ? duration : 30
+        if finalDuration > 120 {
+            finalDuration = 121
+        }
+        
         return Recipe(
             title: recipeName,
             author: recipeAuthor,
             coverImageUrl: coverUrl,
-            portion: portion,
-            durationInMinutes: duration,
+            portion: 0,
+            durationInMinutes: finalDuration,
             ingredients: recipeIngredients,
             instructions: recipeInstructionsList
         )
     }
     
     // MARK: - Helpers
+    
+    /// Keywords that strongly indicate a group header rather than an ingredient
+    private static let groupHeaderKeywords: Set<String> = [
+        "bumbu", "bahan", "untuk", "saus", "kuah", "marinasi", "kaldu", "pelengkap", "isian",
+        "for", "sauce", "marinade", "broth", "garnish", "topping", "dressing", "syrup", "sirup",
+        "baluran", "celupan", "taburan"
+    ]
+
+    /// Determines if a string without quantity is a group header or just a single ingredient
+    static func isGroupHeader(_ text: String) -> Bool {
+        let lower = text.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        if lower.hasSuffix(":") { return true }
+        
+        let words = lower.components(separatedBy: .whitespacesAndNewlines)
+        for word in words {
+            if groupHeaderKeywords.contains(word) { return true }
+        }
+        
+        if lower.hasPrefix("bahan") { return true }
+        
+        return false
+    }
     
     /// Unicode fraction characters mapped to their decimal string equivalents
     private static let unicodeFractions: [Character: String] = [
@@ -303,7 +205,7 @@ extension CookpadRawRecipe {
     private func isQuantityChar(_ char: Character) -> Bool {
         return char.isNumber || char == "/" || char == "." || char == ","
             || char == "-" || char == "–" // range dashes
-            || CookpadRawRecipe.unicodeFractions[char] != nil
+            || FallbackRecipeDTO.unicodeFractions[char] != nil
     }
     
     /// Parse an ingredient string like "10 siung Bawang Merah" into quantity and name.
@@ -321,7 +223,7 @@ extension CookpadRawRecipe {
         
         // Replace unicode fractions with ASCII equivalents for consistency
         var normalized = trimmed
-        for (unicodeFrac, replacement) in CookpadRawRecipe.unicodeFractions {
+        for (unicodeFrac, replacement) in FallbackRecipeDTO.unicodeFractions {
             normalized = normalized.replacingOccurrences(of: String(unicodeFrac), with: replacement)
         }
         
@@ -352,7 +254,7 @@ extension CookpadRawRecipe {
                 let nextWords = remaining.components(separatedBy: " ").filter { !$0.isEmpty }
                 let firstWord = nextWords.first?.lowercased() ?? ""
                 
-                if CookpadRawRecipe.knownUnits.contains(firstWord) {
+                if FallbackRecipeDTO.knownUnits.contains(firstWord) {
                     // Include the unit word in quantity
                     let unitEndOffset = index + 1 + firstWord.count + 1
                     if unitEndOffset <= normalized.count {

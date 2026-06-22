@@ -27,7 +27,7 @@ struct GuideCard: View {
                     .font(Font.headline)
                 
                 Rectangle()
-                    .fill(Color.labelDark!)
+                    .fill(Color.labelDark)
                     .frame(height: 1)
                 
                 // Description

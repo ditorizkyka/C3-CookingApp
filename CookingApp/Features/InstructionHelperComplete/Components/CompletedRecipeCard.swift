@@ -50,8 +50,7 @@ struct CompletedRecipeCard: View {
             HStack(spacing: 8) {
                 HStack(spacing: 2) {
                     Image(systemName: "person.fill")
-                    
-                    Text("\(recipe.portion)")
+                    Text(recipe.portion == 0 ? "-" : "\(recipe.portion)")
                 }
                 
                 HStack(spacing: 2) {
@@ -61,7 +60,7 @@ struct CompletedRecipeCard: View {
                 }
             }
             .font(Font.headline)
-            .foregroundStyle(Color.brandAccent!)
+            .foregroundStyle(Color.brandAccent)
         }
     }
 }

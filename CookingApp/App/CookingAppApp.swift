@@ -13,24 +13,31 @@ import TipKit
 struct CookingAppApp: App {
     init() {
         #if DEBUG
-        // try? Tips.resetDatastore()
+         try? Tips.resetDatastore()
         #endif
         
         try? Tips.configure([
             .displayFrequency(.immediate),
             .datastoreLocation(.applicationDefault)
         ])
+        
+        syncOnboardingTips()
     }
+    
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     
-    var body: some Scene {
+    var body: some Scene { 
         WindowGroup {
-            if hasSeenOnboarding {
-                HomeView()
-            } else {
-                OnboardingView()
+            Group {
+                if hasSeenOnboarding {
+                    HomeView()
+                } else {
+                    OnboardingView()
+                }
             }
+            .preferredColorScheme(.light) 
         }
+        
         .modelContainer(for: Recipe.self)
     }
 }

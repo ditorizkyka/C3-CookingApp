@@ -12,6 +12,7 @@ struct StepSheet: View {
     
     var instructions: [Instruction] = []
     var activeGranularText: String = ""
+    var onStepSelected: ((String) -> Void)? = nil
     
     var body: some View {
         NavigationStack {
@@ -28,7 +29,11 @@ struct StepSheet: View {
                                 mainInstruction: instruction.text,
                                 subInstructions: subTexts,
                                 isCurrent: isCurrent,
-                                activeSubInstruction: activeGranularText
+                                activeSubInstruction: activeGranularText,
+                                onSelect: { selectedText in
+                                    onStepSelected?(selectedText)
+                                    dismiss()
+                                }
                             )
                             .id(instruction.id)
                         }

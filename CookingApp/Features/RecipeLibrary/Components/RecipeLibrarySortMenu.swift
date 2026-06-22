@@ -1,10 +1,3 @@
-//
-//  RecipeLibrarySortMenu.swift
-//  CookingApp
-//
-//  Created by Brian Anashari on 08/06/26.
-//
-
 import SwiftUI
 
 struct RecipeLibrarySortMenu: View {
@@ -33,7 +26,7 @@ struct RecipeLibrarySortMenu: View {
                     }
                 }
             }
-        } label: {
+        } label: { // <-- Ubah primaryAction menjadi label
             Image(systemName: "line.3.horizontal.decrease.circle")
                 .foregroundStyle(.primary)
         }

@@ -23,7 +23,7 @@ struct RecipeCard: View {
             HStack {
                 Text(recipeTitle)
                     .font(Font.headline)
-                    .foregroundStyle(Color.labelLightest!)
+                    .foregroundStyle(Color.labelLightest)
                     .lineLimit(2)
                 
                 Spacer()
@@ -42,7 +42,7 @@ struct RecipeCard: View {
                 // Total Serving
                 HStack(spacing: 2) {
                     Image(systemName: "person.2.fill")
-                    Text("\(recipePortion)")
+                    Text(recipePortion == 0 ? "-" : "\(recipePortion)")
                 }
                 
                 // Time Serving
@@ -89,9 +89,10 @@ struct RecipeCard: View {
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: Radius.large))
+        .contentShape(RoundedRectangle(cornerRadius: Radius.large))
         .overlay(
             RoundedRectangle(cornerRadius: Radius.large)
-                .stroke(Color.surfaceElevated ?? .gray, lineWidth: 1.5)
+                .stroke(Color.surfaceElevated, lineWidth: 1.5)
         )
         
     }

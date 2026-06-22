@@ -50,7 +50,7 @@ struct AddRecipeButton: View {
             
             .background(isManual ? Color.brandSecondary : Color.brandPrimary)
             .cornerRadius(Radius.large)
-            .foregroundStyle((isManual ? Color.labelDark : Color.labelLightest) ?? .white)
+            .foregroundStyle(isManual ? Color.labelDark : Color.labelLightest)
         }
     }
 }
