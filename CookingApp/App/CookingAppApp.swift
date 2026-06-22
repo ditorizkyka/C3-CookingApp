@@ -35,7 +35,9 @@ struct CookingAppApp: App {
                     OnboardingView()
                 }
             }
+            .preferredColorScheme(.light) 
         }
+        
         .modelContainer(for: Recipe.self)
     }
 }
