@@ -47,11 +47,10 @@ struct WebsitePreviewSheet: View {
                     Button("Cancel") {
                         onDismiss()
                     }
-                    .disabled(isLoading || onboardingStep == 2)
+                    .disabled(isLoading)
                 }
             }
         }
         .tint(Color.brandPrimary)
-        .interactiveDismissDisabled(onboardingStep == 2)
     }
 }

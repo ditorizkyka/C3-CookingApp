@@ -124,7 +124,6 @@
             }
             .coordinateSpace(name: "SheetSpace")
             .holeMaskOverlay(isActive: Binding(get: { onboardingStep == 1 }, set: { if !$0 && onboardingStep == 1 { onboardingStep = 2 } }), holeFrame: textFieldFrame, cornerRadius: Radius.infinity)
-            .interactiveDismissDisabled(onboardingStep == 1)
             .onAppear {
                 guard onboardingStep == 1 else { return }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
