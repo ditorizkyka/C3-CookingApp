@@ -32,6 +32,7 @@ struct ButtonApp: View {
             .frame(maxWidth: .infinity)
             .background(backgroundColor)
             .cornerRadius(25)
+            .contentShape(Rectangle())
             
         }
     }

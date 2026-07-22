@@ -44,6 +44,7 @@ struct HoleMaskModifier: ViewModifier {
                         .fill(Color.black.opacity(maskOpacity), style: FillStyle(eoFill: true))
                     }
                     .ignoresSafeArea()
+                    .allowsHitTesting(false)
                 }
             }
     }
